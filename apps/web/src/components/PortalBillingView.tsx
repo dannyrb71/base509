@@ -11,10 +11,14 @@ const RENEWAL_DATE = new Date('2026-09-01T00:00:00');
 const CYCLE_DAYS = 31;
 
 /** Sample codes — production codes are issued and managed from the Base509 admin dashboard. */
-const DISCOUNT_CODES: Record<string, { label: string; percent: number }> = {
-  WELCOME20: { label: '20% off your subscription', percent: 20 },
-  MAKEGOOD10: { label: '10% courtesy discount', percent: 10 },
-  'TESTER-FREE': { label: 'Free access — app tester', percent: 100 },
+type DiscountCode = { label: string; percent: number; status: 'active' | 'expired' | 'not-started' | 'redeemed'; effective?: string };
+const DISCOUNT_CODES: Record<string, DiscountCode> = {
+  WELCOME20: { label: '20% off your subscription', percent: 20, status: 'active' },
+  MAKEGOOD10: { label: '10% courtesy discount', percent: 10, status: 'active' },
+  'TESTER-FREE': { label: 'Free access — app tester', percent: 100, status: 'active' },
+  SUMMER15: { label: '15% summer promotion', percent: 15, status: 'expired', effective: 'July 31, 2026' },
+  LAUNCH50: { label: '50% launch promotion', percent: 50, status: 'not-started', effective: 'October 1, 2026' },
+  THANKYOU25: { label: '25% one-time thank-you', percent: 25, status: 'redeemed' },
 };
 
 function money(value: number) { return `$${value.toFixed(2)}`; }
@@ -53,16 +57,22 @@ export function PortalBillingView() {
   const cardAvailable = entitlements.cardPayments;
   const cardActive = cardAvailable && paymentMethods.card;
   const [discountInput, setDiscountInput] = useState('');
+  const [discountError, setDiscountError] = useState('');
   const [appliedCode, setAppliedCode] = useState<string | null>(null);
   const discount = appliedCode ? DISCOUNT_CODES[appliedCode] : null;
   const effectiveMonthly = Math.max(0, (currentTier.monthly ?? 0) * (1 - (discount?.percent ?? 0) / 100));
   const applyDiscount = () => {
     const code = discountInput.trim().toUpperCase();
     if (!code) return;
-    if (!DISCOUNT_CODES[code]) { setNotice(`“${code}” isn’t a valid discount code.`); return; }
+    const entry = DISCOUNT_CODES[code];
+    if (!entry) { setDiscountError(`“${code}” isn’t a valid discount code. Check the spelling and try again.`); return; }
+    if (entry.status === 'expired') { setDiscountError(`“${code}” expired on ${entry.effective} and can no longer be applied.`); return; }
+    if (entry.status === 'not-started') { setDiscountError(`“${code}” isn’t active yet — it starts ${entry.effective}.`); return; }
+    if (entry.status === 'redeemed') { setDiscountError(`“${code}” is a one-time code that has already been used.`); return; }
     setAppliedCode(code);
     setDiscountInput('');
-    setNotice(`Code ${code} applied — ${DISCOUNT_CODES[code].label}.`);
+    setDiscountError('');
+    setNotice(`Code ${code} applied — ${entry.label}.`);
   };
   const openPlans = () => { setSelectedPlanKey(currentPlanKey); setPlansOpen(true); };
   const confirmPlanChange = () => {
@@ -113,7 +123,8 @@ export function PortalBillingView() {
 
       <PortalPanel title="Discount Code" eyebrow="Promotions & courtesy credits">
         {discount ? <div className="portal-applied-discount"><div><strong className="type-body-bold">{appliedCode}</strong><p className="type-body">{discount.label} — your subscription now bills {money(effectiveMonthly)}/mo.</p></div><button className="portal-remove-button type-body-bold" type="button" onClick={() => { setAppliedCode(null); setNotice('Discount code removed.'); }}>Remove</button></div>
-        : <div className="portal-inline-form portal-discount-form"><label><span className="type-label">Have a code?</span><input value={discountInput} placeholder="Enter discount code" onChange={(event) => setDiscountInput(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter') applyDiscount(); }} /></label><button className="btn btn--secondary type-button" type="button" onClick={applyDiscount}>Apply Code</button></div>}
+        : <><div className="portal-inline-form portal-discount-form"><label><span className="type-label">Have a code?</span><input value={discountInput} placeholder="Enter discount code" aria-invalid={Boolean(discountError)} aria-describedby={discountError ? 'discount-code-error' : undefined} onChange={(event) => { setDiscountInput(event.target.value); setDiscountError(''); }} onKeyDown={(event) => { if (event.key === 'Enter') applyDiscount(); }} /></label><button className="btn btn--secondary type-button" type="button" onClick={applyDiscount}>Apply Code</button></div>
+        {discountError && <p className="portal-field-error type-caption" id="discount-code-error" role="alert">{discountError}</p>}</>}
       </PortalPanel>
 
       <section className="portal-money-streams" aria-labelledby="business-payments-title">

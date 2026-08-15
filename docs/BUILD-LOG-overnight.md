@@ -258,6 +258,11 @@ The portal shares PetAppro tokens, `.type-*` typography, button styles, icons, p
 - Measurement note: Billing at 390 reports documentElement.scrollWidth 562 while body.scrollWidth is 390 and the page cannot actually be scrolled horizontally (verified by scroll attempt; no unclipped element extends past the viewport) — the raw figure is inflated by the internally-scrollable invoice table, so the responsive check for Billing is "cannot scroll horizontally" rather than the strict scrollWidth equality.
 - FILES TOUCHED (this session): `apps/web/src/components/PortalPlanProvider.tsx` (new) · `PlanComparisonTable.tsx` · `PortalBillingView.tsx` · `PortalBusinessView.tsx` · `PortalWalkingRates.tsx` · `PortalClientsView.tsx` · `PortalAccountView.tsx` · `PortalMarketingView.tsx` · `apps/web/src/app/portal/layout.tsx` · `apps/web/src/styles/brand-petappro.css` · `docs/BUILD-LOG-overnight.md`
 
+### Discount-Code Error States (2026-08-15, Cowork covering session, fifth pass)
+
+- Bad discount codes now fail with specific inline errors at the field (danger-token text and input border, `role="alert"`, cleared as soon as the user types): unknown code → "isn't a valid discount code. Check the spelling and try again."; expired → "expired on July 31, 2026 and can no longer be applied."; not yet in effect → "isn't active yet — it starts October 1, 2026."; one-time already redeemed → "is a one-time code that has already been used." Sample codes were added for each state (SUMMER15 expired, LAUNCH50 not-started, THANKYOU25 redeemed) alongside the three working ones; dates use the long form per house style. All four states plus error-clearing and the happy path verified in-browser; `npm run build` PASS (54 pages).
+- FILES TOUCHED (this session): `apps/web/src/components/PortalBillingView.tsx` · `apps/web/src/styles/brand-petappro.css` · `docs/BUILD-LOG-overnight.md`
+
 ## Open Questions for Danny
 
 - **Base509 admin dashboard (Danny, 2026-08-15).** Managing discount codes (promos, courtesy credits, free tester access) needs an internal Base509 dashboard — Danny explicitly wants his own management surface for PetAppro. Logged as a roadmap item for PM; the portal side ships with sample codes only.

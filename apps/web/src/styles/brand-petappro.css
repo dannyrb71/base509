@@ -1853,6 +1853,8 @@
 [data-brand='petappro'] .matrix tbody td.is-plan-current { background: var(--pa-brandy-50); }
 [data-brand='petappro'] .portal-plan-confirm { display: grid; gap: var(--pa-space-2); margin-top: var(--pa-space-4); padding: var(--pa-space-4); border: 2px solid var(--pa-brand-accent); border-radius: var(--pa-card-radius); background: var(--pa-brandy-50); }
 [data-brand='petappro'] .portal-discount-form { align-items: flex-end; }
+[data-brand='petappro'] .portal-field-error { color: var(--pa-coco-600); font-weight: var(--type-weight-semibold); }
+[data-brand='petappro'] .portal-discount-form input[aria-invalid='true'] { border-color: var(--pa-coco-600); }
 [data-brand='petappro'] .portal-applied-discount { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--pa-space-4); padding: var(--pa-space-4); border: 1px solid var(--pa-brand-accent); border-radius: var(--pa-card-radius); background: var(--pa-brandy-50); }
 [data-brand='petappro'] .portal-applied-discount > div { display: grid; gap: var(--pa-space-1); }
 [data-brand='petappro'] .portal-zone-gmap-frame { position: relative; display: grid; }
