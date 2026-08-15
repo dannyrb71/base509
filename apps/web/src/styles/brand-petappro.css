@@ -1669,8 +1669,12 @@
 [data-brand='petappro'] .portal-walk-window-name input,
 [data-brand='petappro'] .portal-walk-window-time input { min-height: var(--pa-control-height); min-width: 0; padding: var(--pa-space-3) var(--pa-space-4); border: 1px solid var(--border-default); border-radius: var(--radius-ctl); background: var(--surface-card); color: var(--text-primary); font: inherit; }
 [data-brand='petappro'] .portal-group-walk-policy__field input { width: var(--pa-space-20); }
-[data-brand='petappro'] .portal-walker-dogs { display: flex; align-items: center; gap: var(--pa-space-2); margin-bottom: var(--pa-space-2); }
-[data-brand='petappro'] .portal-walker-dogs input { width: var(--pa-space-20); }
+[data-brand='petappro'] .portal-walker-dogs { display: flex; align-items: center; gap: var(--pa-space-3); margin-bottom: var(--pa-space-2); }
+[data-brand='petappro'] .portal-walker-dogs input { width: var(--pa-space-20); text-align: center; }
+[data-brand='petappro'] .portal-stepper-input { display: flex; align-items: center; gap: var(--pa-space-2); }
+[data-brand='petappro'] .portal-step-button { display: grid; width: var(--pa-space-10); height: var(--pa-space-10); flex: none; place-items: center; padding: var(--pa-space-2); border: 1px solid var(--border-default); border-radius: 50%; background: var(--surface-card); cursor: pointer; }
+[data-brand='petappro'] .portal-step-button:hover { border-color: var(--pa-brand-accent); }
+[data-brand='petappro'] .portal-step-button img { width: var(--pa-space-5); height: var(--pa-space-5); }
 [data-brand='petappro'] .portal-walk-window-name { min-width: min(100%, calc(var(--pa-space-30) * 2)); }
 [data-brand='petappro'] .portal-walk-window-name input { width: 100%; font-weight: var(--type-weight-semibold); }
 [data-brand='petappro'] .portal-walk-window-grid { display: grid; gap: var(--pa-space-5); }

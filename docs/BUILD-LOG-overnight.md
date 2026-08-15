@@ -357,3 +357,9 @@ Cumulative FILES TOUCHED today (both sessions): `apps/web/src/components/PortalS
 ## Commit Record — 2026-08-15
 
 Portal concepts committed at Danny's direction as `cda4b78` (apps/web + this build log + the two portal design mocks; 181 files). The rest of the shared worktree remains uncommitted for its owners. Not pushed.
+
+### Post-Commit Follow-ups — 2026-08-15 (same session)
+
+- Dogs This Window is now a stepper per Danny: minus icon button · centered number field · plus icon button, each icon in a fully rounded 40px outlined circle with padding, wired to the per-window value with a floor of 1; the window total and zone-capacity line update live. `icon-plus.svg` came from Danny's export; `icon-minus.svg` was not present in the icon folder, so it was derived from the plus asset's exact bar geometry (same fill, caps, and 24-grid) — swap it if Danny exports an official one.
+- Danny's booking-enforcement question (individual-only windows) answered in-session and recorded here: correct — when a window accepts only Individual, booking enforcement (one household per slot, sequenced with the Travel Buffer, bounded by Max Walks Per Day / Walker) belongs to the booking engine (`packages/booking`, planned; capacity-model §6B contract), not the config UI. The portal captures the config; the app's booking flow enforces it at request/approval time. Flagged for the booking-engine spec pass: make individual-walk sequencing with travel buffers explicit.
+- FILES TOUCHED (follow-up): `apps/web/src/components/PortalWalkWindows.tsx` · `apps/web/src/styles/brand-petappro.css` · `apps/web/public/brands/petappro.com/icon-plus.svg` (Danny) · `apps/web/public/brands/petappro.com/icon-minus.svg` (derived) · `docs/BUILD-LOG-overnight.md`
