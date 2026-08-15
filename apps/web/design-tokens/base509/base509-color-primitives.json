@@ -1,0 +1,1252 @@
+{
+  "color": {
+    "base": {
+      "white": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            1,
+            1,
+            1
+          ],
+          "alpha": 1,
+          "hex": "#FFFFFF"
+        },
+        "$description": "Pure white."
+      },
+      "black": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0,
+            0,
+            0
+          ],
+          "alpha": 1,
+          "hex": "#000000"
+        },
+        "$description": "Pure black."
+      },
+      "transparent": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            1,
+            1,
+            1
+          ],
+          "alpha": 0,
+          "hex": "#FFFFFF"
+        },
+        "$description": "Fully transparent white."
+      },
+      "ink": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.08235294,
+            0.16470588,
+            0.2627451
+          ],
+          "alpha": 1,
+          "hex": "#152A43"
+        },
+        "$description": "Base509 ink used for readable dark text, including text on Sunset."
+      },
+      "parchment": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.96078431,
+            0.94117647,
+            0.90588235
+          ],
+          "alpha": 1,
+          "hex": "#F5F0E7"
+        },
+        "$description": "Warm Base509 page background."
+      }
+    },
+    "basalt": {
+      "50": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.96862745,
+            0.97647059,
+            0.98431373
+          ],
+          "alpha": 1,
+          "hex": "#F7F9FB"
+        }
+      },
+      "100": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.85490196,
+            0.87843137,
+            0.90196078
+          ],
+          "alpha": 1,
+          "hex": "#DAE0E6"
+        }
+      },
+      "200": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.74509804,
+            0.78039216,
+            0.81568627
+          ],
+          "alpha": 1,
+          "hex": "#BEC7D0"
+        }
+      },
+      "300": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.63921569,
+            0.68627451,
+            0.73333333
+          ],
+          "alpha": 1,
+          "hex": "#A3AFBB"
+        }
+      },
+      "400": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.53333333,
+            0.59215686,
+            0.65490196
+          ],
+          "alpha": 1,
+          "hex": "#8897A7"
+        }
+      },
+      "500": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.43137255,
+            0.50196078,
+            0.57254902
+          ],
+          "alpha": 1,
+          "hex": "#6E8092"
+        }
+      },
+      "600": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.33333333,
+            0.41568627,
+            0.49411765
+          ],
+          "alpha": 1,
+          "hex": "#556A7E"
+        }
+      },
+      "700": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.23921569,
+            0.32941176,
+            0.41960784
+          ],
+          "alpha": 1,
+          "hex": "#3D546B"
+        }
+      },
+      "800": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.14509804,
+            0.24705882,
+            0.34509804
+          ],
+          "alpha": 1,
+          "hex": "#253F58"
+        }
+      },
+      "900": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.05098039,
+            0.16862745,
+            0.27058824
+          ],
+          "alpha": 1,
+          "hex": "#0D2B45"
+        },
+        "$description": "Original supplied basalt swatch; anchor of this tonal band."
+      },
+      "950": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.03921569,
+            0.08627451,
+            0.12941176
+          ],
+          "alpha": 1,
+          "hex": "#0A1621"
+        }
+      },
+      "$description": "Deep navy foundation and primary Base509 brand color. The supplied seed is fixed at basalt-900."
+    },
+    "columbia": {
+      "50": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.96470588,
+            0.97647059,
+            0.99215686
+          ],
+          "alpha": 1,
+          "hex": "#F6F9FD"
+        }
+      },
+      "100": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.81176471,
+            0.86666667,
+            0.92941176
+          ],
+          "alpha": 1,
+          "hex": "#CFDDED"
+        }
+      },
+      "200": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.66666667,
+            0.75686275,
+            0.8627451
+          ],
+          "alpha": 1,
+          "hex": "#AAC1DC"
+        }
+      },
+      "300": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.51764706,
+            0.64705882,
+            0.79607843
+          ],
+          "alpha": 1,
+          "hex": "#84A5CB"
+        }
+      },
+      "400": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.37647059,
+            0.5372549,
+            0.72941176
+          ],
+          "alpha": 1,
+          "hex": "#6089BA"
+        }
+      },
+      "500": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.23137255,
+            0.43137255,
+            0.65882353
+          ],
+          "alpha": 1,
+          "hex": "#3B6EA8"
+        },
+        "$description": "Original supplied columbia swatch; anchor of this tonal band."
+      },
+      "600": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.18039216,
+            0.35686275,
+            0.55294118
+          ],
+          "alpha": 1,
+          "hex": "#2E5B8D"
+        }
+      },
+      "700": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.13333333,
+            0.28235294,
+            0.45098039
+          ],
+          "alpha": 1,
+          "hex": "#224873"
+        }
+      },
+      "800": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.08627451,
+            0.21176471,
+            0.35294118
+          ],
+          "alpha": 1,
+          "hex": "#16365A"
+        }
+      },
+      "900": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.04313725,
+            0.14509804,
+            0.25882353
+          ],
+          "alpha": 1,
+          "hex": "#0B2542"
+        }
+      },
+      "950": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.01176471,
+            0.08235294,
+            0.16862745
+          ],
+          "alpha": 1,
+          "hex": "#03152B"
+        }
+      },
+      "$description": "Core blue for links, focus, and secondary brand emphasis. The supplied seed is fixed at columbia-500."
+    },
+    "lake": {
+      "50": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.96470588,
+            0.98039216,
+            0.98823529
+          ],
+          "alpha": 1,
+          "hex": "#F6FAFC"
+        }
+      },
+      "100": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.85098039,
+            0.90980392,
+            0.94901961
+          ],
+          "alpha": 1,
+          "hex": "#D9E8F2"
+        }
+      },
+      "200": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.73333333,
+            0.83921569,
+            0.90980392
+          ],
+          "alpha": 1,
+          "hex": "#BBD6E8"
+        }
+      },
+      "300": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.61568627,
+            0.77254902,
+            0.87058824
+          ],
+          "alpha": 1,
+          "hex": "#9DC5DE"
+        }
+      },
+      "400": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.49803922,
+            0.70196078,
+            0.83137255
+          ],
+          "alpha": 1,
+          "hex": "#7FB3D4"
+        },
+        "$description": "Original supplied lake swatch; anchor of this tonal band."
+      },
+      "500": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.40784314,
+            0.58823529,
+            0.70196078
+          ],
+          "alpha": 1,
+          "hex": "#6896B3"
+        }
+      },
+      "600": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.32156863,
+            0.47843137,
+            0.58039216
+          ],
+          "alpha": 1,
+          "hex": "#527A94"
+        }
+      },
+      "700": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.23529412,
+            0.37254902,
+            0.45882353
+          ],
+          "alpha": 1,
+          "hex": "#3C5F75"
+        }
+      },
+      "800": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.15686275,
+            0.2745098,
+            0.34509804
+          ],
+          "alpha": 1,
+          "hex": "#284658"
+        }
+      },
+      "900": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.08235294,
+            0.17647059,
+            0.23529412
+          ],
+          "alpha": 1,
+          "hex": "#152D3C"
+        }
+      },
+      "950": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.01568627,
+            0.09019608,
+            0.1372549
+          ],
+          "alpha": 1,
+          "hex": "#041723"
+        }
+      },
+      "$description": "Light blue for highlights, tints, and decorative accents. The supplied seed is fixed at lake-400."
+    },
+    "sand": {
+      "50": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.98431373,
+            0.97647059,
+            0.96078431
+          ],
+          "alpha": 1,
+          "hex": "#FBF9F5"
+        }
+      },
+      "100": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.94901961,
+            0.90588235,
+            0.84313725
+          ],
+          "alpha": 1,
+          "hex": "#F2E7D7"
+        }
+      },
+      "200": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.91372549,
+            0.83529412,
+            0.72156863
+          ],
+          "alpha": 1,
+          "hex": "#E9D5B8"
+        }
+      },
+      "300": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.8745098,
+            0.76862745,
+            0.6
+          ],
+          "alpha": 1,
+          "hex": "#DFC499"
+        }
+      },
+      "400": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.83921569,
+            0.69803922,
+            0.47843137
+          ],
+          "alpha": 1,
+          "hex": "#D6B27A"
+        },
+        "$description": "Original supplied sand swatch; anchor of this tonal band."
+      },
+      "500": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.70588235,
+            0.58039216,
+            0.38431373
+          ],
+          "alpha": 1,
+          "hex": "#B49462"
+        }
+      },
+      "600": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.57647059,
+            0.46666667,
+            0.29803922
+          ],
+          "alpha": 1,
+          "hex": "#93774C"
+        }
+      },
+      "700": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.45490196,
+            0.36078431,
+            0.21176471
+          ],
+          "alpha": 1,
+          "hex": "#745C36"
+        }
+      },
+      "800": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.33333333,
+            0.25490196,
+            0.12941176
+          ],
+          "alpha": 1,
+          "hex": "#554121"
+        }
+      },
+      "900": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.22352941,
+            0.16078431,
+            0.05490196
+          ],
+          "alpha": 1,
+          "hex": "#39290E"
+        }
+      },
+      "950": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.12156863,
+            0.07058824,
+            0
+          ],
+          "alpha": 1,
+          "hex": "#1F1200"
+        }
+      },
+      "$description": "Warm sand for supporting accents and warm surfaces. The supplied seed is fixed at sand-400."
+    },
+    "sunset": {
+      "50": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.99607843,
+            0.97254902,
+            0.95686275
+          ],
+          "alpha": 1,
+          "hex": "#FEF8F4"
+        }
+      },
+      "100": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.97254902,
+            0.89019608,
+            0.83529412
+          ],
+          "alpha": 1,
+          "hex": "#F8E3D5"
+        }
+      },
+      "200": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.94509804,
+            0.80784314,
+            0.71372549
+          ],
+          "alpha": 1,
+          "hex": "#F1CEB6"
+        }
+      },
+      "300": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.91764706,
+            0.7254902,
+            0.59607843
+          ],
+          "alpha": 1,
+          "hex": "#EAB998"
+        }
+      },
+      "400": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.88627451,
+            0.64313725,
+            0.4745098
+          ],
+          "alpha": 1,
+          "hex": "#E2A479"
+        }
+      },
+      "500": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.85098039,
+            0.56078431,
+            0.34901961
+          ],
+          "alpha": 1,
+          "hex": "#D98F59"
+        }
+      },
+      "600": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.81568627,
+            0.47843137,
+            0.20392157
+          ],
+          "alpha": 1,
+          "hex": "#D07A34"
+        },
+        "$description": "Original supplied sunset swatch; anchor of this tonal band."
+      },
+      "700": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.63921569,
+            0.35686275,
+            0.12156863
+          ],
+          "alpha": 1,
+          "hex": "#A35B1F"
+        }
+      },
+      "800": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.46666667,
+            0.24313725,
+            0.03137255
+          ],
+          "alpha": 1,
+          "hex": "#773E08"
+        }
+      },
+      "900": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.30196078,
+            0.14117647,
+            0
+          ],
+          "alpha": 1,
+          "hex": "#4D2400"
+        }
+      },
+      "950": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.14117647,
+            0.05490196,
+            0
+          ],
+          "alpha": 1,
+          "hex": "#240E00"
+        }
+      },
+      "$description": "Orange call-to-action and energetic brand accent. The supplied seed is fixed at sunset-600."
+    },
+    "driftstone": {
+      "50": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.97647059,
+            0.97647059,
+            0.97647059
+          ],
+          "alpha": 1,
+          "hex": "#F9F9F9"
+        }
+      },
+      "100": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.90588235,
+            0.90980392,
+            0.91372549
+          ],
+          "alpha": 1,
+          "hex": "#E7E8E9"
+        }
+      },
+      "200": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.83921569,
+            0.84705882,
+            0.85490196
+          ],
+          "alpha": 1,
+          "hex": "#D6D8DA"
+        },
+        "$description": "Original supplied driftstone swatch; anchor of this tonal band."
+      },
+      "300": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.73333333,
+            0.7372549,
+            0.74509804
+          ],
+          "alpha": 1,
+          "hex": "#BBBCBE"
+        }
+      },
+      "400": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.62745098,
+            0.63137255,
+            0.63921569
+          ],
+          "alpha": 1,
+          "hex": "#A0A1A3"
+        }
+      },
+      "500": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.5254902,
+            0.52941176,
+            0.5372549
+          ],
+          "alpha": 1,
+          "hex": "#868789"
+        }
+      },
+      "600": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.42745098,
+            0.43137255,
+            0.43529412
+          ],
+          "alpha": 1,
+          "hex": "#6D6E6F"
+        }
+      },
+      "700": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.33333333,
+            0.3372549,
+            0.34117647
+          ],
+          "alpha": 1,
+          "hex": "#555657"
+        }
+      },
+      "800": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.24313725,
+            0.24705882,
+            0.25098039
+          ],
+          "alpha": 1,
+          "hex": "#3E3F40"
+        }
+      },
+      "900": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.15686275,
+            0.16078431,
+            0.16470588
+          ],
+          "alpha": 1,
+          "hex": "#28292A"
+        }
+      },
+      "950": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.07843137,
+            0.08235294,
+            0.08627451
+          ],
+          "alpha": 1,
+          "hex": "#141516"
+        }
+      },
+      "$description": "Cool neutral for borders, disabled states, and subtle surfaces. The supplied seed is fixed at driftstone-200."
+    },
+    "success": {
+      "50": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.96862745,
+            0.98039216,
+            0.96862745
+          ],
+          "alpha": 1,
+          "hex": "#F7FAF7"
+        }
+      },
+      "100": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.84313725,
+            0.89411765,
+            0.85098039
+          ],
+          "alpha": 1,
+          "hex": "#D7E4D9"
+        }
+      },
+      "200": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.72156863,
+            0.80784314,
+            0.7372549
+          ],
+          "alpha": 1,
+          "hex": "#B8CEBC"
+        }
+      },
+      "300": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.60392157,
+            0.7254902,
+            0.62352941
+          ],
+          "alpha": 1,
+          "hex": "#9AB99F"
+        }
+      },
+      "400": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.48627451,
+            0.63921569,
+            0.51764706
+          ],
+          "alpha": 1,
+          "hex": "#7CA384"
+        }
+      },
+      "500": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.36862745,
+            0.56078431,
+            0.40784314
+          ],
+          "alpha": 1,
+          "hex": "#5E8F68"
+        }
+      },
+      "600": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.24705882,
+            0.47843137,
+            0.30588235
+          ],
+          "alpha": 1,
+          "hex": "#3F7A4E"
+        },
+        "$description": "Original supplied success swatch; anchor of this tonal band."
+      },
+      "700": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.18431373,
+            0.37647059,
+            0.23137255
+          ],
+          "alpha": 1,
+          "hex": "#2F603B"
+        }
+      },
+      "800": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.12156863,
+            0.27843137,
+            0.16470588
+          ],
+          "alpha": 1,
+          "hex": "#1F472A"
+        }
+      },
+      "900": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.0627451,
+            0.18823529,
+            0.09803922
+          ],
+          "alpha": 1,
+          "hex": "#103019"
+        }
+      },
+      "950": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.01568627,
+            0.10196078,
+            0.03921569
+          ],
+          "alpha": 1,
+          "hex": "#041A0A"
+        }
+      },
+      "$description": "Utility green for positive and success states; supplementary to the supplied brand palette. The supplied seed is fixed at success-600."
+    },
+    "danger": {
+      "50": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.99607843,
+            0.96862745,
+            0.96470588
+          ],
+          "alpha": 1,
+          "hex": "#FEF7F6"
+        }
+      },
+      "100": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.96078431,
+            0.85882353,
+            0.85098039
+          ],
+          "alpha": 1,
+          "hex": "#F5DBD9"
+        }
+      },
+      "200": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.91764706,
+            0.75294118,
+            0.7372549
+          ],
+          "alpha": 1,
+          "hex": "#EAC0BC"
+        }
+      },
+      "300": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.87058824,
+            0.64705882,
+            0.62745098
+          ],
+          "alpha": 1,
+          "hex": "#DEA5A0"
+        }
+      },
+      "400": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.82352941,
+            0.54117647,
+            0.51764706
+          ],
+          "alpha": 1,
+          "hex": "#D28A84"
+        }
+      },
+      "500": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.76862745,
+            0.43529412,
+            0.41176471
+          ],
+          "alpha": 1,
+          "hex": "#C46F69"
+        }
+      },
+      "600": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.71372549,
+            0.3254902,
+            0.30980392
+          ],
+          "alpha": 1,
+          "hex": "#B6534F"
+        },
+        "$description": "Original supplied danger swatch; anchor of this tonal band."
+      },
+      "700": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.56470588,
+            0.24313725,
+            0.23137255
+          ],
+          "alpha": 1,
+          "hex": "#903E3B"
+        }
+      },
+      "800": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.42745098,
+            0.16470588,
+            0.15686275
+          ],
+          "alpha": 1,
+          "hex": "#6D2A28"
+        }
+      },
+      "900": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.29411765,
+            0.09019608,
+            0.08627451
+          ],
+          "alpha": 1,
+          "hex": "#4B1716"
+        }
+      },
+      "950": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.16862745,
+            0.02352941,
+            0.02352941
+          ],
+          "alpha": 1,
+          "hex": "#2B0606"
+        }
+      },
+      "$description": "Utility red for error and destructive states; supplementary to the supplied brand palette. The supplied seed is fixed at danger-600."
+    }
+  }
+}

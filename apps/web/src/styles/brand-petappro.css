@@ -1,0 +1,2104 @@
+/* ============================================================
+   PETAPPRO brand layer — Brandy Blue default theme + Poppins.
+   Palette by reference from the app's brand bands
+   (design-system/tokens/primitives/color.tokens.json — the app is
+   the source of truth for these hexes; if they diverge, the app wins).
+   Design language per Danny's "5a Petappro" direction: Poppins ladder,
+   soft cards, pill CTAs, teal-tinted shadows.
+   Nothing from Base509 (Oswald/Montserrat/parchment) may appear here.
+   ============================================================ */
+[data-brand='petappro'] {
+  /* Brandy Blue band */
+  --pa-brandy-50: #F2FAFB;
+  --pa-brandy-100: #E6F5F7;
+  --pa-brandy-200: #CDECEF;
+  --pa-brandy-500: #32A8B5;
+  --pa-brandy-600: #006073; /* primary */
+  --pa-brandy-700: #004F60;
+  --pa-brandy-800: #003E4D;
+  --pa-brandy-900: #002C38;
+  /* Maverick Grey (neutrals) */
+  --pa-mav-50: #FAFBFC;
+  --pa-mav-100: #F4F7F8;
+  --pa-mav-200: #E5EBED;
+  --pa-mav-600: #5F737B;
+  --pa-mav-700: #465A62;
+  --pa-mav-900: #1C2C32;
+  /* Accents */
+  --pa-camo-600: #68A82F;   /* success */
+  --pa-camo-700: #508522;
+  --pa-brand-accent: var(--pa-camo-600);
+  --pa-coco-600: #D95137;   /* danger */
+  --pa-bella-600: #1687C0;  /* info */
+
+  /* Published theme-preview palettes. Components consume these tokens only. */
+  --pa-theme-brandy-light: #9EDADF; --pa-theme-brandy-mid: #006073; --pa-theme-brandy-dark: #002C38;
+  --pa-theme-bichon-light: #D0B0DF; --pa-theme-bichon-mid: #674776; --pa-theme-bichon-dark: #332044;
+  --pa-theme-heeler-light: #ACBCEB; --pa-theme-heeler-mid: #455382; --pa-theme-heeler-dark: #232848;
+  --pa-theme-chessie-light: #D9A8AE; --pa-theme-chessie-mid: #75323B; --pa-theme-chessie-dark: #33141E;
+  --pa-theme-hollywood-light: #FE83CF; --pa-theme-hollywood-mid: #A60166; --pa-theme-hollywood-dark: #3A0F2A;
+  --pa-theme-husky-light: #99C7CD; --pa-theme-husky-mid: #19464B; --pa-theme-husky-dark: #12333B;
+  --pa-theme-setter-light: #E0B29A; --pa-theme-setter-mid: #946043; --pa-theme-setter-dark: #2C1C0E;
+  --pa-theme-bark-light: #B8C6C9; --pa-theme-bark-mid: #485A5F; --pa-theme-bark-dark: #16191C;
+  --pa-theme-fursisco-light: #E79D97; --pa-theme-fursisco-mid: #C0362C; --pa-theme-fursisco-dark: #1D262B;
+  --pa-theme-south-light: #99CABD; --pa-theme-south-mid: #18483E; --pa-theme-south-dark: #0F241D;
+  --pa-theme-preview-dark-text: #EFF7F3;
+  --pa-theme-preview-dark-card: #F2F1EF;
+
+  /* Fonts — PetAppro only */
+  --font-display: 'Poppins', 'Segoe UI', sans-serif;
+  --font-body: 'Poppins', 'Segoe UI', sans-serif;
+  --weight-display: 600;
+  --display-case: none;
+  --tracking-display: -0.01em;
+
+  /* Semantic layer */
+  --pa-text-body: #304249;
+  --surface-page: #ffffff;
+  --surface-card: #ffffff;
+  --surface-inverse: var(--pa-brandy-800);
+  --surface-tint: var(--pa-brandy-50);
+  --surface-header: rgba(255, 255, 255, 0.92);
+
+  --text-primary: var(--pa-text-body);
+  --text-secondary: var(--pa-mav-700);
+  --text-accent: var(--pa-brandy-600);
+  --text-inverse: #ffffff;
+  --text-inverse-secondary: color-mix(in srgb, #fff 78%, var(--pa-brandy-800));
+  --text-inverse-accent: var(--pa-brandy-200);
+  --text-on-cta: #ffffff;      /* white on brandy-600 = 7.19:1 AA */
+  --text-on-primary: #ffffff;
+
+  --action-primary: var(--pa-brandy-600);
+  --action-primary-hover: var(--pa-brandy-700);
+  --action-cta: var(--pa-camo-700);
+  --action-cta-hover: color-mix(in srgb, var(--pa-camo-700) 84%, black);
+
+  --border-default: color-mix(in srgb, var(--pa-mav-900) 14%, transparent);
+  --border-inverse: color-mix(in srgb, #fff 25%, transparent);
+  --focus-ring: var(--pa-bella-600);
+
+  --status-success: var(--pa-camo-600);
+  --status-warning-bg: #FDF6E3;
+  --status-warning-border: #E0B94C;
+  --status-warning-text: var(--pa-mav-900);
+
+  /* Shape — soft, friendly. Pill CTAs. */
+  --radius-ctl: 999px;
+  --radius-card: 22px;
+  --shadow-card: 0 4px 16px rgba(0, 96, 115, 0.08);
+  /* PetAppro's take on the shared raised-card elevation (same token name the
+     shared .card--raised rule consumes, brand-tinted like --shadow-card). */
+  --shadow-card-raised: 0 1px 2px rgba(0, 96, 115, 0.16), 0 4px 16px rgba(0, 96, 115, 0.14);
+  --shadow-card-raised-hover: 0 2px 4px rgba(0, 96, 115, 0.18), 0 10px 24px rgba(0, 96, 115, 0.18);
+
+  --motif-color: var(--pa-brandy-500);
+
+  /* Published layout primitives used by the marketing frames. */
+  --pa-space-1: 4px;
+  --pa-space-2: 8px;
+  --pa-space-3: 12px;
+  --pa-space-4: 16px;
+  --pa-space-5: 20px;
+  --pa-space-6: 24px;
+  --pa-space-8: 32px;
+  --pa-space-10: 40px;
+  --pa-space-12: 48px;
+  --pa-space-14: 56px;
+  --pa-space-16: 64px;
+  --pa-space-18: 72px;
+  --pa-space-20: 80px;
+  --pa-space-30: 120px;
+  --pa-content-max: 1200px;
+  --pa-header-mobile: 84px;
+  --pa-header-desktop: 92px;
+  --pa-section-rule: 4px;
+  --pa-card-radius: 20px;
+  --pa-card-shadow: 0 1px 3px color-mix(in srgb, var(--pa-mav-900) 20%, transparent), 0 3px 8px color-mix(in srgb, var(--pa-mav-900) 8%, transparent);
+  --pa-step-number-size: 52px;
+  --pa-portal-sidebar-width: 264px;
+  --pa-control-height: 48px;
+  --pa-control-inactive: color-mix(in srgb, var(--pa-mav-600) 32%, var(--surface-card));
+  --pa-control-inactive-border: color-mix(in srgb, var(--pa-mav-600) 58%, var(--surface-card));
+  --pa-map-height: 360px;
+  --pa-report-chart-height: 320px;
+}
+
+[data-brand='petappro'] .visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+/* ============================================================
+   PETAPPRO — Responsive typography ramp
+   Source of truth: Figma "PetAppro — Design System" → Typography · Semantic
+   (Mobile / Tablet / Desktop modes). Mobile = the live text styles.
+   Breakpoints: tablet >=834px, desktop >=1280px (Dimensions primitives).
+   Do NOT hand-tune values here — change them in the Figma variables and
+   regenerate, so design and code stay in sync.
+   line-height is unitless (scales with size); tracking in em.
+   ============================================================ */
+[data-brand='petappro'] {
+  --type-family-sans: 'Poppins', 'Segoe UI', sans-serif;
+  --type-family-mono: 'Space Mono', ui-monospace, monospace;
+  --type-weight-regular: 400;
+  --type-weight-semibold: 600;
+  --type-weight-bold: 700; /* heaviest weight we use for Poppins */
+
+  /* MOBILE (default) — size · line-height · tracking · weight */
+  --type-display-size: 28px;      --type-display-line: 1.15;     --type-display-track: -0.02em; --type-display-weight: 700;
+  --type-headline-size: 24px;     --type-headline-line: 1.2;     --type-headline-track: 0;      --type-headline-weight: 700;
+  --type-title-lg-size: 20px;     --type-title-lg-line: 1.25;    --type-title-lg-track: -0.01em; --type-title-lg-weight: 700;
+  --type-title-size: 16px;        --type-title-line: 1.15;       --type-title-track: 0;         --type-title-weight: 600;
+  --type-body-lg-size: 15px;      --type-body-lg-line: 1.5;      --type-body-lg-track: 0;        --type-body-lg-weight: 400;
+  --type-body-size: 13px;         --type-body-line: 1.5;         --type-body-track: 0;           --type-body-weight: 400;
+  --type-body-bold-size: 13px;    --type-body-bold-line: 1.5;    --type-body-bold-track: 0;      --type-body-bold-weight: 700;
+  --type-body-sm-size: 11px;      --type-body-sm-line: 1.4;      --type-body-sm-track: 0;        --type-body-sm-weight: 400;
+  --type-body-sm-bold-size: 11px; --type-body-sm-bold-line: 1.4; --type-body-sm-bold-track: 0;  --type-body-sm-bold-weight: 700;
+  --type-label-size: 12px;        --type-label-line: 1.3;        --type-label-track: 0;         --type-label-weight: 700;
+  --type-label-sm-size: 10px;     --type-label-sm-line: 1.3;     --type-label-sm-track: 0.04em; --type-label-sm-weight: 700;
+  --type-button-size: 15px;       --type-button-line: 1.2;       --type-button-track: 0;        --type-button-weight: 600;
+  --type-caption-size: 12px;      --type-caption-line: 1.4;      --type-caption-track: 0;        --type-caption-weight: 400;
+}
+@media (min-width: 834px) { /* Tablet */
+  [data-brand='petappro'] {
+    --type-display-size: 44px;  --type-headline-size: 34px;  --type-title-lg-size: 28px;  --type-title-size: 22px;
+    --type-body-lg-size: 18px;  --type-body-size: 16px;      --type-body-bold-size: 16px; --type-body-sm-size: 14px;
+    --type-body-sm-bold-size: 14px; --type-label-size: 12px; --type-label-sm-size: 10px;  --type-button-size: 16px;
+    --type-caption-size: 12px;
+  }
+}
+@media (min-width: 1280px) { /* Desktop */
+  [data-brand='petappro'] {
+    --type-display-size: 64px;  --type-headline-size: 44px;  --type-title-lg-size: 34px;  --type-title-size: 24px;
+    --type-body-lg-size: 18px;  --type-body-size: 16px;      --type-body-bold-size: 16px; --type-body-sm-size: 14px;
+    --type-body-sm-bold-size: 14px; --type-label-size: 13px; --type-label-sm-size: 11px;  --type-button-size: 16px;
+    --type-caption-size: 13px;
+  }
+}
+
+/* Role utility classes — apply one to get the full responsive treatment */
+[data-brand='petappro'] .type-display      { font-family: var(--type-family-sans); font-size: var(--type-display-size);      line-height: var(--type-display-line);      letter-spacing: var(--type-display-track);      font-weight: var(--type-display-weight); }
+[data-brand='petappro'] .type-headline     { font-family: var(--type-family-sans); font-size: var(--type-headline-size);     line-height: var(--type-headline-line);     letter-spacing: var(--type-headline-track);     font-weight: var(--type-headline-weight); }
+[data-brand='petappro'] .type-title-lg     { font-family: var(--type-family-sans); font-size: var(--type-title-lg-size);     line-height: var(--type-title-lg-line);     letter-spacing: var(--type-title-lg-track);     font-weight: var(--type-title-lg-weight); }
+[data-brand='petappro'] .type-title        { font-family: var(--type-family-sans); font-size: var(--type-title-size);        line-height: var(--type-title-line);        letter-spacing: var(--type-title-track);        font-weight: var(--type-title-weight); }
+[data-brand='petappro'] .type-body-lg      { font-family: var(--type-family-sans); font-size: var(--type-body-lg-size);      line-height: var(--type-body-lg-line);      letter-spacing: var(--type-body-lg-track);      font-weight: var(--type-body-lg-weight); }
+[data-brand='petappro'] .type-body         { font-family: var(--type-family-sans); font-size: var(--type-body-size);         line-height: var(--type-body-line);         letter-spacing: var(--type-body-track);         font-weight: var(--type-body-weight); }
+[data-brand='petappro'] .type-body-bold    { font-family: var(--type-family-sans); font-size: var(--type-body-bold-size);    line-height: var(--type-body-bold-line);    letter-spacing: var(--type-body-bold-track);    font-weight: var(--type-body-bold-weight); }
+[data-brand='petappro'] .type-body-sm      { font-family: var(--type-family-sans); font-size: var(--type-body-sm-size);      line-height: var(--type-body-sm-line);      letter-spacing: var(--type-body-sm-track);      font-weight: var(--type-body-sm-weight); }
+[data-brand='petappro'] .type-body-sm-bold { font-family: var(--type-family-sans); font-size: var(--type-body-sm-bold-size); line-height: var(--type-body-sm-bold-line); letter-spacing: var(--type-body-sm-bold-track); font-weight: var(--type-body-sm-bold-weight); }
+[data-brand='petappro'] .type-label        { font-family: var(--type-family-sans); font-size: var(--type-label-size);        line-height: var(--type-label-line);        letter-spacing: var(--type-label-track);        font-weight: var(--type-label-weight); }
+[data-brand='petappro'] .type-label-sm     { font-family: var(--type-family-sans); font-size: var(--type-label-sm-size);     line-height: var(--type-label-sm-line);     letter-spacing: var(--type-label-sm-track);     font-weight: var(--type-label-sm-weight); }
+[data-brand='petappro'] .type-button       { font-family: var(--type-family-sans); font-size: var(--type-button-size);       line-height: var(--type-button-line);       letter-spacing: var(--type-button-track);       font-weight: var(--type-button-weight); }
+[data-brand='petappro'] .type-caption      { font-family: var(--type-family-sans); font-size: var(--type-caption-size);      line-height: var(--type-caption-line);      letter-spacing: var(--type-caption-track);      font-weight: var(--type-caption-weight); }
+
+/* ============================================================
+   PETAPPRO marketing home — Figma frames 2:2 / 300:3431
+   Mobile-first; the published 834px and 1280px breakpoints are used.
+   ============================================================ */
+[data-brand='petappro'] .site-header {
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
+  border: 0;
+}
+[data-brand='petappro'] .site-header__inner {
+  height: var(--pa-header-mobile);
+  padding: var(--pa-space-5) var(--pa-space-6);
+  flex-wrap: nowrap;
+  justify-content: space-between;
+}
+[data-brand='petappro'] .petappro-wordmark {
+  display: block;
+  width: 166px;
+  height: 40px;
+  object-fit: contain;
+  object-position: left center;
+}
+[data-brand='petappro'] .petappro-wordmark--inverse { width: 144px; }
+[data-brand='petappro'] .site-header__nav { display: none; }
+[data-brand='petappro'] .site-header__actions { display: none; }
+[data-brand='petappro'] .site-header__actions .btn {
+  height: 44px;
+  padding-inline: var(--pa-space-5);
+  white-space: nowrap;
+}
+[data-brand='petappro'] .site-header .account-menu--marketing { margin-left: auto; }
+[data-brand='petappro'] .site-header .account-menu--marketing + .petappro-mobilenav { margin-left: var(--pa-space-3); }
+
+[data-brand='petappro'] .account-menu { position: relative; flex: none; }
+[data-brand='petappro'] .account-menu__trigger {
+  display: flex;
+  align-items: center;
+  gap: var(--pa-space-2);
+  padding: var(--pa-space-1);
+  border: 0;
+  border-radius: var(--radius-ctl);
+  background: transparent;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+[data-brand='petappro'] .account-menu__trigger:hover { background: var(--pa-brandy-50); }
+[data-brand='petappro'] .account-menu__avatar { display: grid; width: var(--pa-space-10); height: var(--pa-space-10); flex: none; place-items: center; border-radius: 50%; background: var(--pa-brand-accent); color: var(--text-inverse); font-size: var(--type-label-size); font-weight: var(--type-weight-bold); }
+[data-brand='petappro'] .account-menu__name,
+[data-brand='petappro'] .account-menu__chevron { display: none; }
+[data-brand='petappro'] .account-menu__chevron img { display: block; width: var(--pa-space-5); height: var(--pa-space-5); transition: transform 200ms ease; }
+[data-brand='petappro'] .account-menu__trigger[aria-expanded='true'] .account-menu__chevron img { transform: rotate(180deg); }
+[data-brand='petappro'] .account-menu__popover { position: absolute; top: calc(100% + var(--pa-space-2)); right: 0; z-index: 100; width: min(340px, calc(100vw - var(--pa-space-8))); padding: var(--pa-space-4); border: 1px solid var(--border-default); border-radius: var(--pa-card-radius); background: var(--surface-card); box-shadow: var(--pa-card-shadow); color: var(--text-primary); }
+[data-brand='petappro'] .account-menu__identity { display: flex; align-items: center; gap: var(--pa-space-3); padding-bottom: var(--pa-space-4); border-bottom: 1px solid var(--border-default); }
+[data-brand='petappro'] .account-menu__identity > div { display: flex; min-width: 0; flex-direction: column; }
+[data-brand='petappro'] .account-menu__popover nav { display: grid; gap: var(--pa-space-1); padding-block: var(--pa-space-3); }
+[data-brand='petappro'] .account-menu__popover nav :where(a, button) { display: flex; width: 100%; align-items: center; justify-content: space-between; padding: var(--pa-space-3); border: 0; border-radius: var(--radius-ctl); background: transparent; color: var(--text-primary); font: inherit; text-align: left; cursor: pointer; }
+[data-brand='petappro'] .account-menu__popover nav :where(a, button):hover { background: var(--pa-brandy-50); text-decoration: none; }
+[data-brand='petappro'] .account-menu__popover nav button:disabled { opacity: .55; cursor: not-allowed; }
+[data-brand='petappro'] .account-menu__popover nav button span { color: var(--text-secondary); font-size: var(--type-caption-size); }
+[data-brand='petappro'] .account-menu__signout { width: 100%; padding: var(--pa-space-3); border: 0; border-top: 1px solid var(--border-default); background: transparent; color: var(--pa-brandy-800); text-align: left; cursor: pointer; }
+[data-brand='petappro'] .account-menu__prelaunch { display: grid; gap: var(--pa-space-3); }
+[data-brand='petappro'] .account-menu__prelaunch > span { color: var(--pa-brand-accent); text-transform: uppercase; }
+[data-brand='petappro'] .account-menu__prelaunch form { display: grid; gap: var(--pa-space-2); }
+[data-brand='petappro'] .account-menu__prelaunch input { min-height: var(--pa-control-height); width: 100%; padding-inline: var(--pa-space-4); border: 1px solid var(--border-default); border-radius: var(--radius-ctl); font: inherit; }
+
+/* Mobile navigation — Figma nodes 440:23805 / 440:23853. */
+[data-brand='petappro'] .petappro-mobilenav { display: block; margin-left: auto; }
+[data-brand='petappro'] .petappro-mobilenav__toggle {
+  display: flex;
+  width: 27px;
+  height: 20px;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+[data-brand='petappro'] .petappro-mobilenav__toggle img {
+  display: block;
+  width: 27px;
+  height: 20px;
+}
+[data-brand='petappro'] .petappro-mobilenav__backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  background: rgba(229, 229, 229, .82);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 300ms ease, visibility 0s linear 300ms;
+}
+[data-brand='petappro'] .petappro-mobilenav__backdrop.is-open {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition: opacity 300ms ease;
+}
+[data-brand='petappro'] .petappro-mobilenav__panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  z-index: 90;
+  display: flex;
+  width: min(350px, calc(100vw - 24px));
+  max-height: 100dvh;
+  flex-direction: column;
+  gap: var(--pa-space-2);
+  padding: var(--pa-space-3);
+  overflow-y: auto;
+  background: var(--surface-card);
+  border-radius: 12px 0 0 12px;
+  box-shadow: 0 74px 50px rgba(0, 0, 0, .14);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 300ms ease, visibility 0s linear 300ms;
+}
+[data-brand='petappro'] .petappro-mobilenav__panel.is-open {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition: opacity 300ms ease;
+}
+[data-brand='petappro'] .petappro-mobilenav__close-row {
+  display: flex;
+  width: 100%;
+  height: 30px;
+  align-items: flex-start;
+  justify-content: flex-end;
+}
+[data-brand='petappro'] .petappro-mobilenav__close-row button {
+  display: block;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+[data-brand='petappro'] .petappro-mobilenav__close-row img {
+  display: block;
+  width: 30px;
+  height: 30px;
+}
+[data-brand='petappro'] .petappro-mobilenav__panel nav {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pa-space-2);
+}
+[data-brand='petappro'] .petappro-mobilenav__panel nav a {
+  display: flex;
+  width: 100%;
+  height: 52px;
+  align-items: center;
+  justify-content: center;
+  padding: var(--pa-space-4);
+  border-radius: 8px;
+  color: var(--pa-brandy-800);
+  font-family: var(--type-family-sans);
+  font-size: var(--type-body-bold-size);
+  font-weight: var(--type-body-bold-weight);
+  line-height: var(--type-body-bold-line);
+  text-align: center;
+  text-decoration: none;
+}
+[data-brand='petappro'] .petappro-mobilenav__panel nav a:hover {
+  background: var(--pa-brandy-50);
+  text-decoration: none;
+}
+[data-brand='petappro'] .petappro-mobilenav__panel .btn {
+  width: 100%;
+  height: 44px;
+  margin: 0;
+}
+
+[data-brand='petappro'] .petappro-home .container {
+  width: 100%;
+  max-width: var(--pa-content-max);
+  padding-inline: var(--pa-space-6);
+}
+[data-brand='petappro'] .petappro-home .section { padding-block: var(--pa-space-12); }
+[data-brand='petappro'] .petappro-home .section--tight { padding-block: var(--pa-space-10); }
+[data-brand='petappro'] .petappro-home .section h2,
+[data-brand='petappro'] .petappro-home .section h3,
+[data-brand='petappro'] .petappro-home p,
+[data-brand='petappro'] .petappro-home figure { margin: 0; }
+[data-brand='petappro'] .petappro-home .btn--secondary {
+  color: var(--pa-camo-600);
+  border-color: var(--pa-camo-600);
+}
+[data-brand='petappro'] .home-section-heading {
+  border-left: var(--pa-section-rule) solid var(--pa-camo-600);
+  padding: 0 0 var(--pa-space-4) var(--pa-space-6);
+  max-width: 100%;
+}
+[data-brand='petappro'] .home-section-heading .eyebrow { margin-bottom: var(--pa-space-4); }
+[data-brand='petappro'] .home-section-heading h2 + p { margin-top: var(--pa-space-4); }
+[data-brand='petappro'] .eyebrow {
+  color: var(--pa-camo-600);
+  letter-spacing: .08em;
+  margin-bottom: var(--pa-space-4);
+}
+
+[data-brand='petappro'] #home-hero {
+  background-color: var(--surface-card);
+  background-image: url('/brands/petappro.com/hereo-background-mobile.svg');
+  background-position: center top;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  padding-block: var(--pa-space-10);
+}
+[data-brand='petappro'] .home-hero__row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--pa-space-8);
+}
+[data-brand='petappro'] .home-hero__copy { width: 100%; }
+[data-brand='petappro'] .home-hero__copy h1 { max-width: 10.5em; }
+[data-brand='petappro'] .home-hero__copy > p {
+  color: var(--text-secondary);
+  margin-top: var(--pa-space-8);
+}
+[data-brand='petappro'] .home-actions {
+  display: flex;
+  justify-content: center;
+  gap: var(--pa-space-4);
+  margin-top: var(--pa-space-4);
+}
+[data-brand='petappro'] .home-actions .btn { padding-inline: var(--pa-space-5); }
+[data-brand='petappro'] .home-hero__art {
+  width: 100%;
+  text-align: center;
+}
+[data-brand='petappro'] .home-hero__art > img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+[data-brand='petappro'] .home-hero__art figcaption {
+  color: var(--text-secondary);
+  margin-top: var(--pa-space-2);
+}
+
+[data-brand='petappro'] #home-all-in-one { background: var(--pa-brandy-50); }
+[data-brand='petappro'] .home-section-heading--compact p { color: var(--text-secondary); }
+
+[data-brand='petappro'] .home-card-grid {
+  display: grid;
+  gap: var(--pa-space-4);
+  padding-top: var(--pa-space-6);
+}
+[data-brand='petappro'] .home-card-grid--four { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+[data-brand='petappro'] .home-card-grid .card {
+  padding: var(--pa-space-6);
+  border: 0;
+  border-radius: var(--pa-card-radius);
+  box-shadow: var(--pa-card-shadow);
+}
+[data-brand='petappro'] #home-why .card { min-height: 236px; }
+[data-brand='petappro'] .home-card-grid .card h3 { margin-bottom: var(--pa-space-2); }
+
+[data-brand='petappro'] #home-how { background: var(--pa-brandy-800); }
+[data-brand='petappro'] #home-how .home-section-heading { border-left-color: var(--pa-camo-600); }
+[data-brand='petappro'] #home-how .eyebrow { color: var(--pa-camo-600); }
+[data-brand='petappro'] .home-steps {
+  display: grid;
+  gap: var(--pa-space-4);
+  padding-top: var(--pa-space-6);
+}
+[data-brand='petappro'] .home-step {
+  min-height: 164px;
+  text-align: center;
+  padding: var(--pa-space-6);
+}
+[data-brand='petappro'] .home-step__number {
+  display: inline-flex;
+  width: var(--pa-step-number-size);
+  height: var(--pa-step-number-size);
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-ctl);
+  background: var(--pa-camo-600);
+  color: var(--text-inverse);
+  margin-bottom: var(--pa-space-4);
+}
+[data-brand='petappro'] .home-step h3 {
+  color: var(--pa-camo-600);
+  margin-top: 0;
+}
+[data-brand='petappro'] .home-step p {
+  color: var(--text-inverse);
+  margin-top: var(--pa-space-2);
+}
+[data-brand='petappro'] .home-centered-action {
+  display: flex;
+  justify-content: center;
+  padding-top: var(--pa-space-8);
+}
+[data-brand='petappro'] #home-how .btn--inverse {
+  color: var(--pa-camo-600);
+  border-color: var(--pa-camo-600);
+}
+
+[data-brand='petappro'] #home-features .container {
+  position: relative;
+  isolation: isolate;
+}
+[data-brand='petappro'] #home-features .home-section-heading,
+[data-brand='petappro'] #home-features .home-feature-grid,
+[data-brand='petappro'] #home-features .home-feature-carousel,
+[data-brand='petappro'] #home-features .home-centered-action {
+  position: relative;
+  z-index: 1;
+}
+[data-brand='petappro'] .home-feature-paws { display: none; }
+[data-brand='petappro'] .home-feature-grid { display: none; }
+[data-brand='petappro'] .home-feature-carousel { padding-top: var(--pa-space-6); }
+[data-brand='petappro'] .carousel__card-heading {
+  display: flex;
+  align-items: center;
+  gap: var(--pa-space-2);
+}
+[data-brand='petappro'] .carousel__card-heading h3 { color: var(--pa-brand-accent); margin: 0; }
+[data-brand='petappro'] .carousel__card-heading img { flex: none; }
+[data-brand='petappro'] .home-feature-carousel .carousel__card {
+  min-height: 176px;
+  padding: var(--pa-space-6);
+  border: 0;
+  border-radius: var(--pa-card-radius);
+  background-color: var(--surface-card);
+  box-shadow: var(--pa-card-shadow);
+  isolation: isolate;
+}
+[data-brand='petappro'] .home-feature-carousel .carousel__card > p { margin-top: var(--pa-space-2); }
+[data-brand='petappro'] .carousel__btn {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-ctl);
+  border: 1px solid var(--pa-camo-600);
+  background: var(--surface-card);
+  color: var(--pa-camo-700);
+}
+[data-brand='petappro'] .carousel__btn:disabled { opacity: .3; }
+[data-brand='petappro'] .carousel__btn img { display: block; width: var(--pa-space-5); height: var(--pa-space-5); margin: auto; }
+[data-brand='petappro'] .pa-chevron-icon--left { transform: rotate(90deg); }
+[data-brand='petappro'] .pa-chevron-icon--right { transform: rotate(-90deg); }
+[data-brand='petappro'] .carousel__dots { display: flex; gap: var(--pa-space-2); }
+[data-brand='petappro'] .carousel__dot {
+  width: 8px;
+  height: 8px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-ctl);
+  background: var(--text-primary);
+  opacity: .3;
+  transform: scale(1);
+  cursor: pointer;
+  transition: width 300ms ease, background-color 300ms ease, opacity 300ms ease, transform 300ms ease;
+}
+[data-brand='petappro'] .carousel__dot.is-active {
+  width: 16px;
+  background: var(--pa-brandy-600);
+  opacity: 1;
+  transform: scale(1.12);
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-brand='petappro'] .carousel__dot { transition: none; }
+}
+
+[data-brand='petappro'] #home-themes { background: var(--pa-brandy-50); }
+[data-brand='petappro'] .home-theme-grid {
+  display: grid;
+  gap: var(--pa-space-4);
+  padding-top: var(--pa-space-6);
+}
+[data-brand='petappro'] .home-theme { text-align: center; }
+[data-brand='petappro'] .home-theme img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+[data-brand='petappro'] .home-theme figcaption { margin-top: var(--pa-space-1); }
+
+[data-brand='petappro'] #home-payment-quote {
+  background: var(--pa-camo-600);
+  color: var(--text-inverse);
+  text-align: center;
+}
+
+[data-brand='petappro'] #home-pricing .card { min-height: 136px; }
+[data-brand='petappro'] #home-pricing .card__kicker { color: var(--pa-camo-600); margin-bottom: var(--pa-space-2); }
+[data-brand='petappro'] #home-final-cta { text-align: center; }
+[data-brand='petappro'] #home-final-cta p { color: var(--text-inverse); margin: var(--pa-space-6) 0; }
+
+[data-brand='petappro'] .site-footer { background: var(--pa-brandy-900); }
+[data-brand='petappro'] .site-footer__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--pa-space-8) 0;
+  padding: var(--pa-space-10) var(--pa-space-6);
+}
+[data-brand='petappro'] .site-footer__col-title {
+  color: var(--pa-camo-600);
+  text-transform: none;
+  letter-spacing: 0;
+  margin-bottom: var(--pa-space-3);
+}
+[data-brand='petappro'] .site-footer__col { gap: var(--pa-space-3); }
+[data-brand='petappro'] .site-footer a { color: var(--text-inverse); }
+[data-brand='petappro'] .site-footer__brand {
+  grid-column: 1 / -1;
+  padding-top: var(--pa-space-5);
+}
+[data-brand='petappro'] .site-footer__brand p { color: var(--text-inverse-secondary); margin: var(--pa-space-3) 0 0; }
+[data-brand='petappro'] .site-footer__base509 {
+  display: block;
+  width: 73px;
+  height: auto;
+  margin-top: var(--pa-space-6);
+}
+
+@media (min-width: 834px) {
+  [data-brand='petappro'] #home-hero {
+    background-image: url('/brands/petappro.com/site/hero-background.svg');
+  }
+
+  [data-brand='petappro'] #home-payment-quote {
+    background-image: url('/brands/petappro.com/site/your%20clients.svg');
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+  }
+
+  [data-brand='petappro'] .home-mobile-break { display: none; }
+  [data-brand='petappro'] .home-card-grid--four { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  [data-brand='petappro'] .home-card-grid--three,
+  [data-brand='petappro'] .home-theme-grid,
+  [data-brand='petappro'] .home-steps { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  [data-brand='petappro'] .home-hero__row { flex-direction: row; }
+  [data-brand='petappro'] .home-hero__copy,
+  [data-brand='petappro'] .home-hero__art { width: 50%; }
+  [data-brand='petappro'] .home-feature-carousel { display: none; }
+  [data-brand='petappro'] .home-feature-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--pa-space-4);
+    padding-top: var(--pa-space-10);
+  }
+  [data-brand='petappro'] .home-feature-card {
+    min-height: 160px;
+    padding: var(--pa-space-6);
+    background: var(--surface-card);
+    border-radius: var(--pa-card-radius);
+    box-shadow: var(--pa-card-shadow);
+    isolation: isolate;
+  }
+  [data-brand='petappro'] .home-feature-card__heading { display: flex; align-items: center; gap: var(--pa-space-2); }
+  [data-brand='petappro'] .home-feature-card__heading h3 { color: var(--pa-brand-accent); }
+  [data-brand='petappro'] .home-feature-card p { margin-top: var(--pa-space-2); }
+  [data-brand='petappro'] .home-feature-paws {
+    display: block;
+    position: absolute;
+    width: min(66vw, 787px);
+    height: auto;
+    right: calc(var(--pa-space-20) * -1);
+    top: calc(var(--pa-space-6) * -1);
+    opacity: .75;
+    pointer-events: none;
+    z-index: 0;
+  }
+}
+
+@media (min-width: 1280px) {
+  [data-brand='petappro'] .site-header__inner {
+    height: var(--pa-header-desktop);
+    padding: 0;
+    gap: var(--pa-space-8);
+  }
+  [data-brand='petappro'] .site-header__nav {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--pa-space-6);
+  }
+  [data-brand='petappro'] .site-header__nav a { color: var(--text-primary); }
+  [data-brand='petappro'] .site-header__actions .btn { height: 44px; }
+  [data-brand='petappro'] .site-header__actions { display: flex; }
+  [data-brand='petappro'] .site-header .account-menu--marketing { margin-left: 0; }
+  [data-brand='petappro'] .account-menu__name,
+  [data-brand='petappro'] .account-menu__chevron { display: inline; }
+  [data-brand='petappro'] .petappro-mobilenav { display: none; }
+  [data-brand='petappro'] .petappro-home .container { padding-inline: 0; }
+  [data-brand='petappro'] .petappro-home .section { padding-block: var(--pa-space-18); }
+  [data-brand='petappro'] .petappro-home .section--tight { padding-block: var(--pa-space-14); }
+  [data-brand='petappro'] #home-hero { padding-block: var(--pa-space-20); }
+  [data-brand='petappro'] .home-hero__row { gap: var(--pa-space-14); min-height: 600px; }
+  [data-brand='petappro'] .home-hero__copy { width: 560px; flex: none; }
+  [data-brand='petappro'] .home-hero__art { width: 580px; flex: none; }
+  [data-brand='petappro'] .home-hero__copy > p { margin-top: var(--pa-space-4); }
+  [data-brand='petappro'] .home-actions { justify-content: flex-start; margin-top: var(--pa-space-6); }
+  [data-brand='petappro'] .home-section-heading--compact { max-width: 700px; }
+  [data-brand='petappro'] #home-all-in-one { padding-block: var(--pa-space-14); }
+  [data-brand='petappro'] .home-card-grid { padding-top: var(--pa-space-10); }
+  [data-brand='petappro'] #home-why .card { min-height: 200px; }
+  [data-brand='petappro'] .home-steps { padding-top: var(--pa-space-5); }
+  [data-brand='petappro'] .home-step { min-height: 191px; }
+  [data-brand='petappro'] .home-feature-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--pa-space-5) var(--pa-space-4); }
+  [data-brand='petappro'] #home-themes { padding-block: var(--pa-space-16); }
+  [data-brand='petappro'] .home-theme-grid { padding-top: var(--pa-space-10); }
+  [data-brand='petappro'] #home-payment-quote { padding-block: var(--pa-space-12); }
+  [data-brand='petappro'] #home-pricing .card { min-height: 173px; }
+  [data-brand='petappro'] #home-final-cta { padding-block: var(--pa-space-16); }
+  [data-brand='petappro'] .site-footer__grid {
+    grid-template-columns: repeat(3, 1fr) 2fr;
+    gap: var(--pa-space-8);
+    padding: var(--pa-space-10) 0;
+  }
+  [data-brand='petappro'] .site-footer__brand { grid-column: auto; padding-top: 0; justify-self: end; }
+}
+
+/* ============================================================
+   PETAPPRO secondary marketing pages — Figma desktop/mobile frames
+   Features, Pricing, Themes, Download, Support, Contact, Sign up.
+   Mobile first; all type is assigned through the published role classes.
+   ============================================================ */
+[data-brand='petappro'] .petappro-page .container {
+  width: 100%;
+  max-width: var(--pa-content-max);
+  padding-inline: var(--pa-space-6);
+}
+[data-brand='petappro'] .petappro-page .section { padding-block: var(--pa-space-12); }
+[data-brand='petappro'] .petappro-page .section--tight { padding-block: var(--pa-space-10); }
+[data-brand='petappro'] .petappro-page h1,
+[data-brand='petappro'] .petappro-page h2,
+[data-brand='petappro'] .petappro-page h3,
+[data-brand='petappro'] .petappro-page p,
+[data-brand='petappro'] .petappro-page figure { margin: 0; }
+[data-brand='petappro'] .petappro-page .btn--secondary {
+  color: var(--pa-camo-700);
+  border-color: var(--pa-camo-600);
+}
+[data-brand='petappro'] .subpage-heading {
+  border-left: var(--pa-section-rule) solid var(--pa-camo-600);
+  padding: 0 0 var(--pa-space-4) var(--pa-space-6);
+  max-width: 720px;
+}
+[data-brand='petappro'] .subpage-heading p { color: var(--text-secondary); margin-top: var(--pa-space-4); }
+[data-brand='petappro'] .subpage-heading .btn { margin-top: var(--pa-space-6); }
+[data-brand='petappro'] .subpage-heading--inverse { color: var(--text-inverse); }
+[data-brand='petappro'] .subpage-heading--inverse p { color: var(--text-inverse-secondary); }
+[data-brand='petappro'] .subpage-hero { padding-block: var(--pa-space-14); }
+[data-brand='petappro'] .subpage-hero--tint { background: var(--pa-brandy-50); }
+[data-brand='petappro'] .subpage-hero--inverse { background: var(--pa-brandy-800); }
+[data-brand='petappro'] .subpage-hero__grid { display: grid; gap: var(--pa-space-10); align-items: center; }
+[data-brand='petappro'] .subpage-cta { text-align: center; }
+[data-brand='petappro'] .subpage-cta p { margin: var(--pa-space-4) 0 var(--pa-space-6); }
+[data-brand='petappro'] .subpage-cta h2 + .btn { margin-top: var(--pa-space-6); }
+
+/* Shared mobile-only scroll-to-top control. The SVG owns its elevation. */
+[data-brand='petappro'] .petappro-scroll-top {
+  position: fixed;
+  right: var(--pa-space-4);
+  bottom: var(--pa-space-4);
+  z-index: 60;
+  display: block;
+  width: 66px;
+  height: 66px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(12px);
+  transition: opacity 160ms ease, transform 160ms ease;
+}
+[data-brand='petappro'] .petappro-scroll-top.is-visible { opacity: 1; pointer-events: auto; transform: translateY(0); }
+[data-brand='petappro'] .petappro-scroll-top img { display: block; width: 66px; height: 66px; }
+
+/* Features */
+[data-brand='petappro'] .features-hero-screens {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  min-height: 370px;
+  overflow: hidden;
+}
+[data-brand='petappro'] .subpage-phone {
+  width: min(44vw, 176px);
+  padding: 7px;
+  background: #111;
+  border-radius: 24px;
+  box-shadow: var(--pa-card-shadow);
+}
+[data-brand='petappro'] .subpage-phone img { display: block; width: 100%; height: auto; border-radius: 18px; }
+[data-brand='petappro'] .features-hero-screens .subpage-phone:first-child { transform: translate(14px, 34px) rotate(-4deg); }
+[data-brand='petappro'] .features-hero-screens .subpage-phone:last-child { transform: translate(-8px, 0) rotate(4deg); }
+[data-brand='petappro'] .features-tools { background: var(--surface-card); }
+[data-brand='petappro'] .feature-detail-grid { display: grid; gap: var(--pa-space-6); margin-top: var(--pa-space-8); }
+[data-brand='petappro'] .feature-detail-card {
+  display: grid;
+  grid-template-columns: 1fr 104px;
+  gap: var(--pa-space-4);
+  min-height: 260px;
+  padding: var(--pa-space-6);
+  overflow: hidden;
+  background: var(--pa-brandy-50);
+  border-radius: var(--pa-card-radius);
+}
+[data-brand='petappro'] .feature-detail-card:nth-child(3n + 2) { background: color-mix(in srgb, var(--pa-camo-600) 11%, white); }
+[data-brand='petappro'] .feature-detail-card:nth-child(3n) { background: color-mix(in srgb, var(--pa-bella-600) 10%, white); }
+[data-brand='petappro'] .feature-detail-card__number { display: block; color: var(--pa-camo-700); margin-bottom: var(--pa-space-4); }
+[data-brand='petappro'] .feature-detail-card p { margin-top: var(--pa-space-3); color: var(--text-secondary); }
+[data-brand='petappro'] .feature-detail-card .subpage-phone { align-self: end; width: 126px; transform: translate(8px, 46px); }
+[data-brand='petappro'] .features-both { text-align: left; }
+[data-brand='petappro'] .features-both__screens { display: flex; justify-content: center; gap: var(--pa-space-8); margin-top: var(--pa-space-8); text-align: center; }
+[data-brand='petappro'] .features-both__screens p { margin-top: var(--pa-space-3); color: var(--pa-brandy-600); }
+
+/* Pricing */
+[data-brand='petappro'] .pricing-tier-grid { display: grid; gap: var(--pa-space-4); margin-top: var(--pa-space-10); }
+[data-brand='petappro'] .pricing-tier {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 340px;
+  padding: var(--pa-space-6);
+  background: var(--surface-card);
+  border: 2px solid transparent;
+  border-radius: var(--pa-card-radius);
+  box-shadow: var(--pa-card-shadow);
+}
+[data-brand='petappro'] .pricing-tier--featured { border-color: var(--pa-camo-600); }
+[data-brand='petappro'] .pricing-tier__badge {
+  position: absolute;
+  top: 0;
+  right: var(--pa-space-4);
+  padding: var(--pa-space-2) var(--pa-space-3);
+  color: var(--text-inverse);
+  background: var(--pa-camo-600);
+  border-radius: 0 0 10px 10px;
+}
+[data-brand='petappro'] .pricing-tier__seats { color: var(--pa-camo-700); margin-bottom: var(--pa-space-3); }
+[data-brand='petappro'] .pricing-tier__price { color: var(--pa-brandy-600); margin: var(--pa-space-3) 0; }
+[data-brand='petappro'] .pricing-tier__price span { color: var(--text-secondary); }
+[data-brand='petappro'] .pricing-tier > p:not(.pricing-tier__price):not(.pricing-tier__seats) { color: var(--text-secondary); margin-bottom: var(--pa-space-3); }
+[data-brand='petappro'] .pricing-tier .btn { align-self: flex-start; margin-top: auto; }
+[data-brand='petappro'] .pricing-table-wrap { margin-top: var(--pa-space-8); overflow-x: auto; border: 1px solid var(--border-default); border-radius: var(--pa-card-radius); }
+[data-brand='petappro'] .pricing-table-wrap .matrix { min-width: 980px; }
+[data-brand='petappro'] .pricing-table-wrap thead { background: var(--pa-brandy-800); color: var(--text-inverse); }
+[data-brand='petappro'] .pricing-table-wrap thead th { color: var(--text-inverse); }
+[data-brand='petappro'] .pricing-table-wrap thead th > span,
+[data-brand='petappro'] .pricing-table-wrap thead th > small { display: block; color: var(--text-inverse); }
+[data-brand='petappro'] .pricing-table-wrap thead th > small { margin-top: var(--pa-space-1); font-size: var(--type-caption-size); font-weight: var(--type-weight-regular); }
+[data-brand='petappro'] .pricing-matrix-caption { padding: var(--pa-space-5) var(--pa-space-4); background: var(--surface-card); color: var(--text-primary); text-align: left; }
+[data-brand='petappro'] .pricing-table-wrap th,
+[data-brand='petappro'] .pricing-table-wrap td { padding: var(--pa-space-4); }
+[data-brand='petappro'] .pricing-table-wrap tbody tr:nth-child(even) { background: var(--pa-brandy-50); }
+[data-brand='petappro'] .pricing-footnote { color: var(--text-secondary); margin-top: var(--pa-space-4); max-width: 72ch; }
+[data-brand='petappro'] .pricing-extras { background: var(--pa-camo-600); color: var(--text-inverse); }
+[data-brand='petappro'] .pricing-extras .subpage-heading { border-left-color: var(--pa-brandy-200); }
+[data-brand='petappro'] .pricing-extras .eyebrow { color: var(--pa-brandy-200); }
+[data-brand='petappro'] .pricing-extras__grid { display: grid; gap: var(--pa-space-4); margin-top: var(--pa-space-8); }
+[data-brand='petappro'] .pricing-extras__grid article { padding: var(--pa-space-6); background: color-mix(in srgb, white 12%, transparent); border-radius: var(--pa-card-radius); }
+[data-brand='petappro'] .pricing-extras__grid p { margin-top: var(--pa-space-3); color: var(--text-inverse); }
+[data-brand='petappro'] .pricing-faq__grid { display: grid; gap: 0; margin-top: var(--pa-space-8); }
+[data-brand='petappro'] .pricing-faq__grid article { padding-block: var(--pa-space-6); border-top: 1px solid var(--border-default); }
+[data-brand='petappro'] .pricing-faq__grid p { margin-top: var(--pa-space-3); color: var(--text-secondary); }
+
+/* Themes */
+[data-brand='petappro'] .themes-hero__art img { display: block; width: 100%; height: auto; }
+[data-brand='petappro'] .themes-gallery__grid { display: grid; gap: var(--pa-space-6); margin-top: var(--pa-space-8); }
+[data-brand='petappro'] .theme-preview { padding: var(--pa-space-4); background: var(--surface-card); border-radius: var(--pa-card-radius); box-shadow: var(--pa-card-shadow); text-align: center; }
+[data-brand='petappro'] .theme-preview img { display: block; width: 100%; height: auto; }
+[data-brand='petappro'] .theme-preview figcaption { margin-top: var(--pa-space-3); color: var(--pa-brandy-600); }
+[data-brand='petappro'] .themes-plans { background: var(--pa-brandy-800); color: var(--text-inverse); }
+[data-brand='petappro'] .themes-plans__grid { display: grid; gap: var(--pa-space-4); margin-top: var(--pa-space-8); }
+[data-brand='petappro'] .themes-plans__grid article { padding: var(--pa-space-6); background: var(--surface-card); color: var(--text-primary); border-radius: var(--pa-card-radius); }
+[data-brand='petappro'] .themes-plans__grid h3 { color: var(--pa-camo-700); }
+[data-brand='petappro'] .themes-plans__grid p { margin-top: var(--pa-space-3); color: var(--text-secondary); }
+[data-brand='petappro'] .themes-branding .container { display: grid; gap: var(--pa-space-8); align-items: center; }
+[data-brand='petappro'] .themes-branding__screen { display: block; width: 150px; height: auto; margin-inline: auto; padding: 7px; background: #111; border-radius: 25px; }
+
+/* Download */
+[data-brand='petappro'] .download-hero__phones { display: block; width: 100%; height: auto; }
+[data-brand='petappro'] .store-badges { display: flex; flex-wrap: wrap; gap: var(--pa-space-3); margin-top: var(--pa-space-6); }
+[data-brand='petappro'] .store-badge { min-width: 156px; padding: var(--pa-space-3) var(--pa-space-4); color: var(--text-inverse); background: #111; border-radius: 10px; line-height: 1.2; }
+[data-brand='petappro'] .store-badge small { font: inherit; font-size: .72em; font-weight: 400; }
+[data-brand='petappro'] .download-notify .container { display: grid; gap: var(--pa-space-6); align-items: center; }
+[data-brand='petappro'] .download-notify h2 { max-width: 25ch; }
+[data-brand='petappro'] .download-notify p { color: var(--text-secondary); margin-top: var(--pa-space-2); }
+[data-brand='petappro'] .waitlist { display: flex; flex-direction: column; gap: var(--pa-space-3); }
+[data-brand='petappro'] .waitlist input {
+  width: 100%;
+  height: 48px;
+  padding-inline: var(--pa-space-4);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-ctl);
+  font: inherit;
+  color: var(--text-primary);
+  background: var(--surface-card);
+}
+[data-brand='petappro'] .waitlist__note { margin-top: var(--pa-space-3); color: var(--text-secondary); }
+[data-brand='petappro'] .download-inside { background: var(--pa-brandy-800); color: var(--text-inverse); }
+[data-brand='petappro'] .download-tabs { display: inline-flex; gap: var(--pa-space-2); margin-top: var(--pa-space-8); padding: var(--pa-space-1); background: color-mix(in srgb, white 14%, transparent); border-radius: var(--radius-ctl); }
+[data-brand='petappro'] .download-tabs span { padding: var(--pa-space-2) var(--pa-space-5); border-radius: var(--radius-ctl); }
+[data-brand='petappro'] .download-tabs .is-active { color: var(--pa-brandy-800); background: var(--surface-card); }
+[data-brand='petappro'] .download-screens { display: flex; gap: var(--pa-space-4); margin-top: var(--pa-space-8); padding-bottom: var(--pa-space-4); overflow-x: auto; scroll-snap-type: x mandatory; }
+[data-brand='petappro'] .download-screens figure { flex: 0 0 170px; scroll-snap-align: start; text-align: center; }
+[data-brand='petappro'] .download-screens img { display: block; width: 100%; height: auto; padding: 7px; background: #111; border-radius: 25px; }
+[data-brand='petappro'] .download-screens figcaption { margin-top: var(--pa-space-3); color: var(--text-inverse); }
+[data-brand='petappro'] .download-disclaimer { color: var(--text-inverse-secondary); margin-top: var(--pa-space-4); }
+
+/* Support, Contact, Sign up */
+[data-brand='petappro'] .support-hero .subpage-heading,
+[data-brand='petappro'] .contact-hero .subpage-heading { max-width: 780px; }
+[data-brand='petappro'] .support-accordion { margin-top: var(--pa-space-8); border-top: 1px solid var(--border-default); }
+[data-brand='petappro'] .support-accordion details { background: var(--surface-card); border-bottom: 1px solid var(--border-default); }
+[data-brand='petappro'] .support-accordion summary { display: flex; justify-content: space-between; gap: var(--pa-space-4); padding: var(--pa-space-6); cursor: pointer; list-style: none; }
+[data-brand='petappro'] .support-accordion summary::-webkit-details-marker { display: none; }
+[data-brand='petappro'] .support-accordion summary span { color: var(--pa-camo-700); }
+[data-brand='petappro'] .support-accordion details[open] summary span { transform: rotate(45deg); }
+[data-brand='petappro'] .support-accordion details p { padding: 0 var(--pa-space-6) var(--pa-space-6); color: var(--text-secondary); }
+[data-brand='petappro'] .support-closing { max-width: 68ch; margin-top: var(--pa-space-6); color: var(--text-secondary); }
+[data-brand='petappro'] .support-contact a { color: var(--text-inverse); text-decoration: underline; }
+[data-brand='petappro'] .contact-details .container { display: grid; gap: var(--pa-space-4); }
+[data-brand='petappro'] .contact-card { min-height: 280px; padding: var(--pa-space-6); background: var(--surface-card); border-radius: var(--pa-card-radius); box-shadow: var(--pa-card-shadow); }
+[data-brand='petappro'] .contact-card p { margin-top: var(--pa-space-4); color: var(--text-secondary); }
+[data-brand='petappro'] .contact-card .btn { margin-top: var(--pa-space-6); }
+[data-brand='petappro'] .signup-section { min-height: 640px; display: grid; align-items: center; }
+[data-brand='petappro'] .signup-card { max-width: 650px; margin-inline: auto; padding: var(--pa-space-8) var(--pa-space-6); text-align: center; background: var(--surface-card); border-radius: var(--pa-card-radius); box-shadow: var(--pa-card-shadow); }
+[data-brand='petappro'] .signup-card > p { max-width: 44ch; margin: var(--pa-space-4) auto var(--pa-space-6); color: var(--text-secondary); }
+[data-brand='petappro'] .signup-card .waitlist__note { margin-top: var(--pa-space-3); }
+
+@media (prefers-reduced-motion: reduce) {
+  [data-brand='petappro'] .petappro-scroll-top { transition: none; }
+  [data-brand='petappro'] .petappro-mobilenav__backdrop,
+  [data-brand='petappro'] .petappro-mobilenav__panel { transition: none; }
+}
+
+@media (min-width: 834px) {
+  [data-brand='petappro'] .subpage-hero__grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--pa-space-14); }
+  [data-brand='petappro'] .feature-detail-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  [data-brand='petappro'] .feature-detail-card:last-child { grid-column: 1 / -1; }
+  [data-brand='petappro'] .pricing-tier-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  [data-brand='petappro'] .pricing-extras__grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  [data-brand='petappro'] .pricing-faq__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 var(--pa-space-10); }
+  [data-brand='petappro'] .themes-gallery__grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  [data-brand='petappro'] .themes-plans__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  [data-brand='petappro'] .themes-branding .container { grid-template-columns: 1fr 280px; }
+  [data-brand='petappro'] .download-notify .container { grid-template-columns: 1fr 1fr; }
+  [data-brand='petappro'] .waitlist { flex-direction: row; }
+  [data-brand='petappro'] .waitlist input { flex: 1; min-width: 0; }
+  [data-brand='petappro'] .download-screens { justify-content: space-between; overflow: visible; }
+  [data-brand='petappro'] .download-screens figure { flex-basis: 21%; }
+  [data-brand='petappro'] .contact-details .container { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (min-width: 1280px) {
+  [data-brand='petappro'] .petappro-page .container { padding-inline: 0; }
+  [data-brand='petappro'] .petappro-page .section { padding-block: var(--pa-space-18); }
+  [data-brand='petappro'] .petappro-page .section--tight { padding-block: var(--pa-space-14); }
+  [data-brand='petappro'] .subpage-hero { min-height: 610px; display: grid; align-items: center; }
+  [data-brand='petappro'] .features-hero-screens { min-height: 560px; }
+  [data-brand='petappro'] .subpage-phone { width: 240px; border-radius: 34px; }
+  [data-brand='petappro'] .subpage-phone img { border-radius: 27px; }
+  [data-brand='petappro'] .feature-detail-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  [data-brand='petappro'] .feature-detail-card:last-child { grid-column: 2 / 3; }
+  [data-brand='petappro'] .pricing-tier-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  [data-brand='petappro'] .pricing-tier { min-height: 388px; padding: var(--pa-space-8); }
+  [data-brand='petappro'] .themes-plans__grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  [data-brand='petappro'] .themes-branding__screen { width: 210px; }
+  [data-brand='petappro'] .download-hero__phones { max-height: 560px; width: auto; justify-self: center; }
+  [data-brand='petappro'] .download-screens figure { flex-basis: 230px; }
+  [data-brand='petappro'] .signup-card { padding: var(--pa-space-14); }
+}
+
+@media (min-width: 834px) {
+  [data-brand='petappro'] .petappro-scroll-top { display: none; }
+}
+
+/* ============================================================
+   Frame-faithful secondary pages. These rules map directly to the current
+   Figma desktop/mobile frames and intentionally supersede the earlier page
+   scaffold above.
+   ============================================================ */
+[data-brand='petappro'] .figma-features__hero {
+  background: var(--pa-brandy-800);
+  color: var(--text-inverse);
+}
+[data-brand='petappro'] .figma-features__hero-grid { display: grid; gap: var(--pa-space-8); align-items: center; }
+[data-brand='petappro'] .figma-features__hero .subpage-heading .btn { margin-top: var(--pa-space-6); }
+[data-brand='petappro'] .feature-spotlight-carousel {
+  min-width: 0;
+  padding: var(--pa-space-3);
+  touch-action: pan-y;
+}
+[data-brand='petappro'] .feature-spotlight-carousel__slide { opacity: 1; }
+[data-brand='petappro'] .feature-spotlight-carousel__image {
+  display: flex;
+  width: 100%;
+  aspect-ratio: 1240 / 614;
+  align-items: flex-end;
+  justify-content: flex-start;
+}
+[data-brand='petappro'] .feature-spotlight-carousel__image img {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 100%;
+  object-fit: contain;
+  object-position: left bottom;
+  box-shadow: var(--pa-card-shadow);
+  pointer-events: none;
+}
+[data-brand='petappro'] .feature-spotlight-carousel__copy {
+  width: 100%;
+  min-height: calc(var(--pa-space-16) * 2 + var(--pa-space-8));
+  margin-top: var(--pa-space-5);
+}
+[data-brand='petappro'] .feature-spotlight-carousel__copy p { margin-top: var(--pa-space-3); }
+[data-brand='petappro'] .feature-spotlight-carousel__dots {
+  display: flex;
+  min-height: var(--pa-space-10);
+  align-items: center;
+  justify-content: center;
+  gap: var(--pa-space-2);
+}
+[data-brand='petappro'] .feature-spotlight-carousel__dots button {
+  width: var(--pa-space-2);
+  height: var(--pa-space-2);
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-ctl);
+  background: var(--pa-brand-accent);
+  opacity: .3;
+  transform: scale(1);
+  cursor: pointer;
+  transition: width 300ms ease, opacity 300ms ease, transform 300ms ease;
+}
+[data-brand='petappro'] .feature-spotlight-carousel__dots button.is-active { width: var(--pa-space-4); opacity: 1; transform: scale(1.12); }
+[data-brand='petappro'] .feature-spotlight-carousel__disclaimer { margin: 0; text-align: center; }
+@media (prefers-reduced-motion: reduce) {
+  [data-brand='petappro'] .feature-spotlight-carousel__dots button { transition: none; }
+}
+[data-brand='petappro'] .figma-features__cards { display: grid; gap: var(--pa-space-4); margin-top: var(--pa-space-8); }
+[data-brand='petappro'] .figma-features__cards article {
+  min-height: 215px;
+  padding: var(--pa-space-6);
+  background: var(--pa-brandy-50);
+  border-radius: var(--pa-card-radius);
+  box-shadow: var(--pa-card-shadow);
+}
+[data-brand='petappro'] .figma-features__card-heading { display: flex; align-items: center; gap: var(--pa-space-2); }
+[data-brand='petappro'] .figma-features__card-heading img {
+  display: block;
+  width: 44px;
+  height: auto;
+  max-height: 44px;
+  flex: none;
+  object-fit: contain;
+  object-position: left center;
+}
+[data-brand='petappro'] .figma-features__cards p { margin-top: var(--pa-space-2); }
+[data-brand='petappro'] .figma-features__essential-grid { display: grid; gap: var(--pa-space-3); margin-top: var(--pa-space-8); }
+[data-brand='petappro'] .figma-features__essential-grid article {
+  display: flex;
+  gap: var(--pa-space-3);
+  align-items: center;
+  min-height: 76px;
+  padding: var(--pa-space-4);
+  background: var(--surface-card);
+  border-radius: 14px;
+  box-shadow: var(--pa-card-shadow);
+}
+[data-brand='petappro'] .figma-features__essential-icon { display: grid; width: var(--pa-space-10); height: var(--pa-space-10); flex: none; place-items: center; border-radius: var(--radius-ctl); background: var(--pa-brand-accent); }
+[data-brand='petappro'] .figma-features__essential-icon img {
+  width: var(--pa-space-5);
+  height: auto;
+  max-height: var(--pa-space-5);
+  object-fit: contain;
+  filter: brightness(0) invert(1);
+}
+
+[data-brand='petappro'] .figma-pricing__hero { background: var(--pa-brandy-50); }
+[data-brand='petappro'] .figma-pricing__hero .subpage-heading { max-width: 900px; }
+[data-brand='petappro'] .figma-pricing__tiers { display: grid; gap: var(--pa-space-4); margin-top: var(--pa-space-8); }
+[data-brand='petappro'] .figma-pricing__tiers article {
+  min-height: 200px;
+  padding: var(--pa-space-6);
+  background: var(--surface-card);
+  border: 1px solid var(--border-default);
+  border-radius: var(--pa-card-radius);
+  box-shadow: var(--pa-card-shadow);
+}
+[data-brand='petappro'] .figma-pricing__tiers article.is-featured { border: 2px solid var(--pa-brand-accent); }
+[data-brand='petappro'] .figma-pricing__tiers article > p:first-child { color: var(--pa-camo-700); text-transform: uppercase; }
+[data-brand='petappro'] .figma-pricing__tiers h2 { margin-top: var(--pa-space-2); color: var(--pa-brand-accent); }
+[data-brand='petappro'] .figma-pricing__tiers article > .type-body { margin-top: var(--pa-space-3); color: var(--text-secondary); }
+[data-brand='petappro'] .figma-pricing__annual { margin-top: var(--pa-space-1); color: var(--text-secondary); }
+[data-brand='petappro'] .figma-pricing__badge { display: inline-flex; margin-top: var(--pa-space-4); color: var(--pa-camo-700); }
+[data-brand='petappro'] .figma-pricing__tiers .btn { margin-top: var(--pa-space-4); }
+[data-brand='petappro'] .figma-pricing__compare .pricing-table-wrap { margin-top: var(--pa-space-8); }
+[data-brand='petappro'] .figma-pricing__honest { background: var(--pa-camo-700); color: var(--text-inverse); }
+[data-brand='petappro'] .figma-pricing__honest .eyebrow { color: var(--text-inverse); }
+[data-brand='petappro'] .figma-pricing__honest-grid { display: grid; gap: var(--pa-space-4); margin-top: var(--pa-space-8); }
+[data-brand='petappro'] .figma-pricing__honest-grid article { padding: var(--pa-space-6); background: var(--surface-card); color: var(--text-primary); border-radius: var(--pa-card-radius); }
+[data-brand='petappro'] .figma-pricing__honest-grid h3 { color: var(--pa-brandy-600); }
+[data-brand='petappro'] .figma-pricing__honest-grid p { margin-top: var(--pa-space-3); color: var(--text-secondary); }
+[data-brand='petappro'] .figma-pricing__faq-grid { display: grid; gap: var(--pa-space-6); margin-top: var(--pa-space-8); }
+[data-brand='petappro'] .figma-pricing__faq-grid h3 { color: var(--pa-brand-accent); }
+[data-brand='petappro'] .figma-pricing__faq-grid p { margin-top: var(--pa-space-2); color: var(--text-secondary); }
+
+[data-brand='petappro'] .figma-themes__hero-grid { display: grid; gap: var(--pa-space-8); align-items: center; }
+[data-brand='petappro'] .figma-themes__hero-art { position: relative; min-height: 360px; }
+[data-brand='petappro'] .figma-themes__hero-phone {
+  position: relative;
+  z-index: 2;
+  display: block;
+  width: 200px;
+  height: auto;
+  margin-left: 12%;
+}
+[data-brand='petappro'] .figma-themes__fan { position: absolute; z-index: 1; right: 0; bottom: 0; display: block; width: 72%; height: auto; }
+[data-brand='petappro'] .figma-themes__gallery .subpage-heading { max-width: 840px; }
+[data-brand='petappro'] .figma-themes__gallery-layout { display: grid; gap: var(--pa-space-6); align-items: start; margin-top: var(--pa-space-8); }
+[data-brand='petappro'] .figma-themes__swatches {
+  display: flex;
+  width: 100%;
+  gap: 14px;
+  padding: 2px 0;
+  overflow-x: auto;
+  scroll-padding-inline: calc(var(--pa-space-3) / 2);
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+}
+[data-brand='petappro'] .figma-themes__swatches::-webkit-scrollbar { display: none; }
+[data-brand='petappro'] .figma-themes__swatches button:first-child { margin-inline-start: calc(var(--pa-space-3) / 2); }
+[data-brand='petappro'] .figma-themes__swatches button:last-child { margin-inline-end: calc(var(--pa-space-3) / 2); }
+[data-brand='petappro'] .figma-themes__swatches button {
+  display: flex;
+  flex: 0 0 calc(100% - var(--pa-space-3));
+  min-height: 76px;
+  gap: 14px;
+  align-items: center;
+  padding: var(--pa-space-4);
+  border: 0;
+  outline: 2px solid transparent;
+  border-radius: 14px;
+  background: var(--surface-card);
+  color: var(--text-primary);
+  text-align: left;
+  scroll-snap-align: center;
+  scroll-snap-stop: always;
+  cursor: pointer;
+  transition: outline-color 200ms ease, box-shadow 200ms ease;
+}
+[data-brand='petappro'] .figma-themes__swatches button.is-selected {
+  outline-color: var(--pa-brand-accent);
+  box-shadow: var(--pa-card-shadow);
+}
+[data-brand='petappro'] .theme-dot {
+  display: grid;
+  flex: none;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  border-radius: 10px;
+}
+[data-brand='petappro'] .theme-dot > i { width: 18px; height: 18px; border-radius: 5px; }
+[data-brand='petappro'] .theme-chip-copy { display: flex; min-width: 0; flex: 1; flex-direction: column; gap: 2px; }
+[data-brand='petappro'] .theme-chip-copy strong,
+[data-brand='petappro'] .theme-chip-copy small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+[data-brand='petappro'] .theme-mini-dots { display: flex; gap: 5px; margin-left: auto; }
+[data-brand='petappro'] .theme-mini-dots i { width: 16px; height: 16px; border-radius: 4px; }
+[data-brand='petappro'] .figma-themes__phone-preview { width: min(340px, 100%); margin-inline: auto; text-align: center; }
+[data-brand='petappro'] .figma-themes__mode { display: inline-flex; padding: 4px; border-radius: var(--radius-ctl); background: var(--surface-card); }
+[data-brand='petappro'] .figma-themes__mode button {
+  min-width: 70px;
+  padding: 8px 18px;
+  border: 0;
+  border-radius: var(--radius-ctl);
+  background: transparent;
+  color: var(--text-primary);
+  font: inherit;
+  cursor: pointer;
+  transition: color 300ms ease, background-color 300ms ease;
+}
+[data-brand='petappro'] .figma-themes__mode button.is-active { color: var(--text-inverse); background: var(--pa-brand-accent); font-weight: 700; }
+[data-brand='petappro'] .theme-phone-shell {
+  width: 100%;
+  margin-block: var(--pa-space-4);
+  padding: 14px;
+  border-radius: 44px;
+  background: var(--preview-light);
+  transition: background-color 300ms ease;
+}
+[data-brand='petappro'] .theme-phone-screen {
+  min-height: 620px;
+  padding: var(--pa-space-8) var(--pa-space-6) var(--pa-space-6);
+  border-radius: 30px;
+  background: var(--preview-screen);
+  color: var(--preview-text);
+  font-family: var(--preview-font);
+  text-align: left;
+  transition: color 300ms ease, background-color 300ms ease;
+}
+[data-brand='petappro'] .theme-phone-brand { display: flex; gap: 14px; align-items: center; font-size: 20px; }
+[data-brand='petappro'] .theme-phone-brand img { transition: filter 300ms ease; }
+[data-brand='petappro'] .figma-themes__phone-preview.is-dark .theme-phone-brand img { filter: brightness(0) invert(1); }
+[data-brand='petappro'] .theme-phone-screen h3 { margin-top: var(--pa-space-6); color: inherit; font: 700 24px/1.2 var(--preview-font); }
+[data-brand='petappro'] .theme-phone-services { display: grid; gap: var(--pa-space-3); margin-top: var(--pa-space-6); }
+[data-brand='petappro'] .theme-phone-service {
+  display: flex;
+  min-height: 76px;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--pa-space-3);
+  padding: var(--pa-space-4);
+  border-radius: 16px;
+  background: var(--preview-card);
+  color: var(--preview-dark);
+  transition: color 300ms ease, background-color 300ms ease;
+}
+[data-brand='petappro'] .theme-phone-service span { display: flex; min-width: 0; flex-direction: column; gap: 3px; }
+[data-brand='petappro'] .theme-phone-service strong { font-size: 13px; }
+[data-brand='petappro'] .theme-phone-service small { font-size: 10px; line-height: 1.35; }
+[data-brand='petappro'] .theme-phone-service > img { width: var(--pa-space-5); height: var(--pa-space-5); flex: none; }
+[data-brand='petappro'] .theme-phone-book {
+  margin-top: var(--pa-space-6);
+  padding: 13px;
+  border-radius: var(--radius-ctl);
+  background: var(--preview-mid);
+  color: white;
+  font-weight: 700;
+  text-align: center;
+  transition: background-color 300ms ease;
+}
+[data-brand='petappro'] .figma-themes__phone-preview > p { color: var(--text-secondary); }
+@media (prefers-reduced-motion: reduce) {
+  [data-brand='petappro'] .theme-phone-brand img { transition: none; }
+}
+[data-brand='petappro'] .figma-themes__plans { background: var(--pa-camo-700); color: var(--text-inverse); }
+[data-brand='petappro'] .figma-themes__plans .eyebrow { color: var(--text-inverse); }
+[data-brand='petappro'] .figma-themes__plan-grid { display: grid; gap: var(--pa-space-4); margin-top: var(--pa-space-8); }
+[data-brand='petappro'] .figma-themes__plan-grid article,
+[data-brand='petappro'] .figma-themes__enterprise { padding: var(--pa-space-6); background: var(--surface-card); color: var(--text-primary); border-radius: var(--pa-card-radius); }
+[data-brand='petappro'] .figma-themes__plan-grid h3 { color: var(--pa-brandy-600); }
+[data-brand='petappro'] .figma-themes__plan-grid p { margin-top: var(--pa-space-3); color: var(--text-secondary); }
+[data-brand='petappro'] .figma-themes__enterprise { margin-top: var(--pa-space-4); }
+[data-brand='petappro'] .figma-themes__enterprise span { color: var(--pa-camo-700); }
+[data-brand='petappro'] .figma-themes__plans-action { display: flex; justify-content: center; margin-top: var(--pa-space-6); }
+
+[data-brand='petappro'] .figma-download__hero-grid { display: grid; gap: var(--pa-space-8); align-items: center; }
+[data-brand='petappro'] .figma-download__badges { display: flex; gap: var(--pa-space-3); align-items: center; margin-top: var(--pa-space-6); }
+[data-brand='petappro'] .figma-download__badges img { display: block; height: 40px; width: auto; }
+[data-brand='petappro'] .figma-download__hero-art { display: block; width: 100%; height: auto; }
+[data-brand='petappro'] .figma-download__notify { background: var(--pa-brandy-50); }
+[data-brand='petappro'] .figma-download__notify-card { padding: var(--pa-space-6); background: var(--surface-card); border-radius: var(--pa-card-radius); }
+[data-brand='petappro'] .figma-download__notify-card > p { margin-top: var(--pa-space-3); color: var(--text-secondary); }
+[data-brand='petappro'] .figma-download__notify-card .waitlist { margin-top: var(--pa-space-6); max-width: 560px; }
+[data-brand='petappro'] .figma-download__inside { background: var(--pa-brandy-600); color: var(--text-inverse); }
+[data-brand='petappro'] .figma-download__tabs { display: flex; width: fit-content; margin: var(--pa-space-6) auto 0; padding: 4px; background: var(--surface-card); border-radius: var(--radius-ctl); color: var(--text-primary); }
+[data-brand='petappro'] .figma-download__tabs button { padding: 7px 18px; border: 0; border-radius: var(--radius-ctl); background: transparent; color: var(--text-primary); font: inherit; cursor: pointer; }
+[data-brand='petappro'] .figma-download__tabs button.is-active { color: var(--text-inverse); background: var(--pa-brand-accent); }
+[data-brand='petappro'] .figma-download__screens { display: flex; gap: var(--pa-space-4); margin-top: var(--pa-space-6); padding-bottom: var(--pa-space-4); overflow-x: auto; scroll-snap-type: x mandatory; }
+[data-brand='petappro'] .figma-download__screens img { flex: 0 0 252px; width: 252px; height: auto; border: 8px solid var(--pa-mav-200); border-radius: 28px; scroll-snap-align: start; }
+[data-brand='petappro'] .figma-download__disclaimer { margin-top: var(--pa-space-4); color: var(--text-inverse); }
+
+[data-brand='petappro'] .figma-support__hero .subpage-heading { max-width: 700px; }
+[data-brand='petappro'] .figma-support__topics > h2 { margin-top: var(--pa-space-4); }
+[data-brand='petappro'] .figma-support__accordion { margin-top: var(--pa-space-8); overflow: hidden; background: var(--surface-card); border-radius: var(--pa-card-radius); }
+[data-brand='petappro'] .figma-support__accordion details { border-bottom: 1px solid var(--border-default); }
+[data-brand='petappro'] .figma-support__accordion summary { display: flex; justify-content: space-between; gap: var(--pa-space-4); padding: var(--pa-space-5) var(--pa-space-6); list-style: none; cursor: pointer; }
+[data-brand='petappro'] .figma-support__accordion summary::-webkit-details-marker { display: none; }
+[data-brand='petappro'] .figma-support__chevron {
+  display: grid;
+  width: var(--pa-space-6);
+  height: var(--pa-space-6);
+  flex: none;
+  place-items: center;
+}
+[data-brand='petappro'] .figma-support__chevron img {
+  grid-area: 1 / 1;
+  display: block;
+  width: 100%;
+  height: 100%;
+  transition: opacity 200ms ease;
+}
+[data-brand='petappro'] .figma-support__chevron-up,
+[data-brand='petappro'] .figma-support__accordion details[open] .figma-support__chevron-down { opacity: 0; }
+[data-brand='petappro'] .figma-support__accordion details[open] .figma-support__chevron-up { opacity: 1; }
+@media (prefers-reduced-motion: reduce) {
+  [data-brand='petappro'] .figma-support__chevron img { transition: none; }
+}
+[data-brand='petappro'] .figma-support__questions { padding: 0 var(--pa-space-6) var(--pa-space-2); }
+[data-brand='petappro'] .figma-support__questions article { padding: var(--pa-space-5) var(--pa-space-3); border-bottom: 1px solid var(--border-default); }
+[data-brand='petappro'] .figma-support__questions article:last-child { border-bottom: 0; }
+[data-brand='petappro'] .figma-support__questions p { margin-top: var(--pa-space-3); }
+[data-brand='petappro'] .figma-support__questions a { text-decoration: underline; }
+[data-brand='petappro'] .figma-support__closing { margin-top: var(--pa-space-10); }
+[data-brand='petappro'] .figma-support__contact { text-align: center; }
+[data-brand='petappro'] .figma-support__contact p { margin-top: var(--pa-space-4); color: var(--text-inverse-secondary); }
+[data-brand='petappro'] .figma-support__contact a { color: inherit; }
+[data-brand='petappro'] .contact-card--email .btn { width: 100%; color: var(--text-primary); border-color: var(--text-primary); }
+[data-brand='petappro'] .contact-hero { background: var(--pa-mav-100); }
+[data-brand='petappro'] .contact-details { background: var(--pa-brandy-50); }
+[data-brand='petappro'] .contact-card { min-height: 0; }
+[data-brand='petappro'] .contact-card h2 { color: var(--pa-brand-accent); }
+[data-brand='petappro'] .contact-card--email { display: flex; flex-direction: column; align-items: flex-start; }
+[data-brand='petappro'] .contact-card--email .btn { margin-top: var(--pa-space-6); }
+[data-brand='petappro'] .signup-section { min-height: 0; padding-block: var(--pa-space-10); }
+[data-brand='petappro'] .signup-card { max-width: 1012px; padding: var(--pa-space-8) var(--pa-space-6); }
+[data-brand='petappro'] .signup-card .waitlist { max-width: 560px; margin-inline: auto; }
+[data-brand='petappro'] .policy-index__intro { margin-bottom: var(--pa-space-8); }
+[data-brand='petappro'] .policies-index .grid { gap: var(--pa-space-6); }
+
+[data-brand='petappro'] .pricing-mobile-break,
+[data-brand='petappro'] .themes-mobile-break,
+[data-brand='petappro'] .download-mobile-break { display: none; }
+
+@media (max-width: 833px) {
+  [data-brand='petappro'] .pricing-mobile-break,
+  [data-brand='petappro'] .themes-mobile-break,
+  [data-brand='petappro'] .download-mobile-break { display: inline; }
+  [data-brand='petappro'] .figma-themes__hero-art { overflow: visible; }
+  [data-brand='petappro'] .figma-themes__fan { right: calc(var(--pa-space-16) * -1); bottom: var(--pa-space-16); }
+  [data-brand='petappro'] .figma-themes__swatches button { overflow: visible; }
+  [data-brand='petappro'] .theme-chip-copy,
+  [data-brand='petappro'] .theme-chip-copy strong,
+  [data-brand='petappro'] .theme-chip-copy small { overflow: visible; text-overflow: clip; white-space: normal; }
+  [data-brand='petappro'] .theme-mini-dots { flex: none; }
+}
+
+@media (min-width: 834px) {
+  [data-brand='petappro'] .feature-spotlight-carousel__copy { min-height: calc(var(--pa-space-16) + var(--pa-space-12)); }
+  [data-brand='petappro'] .figma-features__hero-grid { grid-template-columns: 520px 1fr; gap: var(--pa-space-12); }
+  [data-brand='petappro'] .figma-features__cards,
+  [data-brand='petappro'] .figma-features__essential-grid,
+  [data-brand='petappro'] .figma-pricing__tiers,
+  [data-brand='petappro'] .figma-pricing__honest-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  [data-brand='petappro'] .figma-pricing__faq-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  [data-brand='petappro'] .figma-themes__hero-grid,
+  [data-brand='petappro'] .figma-download__hero-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  [data-brand='petappro'] .figma-themes__gallery-layout { grid-template-columns: 1fr 346px; }
+  [data-brand='petappro'] .figma-themes__swatches { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 0; overflow: visible; scroll-padding-inline: 0; }
+  [data-brand='petappro'] .figma-themes__swatches button { width: auto; min-width: 0; }
+  [data-brand='petappro'] .figma-themes__swatches button:first-child,
+  [data-brand='petappro'] .figma-themes__swatches button:last-child { margin-inline: 0; }
+  [data-brand='petappro'] .figma-themes__phone-preview { position: sticky; top: calc(var(--pa-header-desktop) + var(--pa-space-6)); }
+  [data-brand='petappro'] .figma-themes__plan-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  [data-brand='petappro'] .figma-download__notify-card { padding: var(--pa-space-10); }
+  [data-brand='petappro'] .figma-download__screens { justify-content: space-between; overflow: visible; }
+  [data-brand='petappro'] .figma-download__screens img { flex: 0 1 252px; width: 21%; }
+  [data-brand='petappro'] .figma-download__screens--client { justify-content: center; }
+  [data-brand='petappro'] .figma-download__screens--client img { width: min(252px, 42%); }
+  [data-brand='petappro'] .signup-card { padding: var(--pa-space-14); }
+}
+
+@media (min-width: 1280px) {
+  [data-brand='petappro'] .figma-features__hero { min-height: 530px; }
+  [data-brand='petappro'] .figma-features__full-list { padding-bottom: var(--pa-space-16); }
+  [data-brand='petappro'] .figma-features__cards article { min-height: 251px; }
+  [data-brand='petappro'] .figma-pricing__tiers article { min-height: 230px; }
+  [data-brand='petappro'] .figma-themes__hero-art { min-height: 440px; }
+  [data-brand='petappro'] .figma-themes__hero-phone { width: 248px; margin-left: 12%; }
+  [data-brand='petappro'] .figma-themes__fan { width: 72%; }
+  [data-brand='petappro'] .figma-download__hero-art { max-height: 506px; width: auto; justify-self: center; }
+  [data-brand='petappro'] .figma-support__topics { padding-block: var(--pa-space-14); }
+  [data-brand='petappro'] .contact-hero { min-height: 292px; display: grid; align-items: center; }
+  [data-brand='petappro'] .contact-details .container { gap: var(--pa-space-6); }
+  [data-brand='petappro'] .contact-card { min-height: 178px; }
+  [data-brand='petappro'] .signup-section { padding-block: 100px; }
+}
+
+/* ============================================================
+   Marketing color pass — Danny, 2026-08-14.
+   Default text everywhere, accent reserved for eyebrows, and white text on
+   solid dark sections. Card overrides only affect cards sitting on white.
+   ============================================================ */
+[data-brand='petappro'] :where(.petappro-home, .petappro-page) :where(h1, h2, h3, h4, p, li, dt, dd, th, td, summary, small, strong, .type-label, .type-caption, a:not(.btn)) {
+  color: var(--text-primary) !important;
+}
+[data-brand='petappro'] :where(.petappro-home, .petappro-page) .eyebrow {
+  color: var(--pa-brand-accent) !important;
+}
+[data-brand='petappro'] :where(.petappro-home, .petappro-page) :where(
+  .section--inverse,
+  #home-how,
+  #home-payment-quote,
+  .figma-features__hero,
+  .figma-pricing__honest,
+  .figma-themes__plans,
+  .figma-download__inside,
+  .figma-support__contact
+) :where(h1, h2, h3, h4, p, li, dt, dd, th, td, summary, small, strong, .type-label, .type-caption, a:not(.btn)) {
+  color: var(--text-inverse) !important;
+}
+[data-brand='petappro'] :where(.petappro-home, .petappro-page) :where(
+  .figma-pricing__honest-grid article,
+  .figma-themes__plan-grid article,
+  .figma-themes__enterprise,
+  .figma-download__tabs
+) :where(h1, h2, h3, h4, p, small, strong, .type-label, .type-caption) {
+  color: var(--text-primary) !important;
+}
+[data-brand='petappro'] :where(.petappro-home, .petappro-page) :where(
+  .section--inverse,
+  #home-how,
+  #home-payment-quote,
+  .figma-features__hero,
+  .figma-pricing__honest,
+  .figma-themes__plans,
+  .figma-download__inside,
+  .figma-support__contact
+) .eyebrow {
+  color: var(--pa-brand-accent) !important;
+}
+[data-brand='petappro'] .figma-download__tabs button.is-active { color: var(--text-inverse) !important; }
+[data-brand='petappro'] .pricing-table-wrap thead :where(th, span, small) { color: var(--text-inverse) !important; }
+[data-brand='petappro'] .theme-phone-screen :where(h3, p, small, strong) { color: var(--preview-text) !important; }
+[data-brand='petappro'] .theme-phone-service :where(small, strong) { color: var(--preview-dark) !important; }
+[data-brand='petappro'] :where(.petappro-home, .petappro-page) a:not(.btn) { color: inherit; }
+
+[data-brand='petappro'] #home-why .card,
+[data-brand='petappro'] #home-features .home-feature-card,
+[data-brand='petappro'] #home-features .carousel__card,
+[data-brand='petappro'] #home-pricing .card,
+[data-brand='petappro'] .policies-index .policy-card {
+  background: var(--pa-brandy-50);
+}
+
+[data-brand='petappro'] .site-footer,
+[data-brand='petappro'] .site-footer :where(h2, h3, p, a, span, small, strong, .site-footer__col-title) {
+  color: var(--text-inverse) !important;
+}
+
+/* ============================================================
+   Exploratory provider portal — static concept, DS tokens only.
+   ============================================================ */
+[data-brand='petappro'] .portal-shell { min-height: 100dvh; overflow-x: hidden; background: var(--pa-mav-100); }
+[data-brand='petappro'] .portal-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  display: flex;
+  min-height: var(--pa-header-mobile);
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--pa-space-4);
+  padding-inline: var(--pa-space-6);
+  border-bottom: 1px solid var(--border-default);
+  background: var(--surface-header);
+  backdrop-filter: blur(var(--pa-space-3));
+}
+[data-brand='petappro'] .portal-topbar__brand { display: flex; align-items: center; gap: var(--pa-space-3); color: var(--text-primary); }
+[data-brand='petappro'] .portal-topbar__brand:hover { text-decoration: none; }
+[data-brand='petappro'] .portal-topbar__brand img { display: block; width: auto; height: var(--pa-space-8); }
+[data-brand='petappro'] .portal-topbar__actions { display: flex; align-items: center; gap: var(--pa-space-3); }
+[data-brand='petappro'] .portal-frame { display: grid; width: 100%; min-height: calc(100dvh - var(--pa-header-mobile)); grid-template-columns: minmax(0, 1fr); }
+[data-brand='petappro'] .portal-sidebar {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: var(--pa-space-4);
+  padding: var(--pa-space-4) var(--pa-space-6);
+  border-bottom: 1px solid var(--border-default);
+  background: var(--surface-card);
+}
+[data-brand='petappro'] .portal-business-switcher { display: flex; flex-direction: column; gap: var(--pa-space-1); }
+[data-brand='petappro'] .portal-business-switcher > span { color: var(--text-secondary); }
+[data-brand='petappro'] .portal-nav { display: flex; width: 100%; max-width: 100%; gap: var(--pa-space-2); overflow-x: auto; scrollbar-width: none; }
+[data-brand='petappro'] .portal-nav::-webkit-scrollbar { display: none; }
+[data-brand='petappro'] .portal-nav a {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: var(--pa-space-2);
+  padding: var(--pa-space-3) var(--pa-space-4);
+  border-radius: var(--radius-ctl);
+  color: var(--text-secondary);
+}
+[data-brand='petappro'] .portal-nav a:hover,
+[data-brand='petappro'] .portal-nav a[aria-current='page'] { background: var(--pa-brandy-50); color: var(--pa-brandy-700); text-decoration: none; }
+[data-brand='petappro'] .portal-nav img { width: var(--pa-space-6); height: var(--pa-space-6); }
+[data-brand='petappro'] .portal-main { min-width: 0; }
+[data-brand='petappro'] .portal-page { display: grid; width: 100%; min-width: 0; gap: var(--pa-space-6); max-width: var(--pa-content-max); margin-inline: auto; padding: var(--pa-space-6); }
+[data-brand='petappro'] .portal-page-header { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: var(--pa-space-5); }
+[data-brand='petappro'] .portal-page-header > div:first-child { min-width: 0; }
+[data-brand='petappro'] .portal-page-header h1 { color: var(--pa-brandy-800); }
+[data-brand='petappro'] .portal-page-header p { max-width: 64ch; margin-top: var(--pa-space-2); color: var(--text-secondary); }
+[data-brand='petappro'] .portal-page-header__action { flex: none; }
+[data-brand='petappro'] .portal-page button:disabled { opacity: .55; cursor: not-allowed; }
+[data-brand='petappro'] select { padding-right: var(--pa-space-12) !important; appearance: none; background-image: url('/brands/petappro.com/icon-chevron-down.svg') !important; background-position: right var(--pa-space-3) center !important; background-repeat: no-repeat !important; background-size: var(--pa-space-6) var(--pa-space-6) !important; }
+[data-brand='petappro'] .portal-page .btn--cta { background: var(--pa-brand-accent); color: var(--text-inverse); }
+[data-brand='petappro'] .portal-page .btn--cta:hover { background: var(--pa-camo-700); }
+[data-brand='petappro'] .portal-stat-grid { display: grid; gap: var(--pa-space-4); grid-template-columns: repeat(2, minmax(0, 1fr)); }
+[data-brand='petappro'] .portal-stat { display: flex; min-width: 0; flex-direction: column; gap: var(--pa-space-2); padding: var(--pa-space-5); text-align: left; }
+[data-brand='petappro'] button.portal-stat { font: inherit; cursor: pointer; transition: border-color 200ms ease, box-shadow 200ms ease, transform 200ms ease; }
+[data-brand='petappro'] button.portal-stat:hover { border-color: var(--pa-brand-accent); transform: translateY(-2px); }
+[data-brand='petappro'] button.portal-stat.is-active { border-color: var(--pa-brand-accent); box-shadow: 0 0 0 2px color-mix(in srgb, var(--pa-brand-accent) 24%, transparent), var(--pa-card-shadow); }
+[data-brand='petappro'] .portal-stat > span { color: var(--text-secondary); }
+[data-brand='petappro'] .portal-stat > strong { color: var(--pa-brandy-800); }
+[data-brand='petappro'] .portal-stat--accent { border-color: var(--pa-brand-accent); }
+[data-brand='petappro'] .portal-stat--warning { background: var(--status-warning-bg); border-color: var(--status-warning-border); }
+[data-brand='petappro'] .portal-dashboard-grid,
+[data-brand='petappro'] .portal-settings-grid { display: grid; gap: var(--pa-space-4); }
+[data-brand='petappro'] .portal-panel { min-width: 0; padding: var(--pa-space-6); }
+[data-brand='petappro'] .portal-panel__header { display: flex; align-items: center; justify-content: space-between; gap: var(--pa-space-4); margin-bottom: var(--pa-space-5); }
+[data-brand='petappro'] .portal-panel__header span { color: var(--text-secondary); }
+[data-brand='petappro'] .portal-list,
+[data-brand='petappro'] .portal-task-list,
+[data-brand='petappro'] .portal-preference-list { display: grid; gap: var(--pa-space-3); }
+[data-brand='petappro'] .portal-list-row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: var(--pa-space-4); padding-block: var(--pa-space-3); border-bottom: 1px solid var(--border-default); }
+[data-brand='petappro'] .portal-list-row > div { display: flex; min-width: 0; flex-direction: column; }
+[data-brand='petappro'] .portal-list-row > div span { color: var(--text-secondary); }
+[data-brand='petappro'] .portal-status {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  padding: var(--pa-space-1) var(--pa-space-3);
+  border-radius: var(--radius-ctl);
+  background: var(--pa-brandy-50);
+  color: var(--pa-brandy-700);
+  font-size: var(--type-caption-size);
+  font-weight: var(--type-weight-semibold);
+}
+[data-brand='petappro'] .portal-status--in-progress,
+[data-brand='petappro'] .portal-status--paid { background: color-mix(in srgb, var(--status-success) 14%, var(--surface-card)); color: var(--pa-camo-700); }
+[data-brand='petappro'] .portal-status--pending { background: var(--status-warning-bg); color: var(--status-warning-text); }
+[data-brand='petappro'] .portal-status--past-due { background: var(--status-warning-bg); color: var(--status-warning-text); }
+[data-brand='petappro'] .portal-status--active,
+[data-brand='petappro'] .portal-status--new { background: color-mix(in srgb, var(--status-success) 14%, var(--surface-card)); color: var(--pa-camo-700); }
+[data-brand='petappro'] .portal-task-list article { display: flex; gap: var(--pa-space-3); align-items: flex-start; padding: var(--pa-space-4); border-radius: var(--pa-card-radius); background: var(--pa-mav-100); }
+[data-brand='petappro'] .portal-task-list article > div { display: flex; flex-direction: column; gap: var(--pa-space-1); }
+[data-brand='petappro'] .portal-task-icon { display: grid; width: var(--pa-space-8); height: var(--pa-space-8); flex: none; place-items: center; border-radius: var(--radius-ctl); background: var(--pa-brand-accent); color: var(--text-inverse); font-weight: var(--type-weight-semibold); }
+[data-brand='petappro'] .portal-concept-note { padding: var(--pa-space-3) var(--pa-space-4); border-radius: var(--pa-card-radius); background: var(--pa-brandy-50); color: var(--text-secondary); }
+[data-brand='petappro'] .portal-toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--pa-space-3); margin-bottom: var(--pa-space-4); }
+[data-brand='petappro'] .portal-search { display: flex; flex-direction: column; gap: var(--pa-space-5); }
+[data-brand='petappro'] .portal-search input { min-height: var(--pa-control-height); min-width: min(320px, 72vw); padding-inline: var(--pa-space-4); border: 1px solid var(--border-default); border-radius: var(--radius-ctl); background: var(--surface-card); color: var(--text-primary); font: inherit; }
+[data-brand='petappro'] .portal-table-wrap { max-width: 100%; overflow-x: auto; }
+[data-brand='petappro'] .portal-table { width: 100%; border-collapse: collapse; white-space: nowrap; }
+[data-brand='petappro'] .portal-table th,
+[data-brand='petappro'] .portal-table td { padding: var(--pa-space-4); border-bottom: 1px solid var(--border-default); text-align: left; }
+[data-brand='petappro'] .portal-table thead th { color: var(--text-secondary); font-weight: var(--type-weight-semibold); }
+[data-brand='petappro'] .portal-definition-list { display: grid; gap: var(--pa-space-4); margin: 0; }
+[data-brand='petappro'] .portal-definition-list div { display: flex; flex-direction: column; gap: var(--pa-space-1); padding-bottom: var(--pa-space-3); border-bottom: 1px solid var(--border-default); }
+[data-brand='petappro'] .portal-definition-list dt { color: var(--text-secondary); }
+[data-brand='petappro'] .portal-definition-list dd { margin: 0; overflow-wrap: anywhere; font-weight: var(--type-weight-semibold); }
+[data-brand='petappro'] .portal-brand-preview { display: flex; align-items: center; gap: var(--pa-space-4); margin-bottom: var(--pa-space-4); padding: var(--pa-space-4); border-radius: var(--pa-card-radius); background: var(--pa-theme-husky-dark); color: var(--text-inverse); }
+[data-brand='petappro'] .portal-brand-preview__mark { display: grid; width: var(--pa-space-12); height: var(--pa-space-12); place-items: center; border-radius: var(--radius-ctl); background: var(--pa-theme-husky-light); color: var(--pa-theme-husky-dark); font-weight: var(--type-weight-bold); }
+[data-brand='petappro'] .portal-service-grid { display: grid; gap: var(--pa-space-3); }
+[data-brand='petappro'] .portal-service-grid article { display: flex; flex-direction: column; gap: var(--pa-space-2); padding: var(--pa-space-5); border-radius: var(--pa-card-radius); background: var(--pa-mav-100); }
+[data-brand='petappro'] .portal-service-grid article > strong { color: var(--pa-brandy-700); }
+[data-brand='petappro'] .portal-check-list { display: grid; gap: var(--pa-space-3); margin: 0; padding: 0; list-style: none; }
+[data-brand='petappro'] .portal-check-list li { position: relative; padding-left: var(--pa-space-6); }
+[data-brand='petappro'] .portal-check-list li::before { content: '✓'; position: absolute; left: 0; color: var(--pa-brand-accent); font-weight: var(--type-weight-bold); }
+[data-brand='petappro'] .portal-payment-method { display: flex; align-items: center; gap: var(--pa-space-4); margin-bottom: var(--pa-space-4); }
+[data-brand='petappro'] .portal-payment-method__brand { display: grid; min-width: var(--pa-space-16); min-height: var(--pa-space-10); place-items: center; border-radius: var(--pa-space-2); background: var(--pa-brandy-800); color: var(--text-inverse); }
+[data-brand='petappro'] .portal-account-callout { margin-bottom: var(--pa-space-5); padding: var(--pa-space-4); border-radius: var(--pa-card-radius); background: var(--pa-brandy-50); }
+[data-brand='petappro'] .portal-account-callout p { margin-top: var(--pa-space-2); }
+[data-brand='petappro'] .portal-account-policy-links { margin-top: var(--pa-space-4); padding-top: var(--pa-space-4); border-top: 1px solid var(--border-default); }
+[data-brand='petappro'] .portal-account-policy-links a,
+[data-brand='petappro'] .portal-danger-callout + .portal-close-list ~ p a { color: var(--pa-brand-accent); font-weight: var(--type-weight-semibold); }
+[data-brand='petappro'] .portal-account-policy-links a:hover,
+[data-brand='petappro'] .portal-danger-callout + .portal-close-list ~ p a:hover { color: var(--pa-camo-700); }
+[data-brand='petappro'] .portal-preference-list label { display: flex; align-items: center; justify-content: space-between; gap: var(--pa-space-4); padding: var(--pa-space-4); border-radius: var(--pa-card-radius); background: var(--pa-mav-100); }
+[data-brand='petappro'] .portal-preference-list label > span { display: flex; flex-direction: column; gap: var(--pa-space-1); }
+[data-brand='petappro'] .portal-preference-list input { width: var(--pa-space-5); height: var(--pa-space-5); accent-color: var(--pa-brand-accent); }
+
+[data-brand='petappro'] .portal-summary-list { gap: 0; }
+[data-brand='petappro'] .portal-summary-row { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.4fr) auto; align-items: center; gap: var(--pa-space-3); padding-block: var(--pa-space-3); border-bottom: 1px solid var(--border-default); }
+[data-brand='petappro'] .portal-summary-row > div { display: flex; min-width: 0; flex-direction: column; }
+[data-brand='petappro'] .portal-summary-row .portal-status { grid-column: 3; justify-self: end; }
+[data-brand='petappro'] .portal-summary-row > strong + .portal-status { grid-column: 4; }
+[data-brand='petappro'] .portal-text-button { padding: 0; border: 0; background: transparent; color: var(--pa-brand-accent); cursor: pointer; text-decoration: none; }
+[data-brand='petappro'] .portal-text-button:hover { color: var(--pa-camo-700); text-decoration: underline; }
+[data-brand='petappro'] .portal-download-button { display: inline-flex; align-items: center; gap: var(--pa-space-2); }
+[data-brand='petappro'] .portal-download-button > span { font-size: 1.25em; line-height: 1; }
+[data-brand='petappro'] .portal-empty-state { padding: var(--pa-space-8); text-align: center; color: var(--text-secondary); }
+[data-brand='petappro'] .portal-inline-notice { padding: var(--pa-space-4); border: 1px solid color-mix(in srgb, var(--pa-brand-accent) 35%, var(--border-default)); border-radius: var(--pa-card-radius); background: var(--pa-brandy-50); color: var(--text-primary); }
+[data-brand='petappro'] .portal-icon-button { display: grid; width: var(--pa-space-10); height: var(--pa-space-10); place-items: center; border: 0; border-radius: var(--radius-ctl); background: transparent; cursor: pointer; }
+[data-brand='petappro'] .portal-icon-button img { display: block; width: var(--pa-space-6); height: var(--pa-space-6); }
+[data-brand='petappro'] .portal-icon-button:hover { background: var(--pa-brandy-50); }
+
+[data-brand='petappro'] .portal-field-grid { display: grid; gap: var(--pa-space-4); }
+[data-brand='petappro'] .portal-field-grid label,
+[data-brand='petappro'] .portal-service-editor-grid label { display: flex; min-width: 0; flex-direction: column; gap: var(--pa-space-2); color: var(--text-secondary); font-size: var(--type-caption-size); font-weight: var(--type-weight-semibold); }
+[data-brand='petappro'] :where(.portal-field-grid, .portal-service-editor-grid, .portal-add-staff, .portal-inline-form) :where(input, select),
+[data-brand='petappro'] .portal-editor textarea,
+[data-brand='petappro'] .portal-team-list select { min-height: var(--pa-control-height); min-width: 0; width: 100%; padding: var(--pa-space-3) var(--pa-space-4); border: 1px solid var(--border-default); border-radius: var(--radius-ctl); background: var(--surface-card); color: var(--text-primary); font: inherit; }
+[data-brand='petappro'] .portal-logo-upload { display: flex; flex-wrap: wrap; align-items: center; gap: var(--pa-space-4); margin-bottom: var(--pa-space-5); padding: var(--pa-space-4); border-radius: var(--pa-card-radius); background: var(--pa-brandy-50); }
+[data-brand='petappro'] .portal-logo-upload__preview { display: grid; width: var(--pa-space-20); height: var(--pa-space-20); flex: none; place-items: center; overflow: hidden; border: 1px dashed var(--pa-brand-accent); border-radius: var(--pa-card-radius); background: var(--surface-card); color: var(--pa-brandy-800); }
+[data-brand='petappro'] .portal-logo-upload__preview img { display: block; width: 100%; height: 100%; object-fit: contain; }
+[data-brand='petappro'] .portal-logo-upload > div:last-child { display: flex; min-width: 0; flex: 1; flex-direction: column; align-items: flex-start; gap: var(--pa-space-2); }
+[data-brand='petappro'] .portal-logo-upload input[type='file'] { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+[data-brand='petappro'] .portal-brand-preview__mark img { width: 100%; height: 100%; object-fit: contain; }
+[data-brand='petappro'] .portal-brand-preview--light { background: var(--pa-theme-husky-light); color: var(--pa-theme-husky-dark); }
+
+[data-brand='petappro'] .portal-service-editor-grid { display: grid; gap: var(--pa-space-3); }
+[data-brand='petappro'] .portal-service-editor-grid article { display: grid; gap: var(--pa-space-4); padding: var(--pa-space-5); border-radius: var(--pa-card-radius); background: var(--pa-mav-100); }
+[data-brand='petappro'] .portal-service-editor-grid article.is-locked { opacity: .65; }
+[data-brand='petappro'] .portal-service-tabs { display: flex; gap: var(--pa-space-5); margin-bottom: var(--pa-space-5); overflow-x: auto; border-bottom: 1px solid var(--border-default); }
+[data-brand='petappro'] .portal-service-tabs button { display: inline-flex; min-width: max-content; align-items: center; gap: var(--pa-space-2); padding: var(--pa-space-2) var(--pa-space-1); border: 0; border-bottom: var(--pa-section-rule) solid transparent; border-radius: 0; background: transparent; color: var(--text-primary); font: inherit; font-weight: var(--type-weight-semibold); white-space: nowrap; cursor: pointer; }
+[data-brand='petappro'] .portal-service-tabs button.is-active { border-bottom-color: var(--pa-brand-accent); color: var(--pa-camo-700); }
+[data-brand='petappro'] .portal-service-tabs button:disabled { color: var(--text-secondary); cursor: not-allowed; opacity: .46; }
+[data-brand='petappro'] .portal-service-tabs button small { padding: var(--pa-space-1) var(--pa-space-2); border-radius: var(--radius-ctl); background: var(--pa-mav-100); color: inherit; font-size: var(--type-caption-size); font-weight: var(--type-weight-semibold); line-height: 1; }
+[data-brand='petappro'] .portal-service-editor__heading { display: flex; align-items: center; justify-content: space-between; gap: var(--pa-space-3); }
+[data-brand='petappro'] .portal-switch { position: relative; display: inline-flex !important; width: var(--pa-space-12); height: var(--pa-space-8); flex: none; }
+[data-brand='petappro'] .portal-switch input { position: absolute; opacity: 0; }
+[data-brand='petappro'] .portal-switch i { position: relative; display: block; width: 100%; height: 100%; border-radius: var(--radius-ctl); background: var(--pa-control-inactive); transition: background-color 200ms ease; }
+[data-brand='petappro'] .portal-switch i::after { content: ''; position: absolute; top: var(--pa-space-1); left: var(--pa-space-1); width: var(--pa-space-6); height: var(--pa-space-6); border-radius: 50%; background: var(--surface-card); box-shadow: var(--shadow-card); transition: transform 200ms ease; }
+[data-brand='petappro'] .portal-switch input:checked + i { background: var(--pa-camo-700); }
+[data-brand='petappro'] .portal-switch input:checked + i::after { transform: translateX(var(--pa-space-4)); }
+[data-brand='petappro'] .portal-switch input:focus-visible + i { outline: 2px solid var(--focus-ring); outline-offset: var(--pa-space-1); }
+[data-brand='petappro'] .portal-switch--labeled { width: auto; align-items: center; gap: var(--pa-space-3); }
+[data-brand='petappro'] .portal-switch--labeled i { width: var(--pa-space-12); flex: none; }
+[data-brand='petappro'] .portal-price-input { display: flex; align-items: center; }
+[data-brand='petappro'] .portal-price-input b { display: grid; min-height: var(--pa-control-height); padding-inline: var(--pa-space-3); place-items: center; border: 1px solid var(--border-default); border-right: 0; border-radius: var(--radius-ctl) 0 0 var(--radius-ctl); background: var(--pa-brandy-50); color: var(--text-primary); }
+[data-brand='petappro'] .portal-price-input input { border-radius: 0 var(--radius-ctl) var(--radius-ctl) 0 !important; }
+[data-brand='petappro'] .portal-panel > .portal-subcard { margin-top: var(--pa-space-6); }
+[data-brand='petappro'] .portal-service-surcharge { display: grid; gap: var(--pa-space-4); padding: var(--pa-space-5); border-radius: var(--pa-card-radius); background: var(--pa-brandy-50); }
+[data-brand='petappro'] .portal-service-surcharge__heading { display: flex; align-items: center; justify-content: space-between; gap: var(--pa-space-4); }
+[data-brand='petappro'] .portal-service-surcharge__heading > div { display: grid; max-width: 72ch; gap: var(--pa-space-1); }
+[data-brand='petappro'] .portal-service-surcharge__controls { display: grid; gap: var(--pa-space-4); transition: opacity 200ms ease; }
+[data-brand='petappro'] .portal-service-surcharge__controls.is-disabled { opacity: .45; }
+[data-brand='petappro'] .portal-service-surcharge__controls > label { display: grid; gap: var(--pa-space-2); color: var(--text-secondary); font-size: var(--type-caption-size); font-weight: var(--type-weight-semibold); }
+[data-brand='petappro'] .portal-service-surcharge__controls fieldset { display: flex; flex-wrap: wrap; gap: var(--pa-space-3); margin: 0; padding: 0; border: 0; }
+[data-brand='petappro'] .portal-service-surcharge__controls legend { width: 100%; margin-bottom: var(--pa-space-2); color: var(--text-secondary); font-weight: var(--type-weight-semibold); }
+[data-brand='petappro'] .portal-field-grid--three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+[data-brand='petappro'] .portal-option-list { display: flex; flex-wrap: wrap; gap: var(--pa-space-2); }
+[data-brand='petappro'] .portal-chip { display: inline-flex; align-items: center; gap: var(--pa-space-2); padding: var(--pa-space-2) var(--pa-space-3); border-radius: var(--radius-ctl); background: var(--pa-brandy-50); color: var(--text-primary); }
+[data-brand='petappro'] .portal-chip button { border: 0; background: transparent; color: var(--text-secondary); cursor: pointer; }
+[data-brand='petappro'] .portal-inline-form,
+[data-brand='petappro'] .portal-add-staff { display: grid; gap: var(--pa-space-3); }
+[data-brand='petappro'] .portal-editor { display: flex; flex-direction: column; gap: var(--pa-space-3); }
+[data-brand='petappro'] .portal-editor textarea { border-radius: 0; resize: vertical; line-height: var(--type-body-line); }
+
+[data-brand='petappro'] .portal-walking-editor { display: grid; gap: var(--pa-space-6); }
+[data-brand='petappro'] .portal-walking-tab { display: grid; gap: var(--pa-space-10); }
+[data-brand='petappro'] .portal-walk-offering { margin: 0; padding: 0; border: 0; }
+[data-brand='petappro'] .portal-walk-offering legend { margin-bottom: var(--pa-space-3); }
+[data-brand='petappro'] .portal-walk-offering > div { display: grid; gap: var(--pa-space-3); }
+[data-brand='petappro'] .portal-walk-offering label { position: relative; display: grid; gap: var(--pa-space-1); padding: var(--pa-space-4); border: 2px solid transparent; border-radius: var(--pa-card-radius); background: var(--pa-mav-100); cursor: pointer; }
+[data-brand='petappro'] .portal-walk-offering label.is-active { border-color: var(--pa-brand-accent); background: var(--pa-brandy-50); }
+[data-brand='petappro'] .portal-walk-offering input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+[data-brand='petappro'] .portal-walk-offering input:focus-visible + span { outline: 2px solid var(--focus-ring); outline-offset: var(--pa-space-1); }
+[data-brand='petappro'] .portal-walk-settings { display: grid; gap: var(--pa-space-4); }
+[data-brand='petappro'] :where(.portal-walk-settings, .portal-walk-rate-fields) > label { display: grid; min-width: 0; align-content: start; gap: var(--pa-space-2); color: var(--text-secondary); font-size: var(--type-caption-size); font-weight: var(--type-weight-semibold); }
+[data-brand='petappro'] :where(.portal-walk-settings, .portal-walk-rate-fields, .portal-service-surcharge__controls) :where(input, select) { min-height: var(--pa-control-height); min-width: 0; width: 100%; padding: var(--pa-space-3) var(--pa-space-4); border: 1px solid var(--border-default); border-radius: var(--radius-ctl); background-color: var(--surface-card); color: var(--text-primary); font: inherit; }
+[data-brand='petappro'] :where(.portal-walk-settings, .portal-walk-rate-fields) select { padding-right: var(--pa-space-12); }
+[data-brand='petappro'] :where(.portal-walk-settings, .portal-walk-rate-fields) small { color: var(--text-secondary); font-weight: var(--type-weight-regular); }
+[data-brand='petappro'] .portal-input-suffix { display: flex; }
+[data-brand='petappro'] .portal-input-suffix input { border-radius: var(--radius-ctl) 0 0 var(--radius-ctl) !important; }
+[data-brand='petappro'] .portal-input-suffix b { display: grid; min-height: var(--pa-control-height); padding-inline: var(--pa-space-3); place-items: center; border: 1px solid var(--border-default); border-left: 0; border-radius: 0 var(--radius-ctl) var(--radius-ctl) 0; background: var(--pa-brandy-50); color: var(--text-primary); }
+[data-brand='petappro'] .portal-walk-pricing-note { display: grid; gap: var(--pa-space-2); padding: var(--pa-space-4); border-left: var(--pa-section-rule) solid var(--pa-brand-accent); background: var(--pa-brandy-50); }
+[data-brand='petappro'] .portal-walk-rate-list { display: grid; gap: var(--pa-space-3); }
+[data-brand='petappro'] .portal-walk-rate-list > article { display: grid; gap: var(--pa-space-4); padding: var(--pa-space-5); border: 1px solid var(--border-default); border-radius: var(--pa-card-radius); background: var(--pa-mav-100); transition: opacity 200ms ease; }
+[data-brand='petappro'] .portal-walk-rate-list > article.is-disabled { opacity: .58; }
+[data-brand='petappro'] .portal-walk-rate-list footer { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--pa-space-3); }
+[data-brand='petappro'] .portal-walk-rate-fields { display: grid; gap: var(--pa-space-3); }
+[data-brand='petappro'] .portal-walk-rate-list footer { justify-content: flex-end; padding-top: var(--pa-space-3); border-top: 1px solid var(--border-default); }
+[data-brand='petappro'] .portal-walk-rate-list footer > div { display: flex; flex-wrap: wrap; gap: var(--pa-space-4); }
+[data-brand='petappro'] .portal-walk-rate-list > article.portal-walk-policy-row { background: var(--pa-brandy-50); }
+[data-brand='petappro'] .portal-group-walk-policy__field { display: flex; flex-wrap: wrap; align-items: flex-end; gap: var(--pa-space-4); }
+[data-brand='petappro'] .portal-group-walk-policy__field label { display: grid; gap: var(--pa-space-2); color: var(--text-secondary); }
+[data-brand='petappro'] .portal-group-walk-policy__field input,
+[data-brand='petappro'] .portal-walker-dogs input,
+[data-brand='petappro'] .portal-walk-window-name input,
+[data-brand='petappro'] .portal-walk-window-time input { min-height: var(--pa-control-height); min-width: 0; padding: var(--pa-space-3) var(--pa-space-4); border: 1px solid var(--border-default); border-radius: var(--radius-ctl); background: var(--surface-card); color: var(--text-primary); font: inherit; }
+[data-brand='petappro'] .portal-group-walk-policy__field input { width: var(--pa-space-20); }
+[data-brand='petappro'] .portal-walker-dogs { display: flex; align-items: center; gap: var(--pa-space-2); margin-bottom: var(--pa-space-2); }
+[data-brand='petappro'] .portal-walker-dogs input { width: var(--pa-space-20); }
+[data-brand='petappro'] .portal-walk-window-name { min-width: min(100%, calc(var(--pa-space-30) * 2)); }
+[data-brand='petappro'] .portal-walk-window-name input { width: 100%; font-weight: var(--type-weight-semibold); }
+[data-brand='petappro'] .portal-walk-window-grid { display: grid; gap: var(--pa-space-5); }
+[data-brand='petappro'] .portal-walk-window-grid fieldset,
+[data-brand='petappro'] .portal-client-walk-phone fieldset { display: grid; min-width: 0; gap: var(--pa-space-3); margin: 0; padding: 0; border: 0; }
+[data-brand='petappro'] .portal-walk-window-grid legend,
+[data-brand='petappro'] .portal-client-walk-phone legend { margin-bottom: var(--pa-space-2); color: var(--text-secondary); }
+[data-brand='petappro'] .portal-walk-window-days { flex-wrap: wrap; }
+[data-brand='petappro'] .portal-walk-window-days button { min-width: var(--pa-space-10); padding-inline: var(--pa-space-3); }
+[data-brand='petappro'] .portal-walk-window-time { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: var(--pa-space-2); }
+[data-brand='petappro'] .portal-walk-window-services,
+[data-brand='petappro'] .portal-walk-window-walkers > div { display: flex; flex-wrap: wrap; gap: var(--pa-space-4); }
+[data-brand='petappro'] button.portal-chip { border: 1px solid var(--border-default); font: inherit; cursor: pointer; }
+[data-brand='petappro'] button.portal-chip.is-active { border-color: var(--pa-brand-accent); background: color-mix(in srgb, var(--pa-brand-accent) 14%, var(--surface-card)); color: var(--pa-camo-700); }
+[data-brand='petappro'] .portal-chip--compact { padding: var(--pa-space-1) var(--pa-space-2); font-size: var(--type-caption-size) !important; }
+[data-brand='petappro'] .portal-walker-assignment-list { display: grid !important; gap: var(--pa-space-2) !important; }
+[data-brand='petappro'] .portal-walker-assignment { display: grid; gap: var(--pa-space-3); padding: var(--pa-space-3); border: 1px solid var(--border-default); border-radius: var(--pa-card-radius); background: var(--surface-card); opacity: .62; }
+[data-brand='petappro'] .portal-walker-assignment.is-active { border-color: color-mix(in srgb, var(--pa-brand-accent) 45%, var(--border-default)); opacity: 1; }
+[data-brand='petappro'] .portal-walker-assignment > div { display: grid; gap: var(--pa-space-2); padding-left: var(--pa-space-8); }
+[data-brand='petappro'] .portal-walk-window-capacity { gap: var(--pa-space-1); }
+[data-brand='petappro'] .portal-client-walk-phone { display: grid; width: min(100%, calc(var(--pa-space-30) * 3)); gap: var(--pa-space-5); margin-inline: auto; padding: var(--pa-space-6); border: var(--pa-section-rule) solid var(--pa-brandy-800); border-radius: calc(var(--pa-card-radius) + var(--pa-space-5)); background: var(--surface-card); box-shadow: var(--pa-card-shadow); }
+[data-brand='petappro'] .portal-client-walk-phone > h4 { margin-bottom: calc(var(--pa-space-4) * -1); color: var(--pa-brandy-800); }
+[data-brand='petappro'] .portal-client-walk-phone .portal-record-tabs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); margin: 0; }
+[data-brand='petappro'] .portal-client-walk-phone .portal-record-tabs button { padding-inline: var(--pa-space-2); font-size: var(--type-caption-size); white-space: nowrap; }
+[data-brand='petappro'] .portal-client-walk-phone .portal-walk-window-days { flex-wrap: nowrap; }
+[data-brand='petappro'] .portal-client-walk-phone .portal-walk-window-days button { min-width: 0; flex: 1; padding-inline: var(--pa-space-1); }
+[data-brand='petappro'] .portal-client-walk-options { display: grid; gap: var(--pa-space-2); }
+[data-brand='petappro'] .portal-client-walk-options .portal-payment-choice { width: 100%; align-items: center; justify-content: space-between; color: var(--text-primary); font: inherit; text-align: left; }
+[data-brand='petappro'] .portal-payment-choice.is-active { border-color: var(--pa-brand-accent); background: color-mix(in srgb, var(--pa-brand-accent) 10%, var(--surface-card)); }
+[data-brand='petappro'] .portal-client-walk-trust { display: grid; gap: var(--pa-space-2); }
+[data-brand='petappro'] .portal-client-walk-trust > div { display: flex; align-items: flex-start; gap: var(--pa-space-3); padding: var(--pa-space-3); border-radius: var(--pa-card-radius); background: var(--pa-brandy-50); }
+[data-brand='petappro'] .portal-client-walk-trust img { width: var(--pa-space-6); height: var(--pa-space-6); flex: none; }
+[data-brand='petappro'] .portal-client-walk-cta { width: 100%; white-space: normal; }
+[data-brand='petappro'] .portal-availability-layout { display: grid; gap: var(--pa-space-5); align-items: start; }
+[data-brand='petappro'] .portal-availability-calendar { min-width: 0; padding: var(--pa-space-4); border-radius: var(--pa-card-radius); background: var(--pa-mav-100); }
+[data-brand='petappro'] .portal-calendar-nav { display: grid; grid-template-columns: var(--pa-space-10) minmax(0, 1fr) var(--pa-space-10); align-items: center; gap: var(--pa-space-3); margin-bottom: var(--pa-space-4); text-align: center; }
+[data-brand='petappro'] .portal-calendar-nav button { display: grid; width: var(--pa-space-10); height: var(--pa-space-10); padding: 0; place-items: center; border: 1px solid var(--border-default); border-radius: var(--radius-ctl); background: var(--surface-card); cursor: pointer; }
+[data-brand='petappro'] .portal-calendar-nav button:first-child img { transform: rotate(90deg); }
+[data-brand='petappro'] .portal-calendar-nav button:last-child img { transform: rotate(-90deg); }
+[data-brand='petappro'] .portal-calendar-selection-tools { display: flex; flex-wrap: wrap; gap: var(--pa-space-2); margin-bottom: var(--pa-space-3); }
+[data-brand='petappro'] .portal-calendar-selection-tools button { min-height: var(--pa-control-height); padding-inline: var(--pa-space-4); border: 1px solid var(--pa-brandy-700); border-radius: var(--radius-ctl); background: var(--surface-card); color: var(--pa-brandy-800); font: inherit; font-weight: var(--type-weight-semibold); cursor: pointer; }
+[data-brand='petappro'] .portal-calendar-selection-tools button:hover,
+[data-brand='petappro'] .portal-calendar-selection-tools button.is-active { border-color: var(--pa-brandy-900); background: var(--pa-brandy-800); color: var(--text-inverse); }
+[data-brand='petappro'] .portal-calendar-selection-help { margin-bottom: var(--pa-space-3); color: var(--text-secondary); }
+[data-brand='petappro'] .portal-calendar-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); column-gap: var(--pa-space-3); row-gap: var(--pa-space-3); }
+[data-brand='petappro'] .portal-calendar-grid--labels { margin-bottom: var(--pa-space-2); text-align: center; }
+[data-brand='petappro'] .portal-calendar-grid--labels span { color: var(--text-secondary); }
+[data-brand='petappro'] .portal-calendar-grid > button { position: relative; display: grid; width: min(100%, var(--pa-space-12)); min-width: 0; aspect-ratio: 1; padding: var(--pa-space-2); place-items: center; justify-self: center; border: 1px solid var(--border-default); border-radius: var(--pa-space-2); background: var(--surface-card); color: var(--text-primary); font: inherit; font-weight: var(--type-weight-semibold); cursor: pointer; }
+[data-brand='petappro'] .portal-calendar-grid > button.is-holiday { border-color: var(--pa-brandy-500); background: var(--pa-brandy-50); }
+[data-brand='petappro'] .portal-calendar-grid > button.is-blocked { border-color: var(--pa-coco-600); background: color-mix(in srgb, var(--pa-coco-600) 12%, var(--surface-card)); color: var(--pa-coco-600); }
+[data-brand='petappro'] .portal-calendar-grid > button.is-limited { box-shadow: inset 0 calc(var(--pa-section-rule) * -1) 0 var(--status-warning-border); }
+[data-brand='petappro'] .portal-calendar-grid > button.is-selected { outline: 2px solid var(--focus-ring); outline-offset: var(--pa-space-1); }
+[data-brand='petappro'] .portal-calendar-grid > button small { position: absolute; top: var(--pa-space-1); right: var(--pa-space-1); display: grid; min-width: var(--pa-space-5); height: var(--pa-space-5); padding-inline: var(--pa-space-1); place-items: center; border-radius: var(--radius-ctl); background: var(--pa-brand-accent); color: var(--text-inverse); font-size: var(--type-caption-size); }
+[data-brand='petappro'] .portal-calendar-marker { position: absolute; bottom: var(--pa-space-1); width: var(--pa-space-2); height: var(--pa-space-2); border-radius: 50%; }
+[data-brand='petappro'] .portal-calendar-marker--holiday { left: var(--pa-space-2); background: var(--pa-brandy-600); }
+[data-brand='petappro'] .portal-calendar-marker--limited { right: var(--pa-space-2); background: var(--status-warning-border); }
+[data-brand='petappro'] .portal-calendar-legend { display: flex; flex-wrap: wrap; gap: var(--pa-space-3); margin-top: var(--pa-space-4); padding-top: var(--pa-space-3); border-top: 1px solid var(--border-default); color: var(--text-secondary); }
+[data-brand='petappro'] .portal-calendar-legend span { display: inline-flex; align-items: center; gap: var(--pa-space-2); }
+[data-brand='petappro'] .portal-calendar-legend i { width: var(--pa-space-3); height: var(--pa-space-3); border-radius: 50%; background: var(--surface-card); border: 1px solid var(--border-default); }
+[data-brand='petappro'] .portal-calendar-legend i.is-holiday { background: var(--pa-brandy-600); border-color: var(--pa-brandy-600); }
+[data-brand='petappro'] .portal-calendar-legend i.is-blocked { background: var(--pa-coco-600); border-color: var(--pa-coco-600); }
+[data-brand='petappro'] .portal-calendar-legend i.is-limited { background: var(--status-warning-border); border-color: var(--status-warning-border); }
+[data-brand='petappro'] .portal-calendar-legend i.has-bookings { background: var(--pa-brand-accent); border-color: var(--pa-brand-accent); }
+[data-brand='petappro'] .portal-date-editor { display: grid; gap: var(--pa-space-5); padding: var(--pa-space-5); border-radius: var(--pa-card-radius); background: var(--pa-brandy-50); }
+[data-brand='petappro'] .portal-date-editor > div:first-child { display: grid; gap: var(--pa-space-1); }
+[data-brand='petappro'] .portal-date-editor__toggle { display: flex; align-items: center; justify-content: space-between; gap: var(--pa-space-4); }
+[data-brand='petappro'] .portal-date-editor__toggle > span:first-child { display: grid; gap: var(--pa-space-1); }
+[data-brand='petappro'] .portal-date-editor__availability,
+[data-brand='petappro'] .portal-date-editor__services { display: grid; gap: var(--pa-space-2); margin: 0; padding: 0; border: 0; }
+[data-brand='petappro'] .portal-date-editor__availability legend,
+[data-brand='petappro'] .portal-date-editor__services legend { margin-bottom: var(--pa-space-2); }
+[data-brand='petappro'] .portal-date-editor__availability label { position: relative; display: flex; padding: var(--pa-space-3); border: 1px solid var(--border-default); border-radius: var(--pa-card-radius); background: var(--surface-card); cursor: pointer; }
+[data-brand='petappro'] .portal-date-editor__availability label.is-active { border-color: var(--pa-brand-accent); background: color-mix(in srgb, var(--pa-brand-accent) 10%, var(--surface-card)); }
+[data-brand='petappro'] .portal-date-editor__availability input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+[data-brand='petappro'] .portal-date-editor__availability input:focus-visible + span { outline: 2px solid var(--focus-ring); outline-offset: var(--pa-space-1); }
+[data-brand='petappro'] .portal-date-editor__services { padding: var(--pa-space-4); border-radius: var(--pa-card-radius); background: var(--surface-card); }
+[data-brand='petappro'] .portal-date-editor__mixed { padding: var(--pa-space-3); border-left: var(--pa-section-rule) solid var(--status-warning-border); background: var(--surface-card); color: var(--text-secondary); }
+[data-brand='petappro'] .portal-date-editor__note { display: grid; gap: var(--pa-space-2); color: var(--text-secondary); font-weight: var(--type-weight-semibold); }
+[data-brand='petappro'] .portal-date-editor__note textarea { min-height: var(--pa-control-height); width: 100%; padding: var(--pa-space-3); resize: vertical; border: 1px solid var(--border-default); border-radius: 0; background: var(--surface-card); color: var(--text-primary); font: inherit; }
+[data-brand='petappro'] .portal-holiday-list { display: grid; gap: var(--pa-space-2); margin-top: var(--pa-space-5); }
+[data-brand='petappro'] .portal-holiday-list article { display: flex; align-items: center; justify-content: space-between; gap: var(--pa-space-4); padding-block: var(--pa-space-3); border-bottom: 1px solid var(--border-default); }
+[data-brand='petappro'] .portal-holiday-list article > div { display: grid; gap: var(--pa-space-1); }
+[data-brand='petappro'] .portal-pricing-calendar-guide { display: grid; gap: var(--pa-space-5); }
+[data-brand='petappro'] .portal-pricing-calendar-guide .btn { width: fit-content; }
+[data-brand='petappro'] .portal-team-list { display: grid; gap: var(--pa-space-3); }
+[data-brand='petappro'] .portal-team-list article { display: grid; gap: var(--pa-space-3); padding: var(--pa-space-4); border-radius: var(--pa-card-radius); background: var(--pa-mav-100); }
+[data-brand='petappro'] .portal-team-list article > div:first-child { display: flex; flex-direction: column; }
+[data-brand='petappro'] .portal-permissions { display: flex; flex-wrap: wrap; gap: var(--pa-space-3); }
+[data-brand='petappro'] .portal-permissions label { display: flex; align-items: center; gap: var(--pa-space-2); font-size: var(--type-caption-size); }
+[data-brand='petappro'] .portal-checkbox { position: relative; display: inline-flex; flex-direction: row; align-items: center; gap: var(--pa-space-2); }
+[data-brand='petappro'] .portal-checkbox input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+[data-brand='petappro'] .portal-checkbox > span,
+[data-brand='petappro'] .portal-checkbox > i { display: grid; width: var(--pa-space-5); height: var(--pa-space-5); flex: none; place-items: center; border: 1.5px solid var(--pa-control-inactive-border); border-radius: var(--pa-space-2); background: var(--surface-card); background-position: center; background-repeat: no-repeat; }
+[data-brand='petappro'] .portal-checkbox input:checked + span,
+[data-brand='petappro'] .portal-checkbox input:checked + i { border-color: var(--pa-brandy-800); background-color: var(--pa-brandy-800); background-image: url('/brands/petappro.com/icon-checkbox-check.svg'); }
+[data-brand='petappro'] .portal-checkbox input:focus-visible + span,
+[data-brand='petappro'] .portal-checkbox input:focus-visible + i { outline: 2px solid var(--focus-ring); outline-offset: var(--pa-space-1); }
+[data-brand='petappro'] .portal-remove-button { width: fit-content; border: 0; background: transparent; color: var(--pa-brandy-800); cursor: pointer; }
+[data-brand='petappro'] .portal-remove-button:hover { color: var(--pa-coco-600); text-decoration: underline; }
+[data-brand='petappro'] .portal-add-staff { margin-top: var(--pa-space-4); }
+[data-brand='petappro'] .portal-seat-warning { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--pa-space-3); margin-top: var(--pa-space-4); padding: var(--pa-space-4); border: 1px solid var(--status-warning-border); border-radius: var(--pa-card-radius); background: var(--status-warning-bg); }
+[data-brand='petappro'] .portal-role-note { margin-bottom: var(--pa-space-4); padding: var(--pa-space-4); border-radius: var(--pa-card-radius); background: var(--pa-brandy-50); }
+[data-brand='petappro'] .portal-role-select,
+[data-brand='petappro'] .portal-report-controls select { min-height: var(--pa-control-height); padding: var(--pa-space-3) var(--pa-space-12) var(--pa-space-3) var(--pa-space-4) !important; border: 1px solid var(--border-default); border-radius: var(--radius-ctl); background-color: var(--surface-card); color: var(--text-primary); font: inherit; }
+[data-brand='petappro'] .portal-service-area-trigger { display: flex; min-height: var(--pa-control-height); width: 100%; align-items: center; justify-content: space-between; gap: var(--pa-space-3); padding: var(--pa-space-3) var(--pa-space-4); border: 1px solid var(--border-default); border-radius: var(--radius-ctl); background: var(--surface-card); color: var(--text-primary); font: inherit; text-align: left; cursor: pointer; }
+[data-brand='petappro'] .portal-service-area-trigger img { width: var(--pa-space-5); height: var(--pa-space-5); }
+
+[data-brand='petappro'] .portal-modal-backdrop { position: fixed; inset: 0; z-index: 120; display: grid; padding: var(--pa-space-6); place-items: center; background: color-mix(in srgb, var(--pa-brandy-900) 58%, transparent); }
+[data-brand='petappro'] .portal-modal { width: min(720px, 100%); max-height: calc(100dvh - var(--pa-space-12)); padding: var(--pa-space-6); overflow-y: auto; border-radius: var(--pa-card-radius); background: var(--surface-card); box-shadow: var(--pa-card-shadow); }
+[data-brand='petappro'] .portal-modal--wide { width: min(var(--pa-content-max), 100%); }
+[data-brand='petappro'] .portal-modal__header { display: flex; align-items: center; justify-content: space-between; gap: var(--pa-space-4); margin-bottom: var(--pa-space-5); }
+[data-brand='petappro'] .portal-modal__header button { width: var(--pa-space-10); height: var(--pa-space-10); border: 0; border-radius: 50%; background: var(--pa-brandy-50); color: var(--text-primary); font-size: var(--type-title-lg-size); cursor: pointer; }
+[data-brand='petappro'] .portal-theme-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--pa-space-3); }
+[data-brand='petappro'] .portal-theme-grid button { display: flex; align-items: center; gap: var(--pa-space-3); padding: var(--pa-space-4); border: 2px solid transparent; border-radius: var(--pa-card-radius); background: var(--pa-brandy-50); color: var(--text-primary); cursor: pointer; }
+[data-brand='petappro'] .portal-theme-grid button.is-active { border-color: var(--pa-brand-accent); }
+[data-brand='petappro'] .portal-theme-swatch { width: var(--pa-space-8); height: var(--pa-space-8); border-radius: var(--radius-ctl); background: linear-gradient(135deg, var(--pa-brandy-100) 50%, var(--pa-brandy-800) 50%); }
+[data-brand='petappro'] .portal-segmented { display: flex; width: fit-content; gap: var(--pa-space-1); margin-block: var(--pa-space-5); padding: var(--pa-space-1); border-radius: var(--radius-ctl); background: var(--pa-brandy-50); }
+[data-brand='petappro'] .portal-segmented button { padding: var(--pa-space-2) var(--pa-space-4); border: 0; border-radius: var(--radius-ctl); background: transparent; cursor: pointer; }
+[data-brand='petappro'] .portal-segmented button.is-active { background: var(--pa-brand-accent); color: var(--text-inverse); }
+[data-brand='petappro'] .portal-modal-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: var(--pa-space-3); margin-top: var(--pa-space-6); }
+[data-brand='petappro'] .portal-drawer-backdrop { padding: 0; place-items: stretch end; }
+[data-brand='petappro'] .portal-drawer { display: grid; width: min(480px, 100%); align-content: start; gap: var(--pa-space-5); padding: var(--pa-space-6); overflow-y: auto; background: var(--surface-card); box-shadow: var(--pa-card-shadow); }
+[data-brand='petappro'] .portal-drawer .portal-modal__header { margin-bottom: 0; }
+[data-brand='petappro'] .portal-business-tab-panel { display: grid; gap: var(--pa-space-6); }
+[data-brand='petappro'] .portal-tab-save { display: flex; justify-content: flex-end; }
+[data-brand='petappro'] .portal-collapse-row { display: flex; align-items: center; gap: var(--pa-space-3); }
+[data-brand='petappro'] .portal-collapse-controls { display: flex; flex: none; align-items: center; gap: var(--pa-space-3); }
+[data-brand='petappro'] .portal-collapse-row > .portal-collapse-summary { flex: 1 1 auto; width: auto; min-width: 0; }
+[data-brand='petappro'] .portal-collapse-summary { display: flex; width: 100%; flex-wrap: wrap; align-items: center; gap: var(--pa-space-3); padding: 0; border: 0; background: transparent; color: var(--text-primary); font: inherit; text-align: left; cursor: pointer; }
+[data-brand='petappro'] .portal-collapse-summary > strong { flex: none; }
+[data-brand='petappro'] .portal-collapse-summary > span.type-body { flex: 1 1 auto; min-width: 0; color: var(--text-secondary); }
+[data-brand='petappro'] .portal-collapse-summary .portal-status { flex: none; }
+[data-brand='petappro'] .portal-collapse-summary > img { flex: none; transition: transform 200ms ease; }
+[data-brand='petappro'] .portal-collapse-summary[aria-expanded='true'] > img { transform: rotate(180deg); }
+[data-brand='petappro'] .portal-walking-body { display: grid; gap: var(--pa-space-6); }
+[data-brand='petappro'] .portal-walking-body.is-disabled,
+[data-brand='petappro'] .portal-subcard__body.is-disabled { opacity: .45; }
+[data-brand='petappro'] .portal-service-editor-grid article.is-inactive > :not(.portal-service-editor__heading) { opacity: .45; }
+[data-brand='petappro'] .portal-collapse-toggle { display: grid; place-items: center; padding: 0; border: 0; background: transparent; cursor: pointer; }
+[data-brand='petappro'] .portal-collapse-toggle img { transition: transform 200ms ease; }
+[data-brand='petappro'] .portal-collapse-toggle[aria-expanded='true'] img { transform: rotate(180deg); }
+[data-brand='petappro'] .portal-subcard { border: 1px solid var(--border-default); border-radius: var(--pa-card-radius); background: var(--surface-card); overflow: hidden; }
+[data-brand='petappro'] .portal-subcard__head { display: flex; flex-wrap: wrap; align-items: center; gap: var(--pa-space-3); padding: var(--pa-space-4) var(--pa-space-5); background: var(--pa-brandy-50); border-bottom: 1px solid var(--border-default); }
+[data-brand='petappro'] .portal-subcard--plain .portal-subcard__head { background: var(--surface-card); border-bottom: 0; }
+[data-brand='petappro'] .portal-subcard--plain .portal-subcard__body { border-top: 1px solid var(--border-default); }
+[data-brand='petappro'] .portal-subcard__title { display: grid; gap: var(--pa-space-1); }
+[data-brand='petappro'] .portal-subcard__title h3 { display: flex; align-items: center; gap: var(--pa-space-2); }
+[data-brand='petappro'] .portal-subcard__actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--pa-space-3); margin-left: auto; }
+[data-brand='petappro'] .portal-subcard__body { display: grid; gap: var(--pa-space-4); padding: var(--pa-space-5); }
+[data-brand='petappro'] .portal-stepnum { display: grid; width: calc(var(--pa-space-6) + var(--pa-space-3)); height: calc(var(--pa-space-6) + var(--pa-space-3)); flex: none; place-items: center; border-radius: 50%; background: var(--pa-brand-accent); color: var(--text-inverse); font-size: var(--type-body-size); font-weight: var(--type-weight-semibold); }
+[data-brand='petappro'] .portal-stepnum--muted { background: var(--pa-mav-600); }
+[data-brand='petappro'] .portal-info-toggle { display: inline-grid; width: var(--pa-space-5); height: var(--pa-space-5); flex: none; place-items: center; padding: 0; border: 1px solid var(--border-default); border-radius: 50%; background: var(--surface-card); color: var(--pa-brand-accent); font-size: var(--type-caption-size); font-weight: var(--type-weight-semibold); cursor: pointer; }
+[data-brand='petappro'] .portal-info-toggle[aria-expanded='true'] { border-color: var(--pa-brand-accent); background: var(--pa-brand-accent); color: var(--text-inverse); }
+[data-brand='petappro'] .portal-eq { display: flex; align-items: stretch; gap: var(--pa-space-3); padding: var(--pa-space-4); border: 1px dashed var(--border-default); border-radius: var(--pa-card-radius); background: var(--pa-brandy-50); }
+[data-brand='petappro'] .portal-eq__box { display: grid; flex: 1; min-width: 0; align-content: start; gap: var(--pa-space-1); padding: var(--pa-space-3) var(--pa-space-4); border: 1px solid var(--border-default); border-radius: var(--pa-space-2); background: var(--surface-card); }
+[data-brand='petappro'] .portal-eq__box--result { border-color: var(--pa-brandy-800); background: var(--pa-brandy-800); }
+[data-brand='petappro'] .portal-eq__box--result :where(.type-label, .type-caption),
+[data-brand='petappro'] .portal-eq__box--result .portal-eq__example { color: var(--text-inverse); }
+[data-brand='petappro'] .portal-eq__op { align-self: center; flex: none; color: var(--pa-camo-700); font-size: var(--type-title-size); font-weight: var(--type-weight-semibold); }
+[data-brand='petappro'] .portal-eq__example { font-weight: var(--type-weight-semibold); color: var(--text-primary); }
+[data-brand='petappro'] .portal-restore-note { color: var(--text-secondary); }
+[data-brand='petappro'] .portal-table-wrap--scroll { max-height: 660px; overflow-y: auto; }
+[data-brand='petappro'] .portal-table-wrap--scroll thead th { position: sticky; top: 0; z-index: 1; background: var(--surface-card); }
+[data-brand='petappro'] .portal-zone-gmap-frame { position: relative; display: grid; }
+[data-brand='petappro'] .portal-zone-gmap { width: 100%; min-height: var(--pa-map-height); border: 1px solid var(--border-default); border-radius: var(--pa-card-radius); overflow: hidden; }
+[data-brand='petappro'] .portal-zone-gmap__hint { position: absolute; bottom: var(--pa-space-3); left: 50%; transform: translateX(-50%); padding: var(--pa-space-2) var(--pa-space-4); border-radius: var(--radius-ctl); background: var(--surface-card); box-shadow: var(--pa-card-shadow); color: var(--text-primary); }
+[data-brand='petappro'] .portal-theme-picker .figma-themes__gallery-layout { margin-top: 0; }
+[data-brand='petappro'] .portal-theme-picker .theme-phone-screen { min-height: var(--pa-map-height); }
+
+[data-brand='petappro'] .portal-stripe-card { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--pa-space-5); padding: var(--pa-space-5); border: 1px solid var(--border-default); border-radius: var(--pa-card-radius); background: var(--pa-brandy-50); }
+[data-brand='petappro'] .portal-stripe-card > div { display: grid; max-width: 68ch; gap: var(--pa-space-2); }
+[data-brand='petappro'] .portal-stripe-card.is-connected { border-color: var(--pa-brand-accent); }
+[data-brand='petappro'] .portal-money-streams { display: grid; gap: var(--pa-space-4); }
+[data-brand='petappro'] .portal-money-streams__intro { display: grid; gap: var(--pa-space-2); }
+[data-brand='petappro'] .portal-money-streams article { display: grid; align-content: start; gap: var(--pa-space-2); padding: var(--pa-space-5); border-radius: var(--pa-card-radius); background: var(--pa-brandy-50); }
+[data-brand='petappro'] .portal-payment-choices { display: grid; gap: var(--pa-space-3); }
+[data-brand='petappro'] .portal-payment-choice { display: flex; align-items: flex-start; gap: var(--pa-space-3); padding: var(--pa-space-4); border: 1px solid var(--border-default); border-radius: var(--pa-card-radius); background: var(--pa-brandy-50); cursor: pointer; }
+[data-brand='petappro'] .portal-payment-choice__check { margin-top: var(--pa-space-1); }
+[data-brand='petappro'] .portal-payment-choice__copy { display: grid; min-width: 0; gap: var(--pa-space-1); }
+[data-brand='petappro'] .portal-payment-choice__copy > span:first-child { display: flex; flex-wrap: wrap; align-items: center; gap: var(--pa-space-2); }
+[data-brand='petappro'] .portal-payment-handle { display: grid; gap: var(--pa-space-2); margin-left: var(--pa-space-8); color: var(--text-secondary); }
+[data-brand='petappro'] .portal-payment-handle input { min-height: var(--pa-control-height); padding-inline: var(--pa-space-4); border: 1px solid var(--border-default); border-radius: var(--radius-ctl); background: var(--surface-card); color: var(--text-primary); font: inherit; }
+[data-brand='petappro'] .portal-stripe-module { min-width: 0; margin: 0; padding: 0; border: 0; transition: opacity 200ms ease, filter 200ms ease; }
+[data-brand='petappro'] .portal-stripe-module.is-disabled { opacity: .42; filter: grayscale(.35); }
+[data-brand='petappro'] .portal-stripe-module.is-disabled :where(button, input) { cursor: not-allowed; }
+[data-brand='petappro'] .portal-stepper--module { margin-bottom: var(--pa-space-5); padding-bottom: var(--pa-space-4); }
+[data-brand='petappro'] .portal-stripe-gate-note { margin-top: var(--pa-space-3); }
+[data-brand='petappro'] .portal-client-payment-preview { display: grid; gap: var(--pa-space-2); padding: var(--pa-space-5); border-radius: var(--pa-card-radius); background: var(--pa-brandy-50); }
+[data-brand='petappro'] .portal-connect-summary { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--pa-space-3); margin-top: var(--pa-space-3); }
+[data-brand='petappro'] .portal-connect-summary div { display: grid; gap: var(--pa-space-1); }
+[data-brand='petappro'] .portal-connect-summary dt { color: var(--text-secondary); font-size: var(--type-caption-size); font-weight: var(--type-weight-semibold); }
+[data-brand='petappro'] .portal-connect-summary dd { margin: 0; font-weight: var(--type-weight-semibold); }
+[data-brand='petappro'] .portal-connect-state-preview { display: flex; flex-wrap: wrap; align-items: center; gap: var(--pa-space-2); margin-top: var(--pa-space-4); padding-top: var(--pa-space-4); border-top: 1px solid var(--border-default); }
+[data-brand='petappro'] .portal-connect-state-preview button { padding: var(--pa-space-2) var(--pa-space-3); border: 1px solid var(--border-default); border-radius: var(--radius-ctl); background: var(--surface-card); color: var(--text-primary); font: inherit; font-size: var(--type-caption-size); font-weight: var(--type-weight-semibold); cursor: pointer; }
+[data-brand='petappro'] .portal-connect-state-preview button.is-active { border-color: var(--pa-brand-accent); background: var(--pa-brand-accent); color: var(--text-inverse); }
+[data-brand='petappro'] .portal-stepper { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--pa-space-2); margin: 0 0 var(--pa-space-6); padding: 0; list-style: none; }
+[data-brand='petappro'] .portal-stepper li { display: flex; min-width: 0; align-items: center; gap: var(--pa-space-2); color: var(--text-secondary); }
+[data-brand='petappro'] .portal-stepper li > span { display: grid; width: var(--pa-space-8); height: var(--pa-space-8); flex: none; place-items: center; border-radius: 50%; background: var(--pa-mav-200); }
+[data-brand='petappro'] .portal-stepper li.is-current > span,
+[data-brand='petappro'] .portal-stepper li.is-complete > span { background: var(--pa-brand-accent); color: var(--text-inverse); }
+[data-brand='petappro'] .portal-stripe-step { display: grid; gap: var(--pa-space-4); }
+
+[data-brand='petappro'] .portal-client-record__summary,
+[data-brand='petappro'] .portal-client-record__actions,
+[data-brand='petappro'] .portal-client-record__footer { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--pa-space-3); }
+[data-brand='petappro'] .portal-client-record__summary { padding: var(--pa-space-4); border-radius: var(--pa-card-radius); background: var(--pa-brandy-50); }
+[data-brand='petappro'] .portal-client-record__summary > div:first-child { display: grid; gap: var(--pa-space-2); }
+[data-brand='petappro'] .portal-record-tabs,
+[data-brand='petappro'] .portal-report-tabs { display: flex; flex-wrap: wrap; gap: var(--pa-space-2); margin-block: var(--pa-space-5); }
+[data-brand='petappro'] :where(.portal-record-tabs, .portal-report-tabs) button { padding: var(--pa-space-2) var(--pa-space-4); border: 1px solid var(--border-default); border-radius: var(--radius-ctl); background: var(--surface-card); color: var(--text-primary); font: inherit; font-weight: var(--type-weight-semibold); cursor: pointer; }
+[data-brand='petappro'] :where(.portal-record-tabs, .portal-report-tabs) button.is-active { border-color: var(--pa-brand-accent); background: var(--pa-brand-accent); color: var(--text-inverse); }
+[data-brand='petappro'] .portal-client-record-grid { display: grid; gap: var(--pa-space-5); }
+[data-brand='petappro'] .portal-client-record-grid > section { display: grid; align-content: start; gap: var(--pa-space-4); padding: var(--pa-space-5); border-radius: var(--pa-card-radius); background: var(--pa-brandy-50); }
+[data-brand='petappro'] .portal-record-notes { width: 100%; padding: var(--pa-space-4); border: 1px solid var(--border-default); border-radius: 0; background: var(--surface-card); color: var(--text-primary); font: inherit; resize: vertical; }
+[data-brand='petappro'] .portal-pet-record-grid { display: grid; gap: var(--pa-space-3); }
+[data-brand='petappro'] .portal-pet-record-grid article { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: var(--pa-space-4); padding: var(--pa-space-4); border-radius: var(--pa-card-radius); background: var(--pa-brandy-50); }
+[data-brand='petappro'] .portal-pet-avatar { display: grid; width: var(--pa-space-12); height: var(--pa-space-12); place-items: center; border-radius: 50%; background: var(--pa-brandy-800); color: var(--text-inverse); }
+[data-brand='petappro'] .portal-client-record__footer { margin-top: var(--pa-space-5); padding-top: var(--pa-space-4); border-top: 1px solid var(--border-default); }
+
+[data-brand='petappro'] .portal-map-layout { display: grid; gap: var(--pa-space-5); }
+[data-brand='petappro'] .portal-map-controls { display: grid; align-content: start; gap: var(--pa-space-5); }
+[data-brand='petappro'] .portal-map-controls label { display: grid; gap: var(--pa-space-2); }
+[data-brand='petappro'] .portal-map-controls select { min-height: var(--pa-control-height); padding-inline: var(--pa-space-4); border: 1px solid var(--border-default); border-radius: var(--radius-ctl); background: var(--surface-card); color: var(--text-primary); font: inherit; }
+[data-brand='petappro'] .portal-map-controls input[type='range'] { width: 100%; accent-color: var(--pa-brand-accent); }
+[data-brand='petappro'] .portal-service-map { position: relative; min-height: var(--pa-map-height); overflow: hidden; border: 1px solid var(--border-default); border-radius: var(--pa-card-radius); background: linear-gradient(30deg, var(--pa-brandy-50), var(--pa-mav-100)); }
+[data-brand='petappro'] .portal-map-road { position: absolute; display: block; width: 130%; height: var(--pa-space-3); background: var(--surface-card); box-shadow: 0 0 0 1px var(--border-default); }
+[data-brand='petappro'] .portal-map-road--one { top: 28%; left: -12%; transform: rotate(16deg); }
+[data-brand='petappro'] .portal-map-road--two { top: 64%; left: -8%; transform: rotate(-12deg); }
+[data-brand='petappro'] .portal-map-road--three { top: 44%; left: -15%; transform: rotate(74deg); }
+[data-brand='petappro'] .portal-map-coverage { position: absolute; top: 50%; left: 50%; width: var(--service-radius); max-width: 78%; aspect-ratio: 1; border: 2px solid var(--pa-brand-accent); border-radius: 50%; background: color-mix(in srgb, var(--pa-brand-accent) 22%, transparent); transform: translate(-50%, -50%); }
+[data-brand='petappro'] .portal-service-map.is-custom .portal-map-coverage { width: 66%; border-radius: var(--pa-card-radius); clip-path: polygon(8% 25%, 38% 5%, 82% 16%, 96% 58%, 67% 94%, 18% 82%, 2% 50%); }
+[data-brand='petappro'] .portal-service-map.is-drawing .portal-map-coverage { outline: 3px dashed var(--pa-brandy-800); outline-offset: var(--pa-space-2); }
+[data-brand='petappro'] .portal-map-pin { position: absolute; top: 50%; left: 50%; z-index: 2; display: grid; width: var(--pa-space-12); height: var(--pa-space-12); place-items: center; border-radius: 50%; background: var(--pa-brandy-800); color: var(--text-inverse); font-weight: var(--type-weight-bold); transform: translate(-50%, -50%); }
+[data-brand='petappro'] .portal-service-map > small { position: absolute; right: var(--pa-space-4); bottom: var(--pa-space-4); padding: var(--pa-space-2) var(--pa-space-3); border-radius: var(--radius-ctl); background: var(--surface-card); color: var(--text-secondary); }
+[data-brand='petappro'] .portal-zone-manager { margin-top: var(--pa-space-5); }
+[data-brand='petappro'] .portal-zone-list { display: grid; gap: var(--pa-space-2); }
+[data-brand='petappro'] .portal-zone-list > div { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: var(--pa-space-3); padding: var(--pa-space-2); border: 1px solid var(--border-default); border-radius: var(--pa-card-radius); background: var(--pa-brandy-50); }
+[data-brand='petappro'] .portal-zone-list > div.is-active { border-color: var(--pa-brand-accent); background: color-mix(in srgb, var(--pa-brand-accent) 10%, var(--surface-card)); }
+[data-brand='petappro'] .portal-zone-list > div > button:first-child { display: grid; gap: var(--pa-space-1); padding: var(--pa-space-2); border: 0; background: transparent; color: var(--text-primary); text-align: left; cursor: pointer; }
+[data-brand='petappro'] .portal-zone-add { align-items: end; }
+[data-brand='petappro'] .portal-zone-map { isolation: isolate; }
+[data-brand='petappro'] .portal-zone-map :where(.portal-map-road, .portal-map-pin, .portal-map-coverage, .portal-zone-label, small) { z-index: 3; }
+[data-brand='petappro'] .portal-zone-coverage { position: absolute; z-index: 1; display: block; border: 1px solid var(--pa-brandy-700); border-radius: 50%; background: color-mix(in srgb, var(--pa-brandy-500) 15%, transparent); opacity: .42; }
+[data-brand='petappro'] .portal-zone-coverage.is-active { border-color: var(--pa-brand-accent); background: color-mix(in srgb, var(--pa-brand-accent) 20%, transparent); opacity: .82; }
+[data-brand='petappro'] .portal-zone-coverage--1 { top: 16%; left: 11%; width: 46%; aspect-ratio: 1.25; }
+[data-brand='petappro'] .portal-zone-coverage--2 { top: 35%; right: 12%; width: 42%; aspect-ratio: 1.1; }
+[data-brand='petappro'] .portal-zone-coverage--3 { right: 31%; bottom: 7%; width: 36%; aspect-ratio: 1.3; }
+[data-brand='petappro'] .portal-zone-map-labels { position: absolute; inset: 0; z-index: 4; pointer-events: none; }
+[data-brand='petappro'] .portal-zone-label { position: absolute; padding: var(--pa-space-1) var(--pa-space-2); border-radius: var(--radius-ctl); background: var(--surface-card); color: var(--text-secondary); font-size: var(--type-caption-size); font-weight: var(--type-weight-semibold); box-shadow: var(--shadow-card); }
+[data-brand='petappro'] .portal-zone-label.is-active { background: var(--pa-brand-accent); color: var(--text-inverse); }
+[data-brand='petappro'] .portal-zone-label--1 { top: 20%; left: 14%; }
+[data-brand='petappro'] .portal-zone-label--2 { top: 41%; right: 15%; }
+[data-brand='petappro'] .portal-zone-label--3 { right: 34%; bottom: 12%; }
+
+[data-brand='petappro'] .portal-security-status { display: grid; gap: var(--pa-space-3); margin-bottom: var(--pa-space-5); }
+[data-brand='petappro'] .portal-session-list { display: grid; gap: 0; margin-bottom: var(--pa-space-4); }
+[data-brand='petappro'] .portal-session-list article { display: flex; align-items: center; justify-content: space-between; gap: var(--pa-space-3); padding-block: var(--pa-space-3); border-bottom: 1px solid var(--border-default); }
+[data-brand='petappro'] .portal-session-list article > div { display: flex; flex-direction: column; }
+[data-brand='petappro'] .portal-mfa-setup { display: grid; gap: var(--pa-space-5); align-items: center; }
+[data-brand='petappro'] .portal-mfa-setup > div:last-child { display: grid; gap: var(--pa-space-3); }
+[data-brand='petappro'] .portal-mfa-setup label { display: grid; gap: var(--pa-space-2); }
+[data-brand='petappro'] .portal-mfa-setup input { min-height: var(--pa-control-height); padding-inline: var(--pa-space-4); border: 1px solid var(--border-default); border-radius: var(--radius-ctl); font: inherit; }
+[data-brand='petappro'] .portal-mfa-qr { display: grid; width: var(--pa-space-30); height: var(--pa-space-30); padding: var(--pa-space-2); place-items: center; border: 1px solid var(--border-default); background: var(--surface-card); }
+[data-brand='petappro'] .portal-mfa-qr svg { display: block; width: 100%; height: 100%; }
+[data-brand='petappro'] .portal-danger-callout { display: grid; gap: var(--pa-space-2); margin-bottom: var(--pa-space-5); padding: var(--pa-space-4); border: 1px solid var(--pa-coco-600); border-radius: var(--pa-card-radius); background: color-mix(in srgb, var(--pa-coco-600) 8%, var(--surface-card)); }
+[data-brand='petappro'] .portal-danger-button { border-color: var(--pa-coco-600); background: var(--pa-coco-600); color: var(--text-inverse); }
+[data-brand='petappro'] .portal-danger-button:hover:not(:disabled) { background: color-mix(in srgb, var(--pa-coco-600) 82%, var(--pa-brandy-900)); }
+[data-brand='petappro'] .portal-danger-button:disabled { cursor: not-allowed; opacity: .45; }
+[data-brand='petappro'] .portal-close-list { display: grid; gap: var(--pa-space-2); margin-block: var(--pa-space-4); padding-left: var(--pa-space-6); }
+[data-brand='petappro'] .portal-close-confirm { margin-top: var(--pa-space-5); }
+[data-brand='petappro'] .portal-close-input { display: grid; gap: var(--pa-space-2); margin-top: var(--pa-space-4); }
+[data-brand='petappro'] .portal-close-input input { min-height: var(--pa-control-height); padding-inline: var(--pa-space-4); border: 1px solid var(--border-default); border-radius: var(--radius-ctl); background: var(--surface-card); color: var(--text-primary); font: inherit; }
+
+[data-brand='petappro'] .portal-report-controls { display: grid; gap: var(--pa-space-3); align-items: flex-end; }
+[data-brand='petappro'] .portal-report-periods { display: flex; flex-wrap: wrap; gap: var(--pa-space-2); }
+[data-brand='petappro'] .portal-report-periods button { padding: var(--pa-space-2) var(--pa-space-5); border: 1px solid var(--border-default); border-radius: var(--radius-ctl); background: var(--surface-card); color: var(--text-primary); font: inherit; font-weight: var(--type-weight-semibold); cursor: pointer; }
+[data-brand='petappro'] .portal-report-periods button.is-active { border-color: var(--pa-brand-accent); background: var(--pa-brand-accent); color: var(--text-inverse); }
+[data-brand='petappro'] .portal-report-date { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: var(--pa-space-3); text-align: center; }
+[data-brand='petappro'] .portal-report-date button { display: grid; width: var(--pa-space-10); height: var(--pa-space-10); place-items: center; border: 1px solid var(--border-default); border-radius: 50%; background: var(--surface-card); cursor: pointer; }
+[data-brand='petappro'] .portal-report-date button:first-child img { transform: rotate(90deg); }
+[data-brand='petappro'] .portal-report-date button:last-child img { transform: rotate(-90deg); }
+[data-brand='petappro'] .portal-report-calendar { display: grid; gap: var(--pa-space-1); color: var(--text-secondary); }
+[data-brand='petappro'] .portal-report-calendar input { min-height: var(--pa-control-height); padding-inline: var(--pa-space-4); border: 1px solid var(--border-default); border-radius: var(--radius-ctl); background: var(--surface-card); color: var(--text-primary); font: inherit; }
+[data-brand='petappro'] .portal-report-kpis { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--pa-space-3); }
+[data-brand='petappro'] .portal-report-section { display: grid; gap: var(--pa-space-4); }
+[data-brand='petappro'] .portal-report-card-grid { display: grid; gap: var(--pa-space-4); }
+[data-brand='petappro'] .portal-report-card { min-width: 0; padding: var(--pa-space-6); }
+[data-brand='petappro'] .portal-report-card > h2 { margin-bottom: var(--pa-space-5); }
+[data-brand='petappro'] .portal-chart { width: 100%; overflow-x: auto; }
+[data-brand='petappro'] .portal-chart svg { display: block; min-width: 560px; width: 100%; height: var(--pa-report-chart-height); }
+[data-brand='petappro'] .portal-chart__grid line { stroke: var(--border-default); stroke-dasharray: 4 4; }
+[data-brand='petappro'] .portal-chart__line { fill: none; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 1; animation: portal-line-draw 900ms ease both; }
+[data-brand='petappro'] .portal-chart__line--collected { animation-delay: 150ms; }
+[data-brand='petappro'] .portal-chart__line--earnings { stroke: var(--pa-brand-accent); }
+[data-brand='petappro'] .portal-chart__line--collected { stroke: var(--pa-bella-600); }
+[data-brand='petappro'] .portal-chart__line--comparison { stroke: var(--pa-camo-700); stroke-dasharray: var(--pa-space-2) var(--pa-space-2); opacity: .42; animation: none; }
+[data-brand='petappro'] .portal-chart__line--comparison-collected { stroke: var(--pa-brandy-500); }
+[data-brand='petappro'] .portal-chart text { fill: var(--text-secondary); font-family: var(--type-family-sans); font-size: var(--type-caption-size); }
+@keyframes portal-line-draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+[data-brand='petappro'] .portal-chart-legend { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--pa-space-4); }
+[data-brand='petappro'] .portal-chart-legend--stack { flex-direction: column; }
+[data-brand='petappro'] .portal-chart-legend span { display: inline-flex; align-items: center; gap: var(--pa-space-2); }
+[data-brand='petappro'] .portal-chart-legend i { width: var(--pa-space-3); height: var(--pa-space-3); border-radius: var(--pa-space-1); }
+[data-brand='petappro'] .portal-chart-legend i.is-earnings { background: var(--pa-brand-accent); }
+[data-brand='petappro'] .portal-chart-legend i.is-collected { background: var(--pa-bella-600); }
+[data-brand='petappro'] .portal-chart-legend i.is-comparison { border: 1px dashed var(--pa-camo-700); background: transparent; }
+[data-brand='petappro'] .portal-donut-layout { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: var(--pa-space-6); min-height: calc(var(--pa-space-30) + var(--pa-space-20)); }
+[data-brand='petappro'] .portal-donut { width: calc(var(--pa-space-30) + var(--pa-space-16)); aspect-ratio: 1; border-radius: 50%; background: conic-gradient(var(--pa-brand-accent) 0 var(--donut-stop), var(--pa-bella-600) var(--donut-stop) 100%); mask: radial-gradient(circle, transparent 0 48%, black 49%); animation: portal-donut-in 700ms ease both; }
+@keyframes portal-donut-in { from { transform: scale(.72) rotate(-45deg); opacity: 0; } to { transform: scale(1) rotate(0); opacity: 1; } }
+[data-brand='petappro'] .portal-bar-chart { display: flex; height: var(--pa-report-chart-height); align-items: flex-end; gap: var(--pa-space-3); padding-top: var(--pa-space-4); border-bottom: 1px solid var(--border-default); }
+[data-brand='petappro'] .portal-bar-chart span { display: flex; min-width: 0; height: 100%; flex: 1; flex-direction: column; justify-content: flex-end; align-items: center; gap: var(--pa-space-2); }
+[data-brand='petappro'] .portal-bar-chart i { width: min(var(--pa-space-10), 80%); border-radius: var(--pa-space-2) var(--pa-space-2) 0 0; background: var(--pa-brand-accent); transform-origin: bottom; animation: portal-bar-grow 700ms ease both; }
+@keyframes portal-bar-grow { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+[data-brand='petappro'] .portal-cadence { display: flex; flex-direction: column; justify-content: center; }
+[data-brand='petappro'] .portal-top-clients { display: grid; margin: 0; padding: 0; list-style: none; }
+[data-brand='petappro'] .portal-top-clients li { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: var(--pa-space-4); padding-block: var(--pa-space-3); border-bottom: 1px solid var(--border-default); }
+[data-brand='petappro'] .portal-rate-mix { display: grid; gap: var(--pa-space-6); align-items: center; }
+[data-brand='petappro'] .portal-kpi-detail { display: grid; gap: var(--pa-space-4); }
+[data-brand='petappro'] .portal-kpi-detail__rows { display: grid; }
+[data-brand='petappro'] .portal-kpi-detail__rows > div { display: flex; justify-content: space-between; gap: var(--pa-space-4); padding-block: var(--pa-space-3); border-bottom: 1px solid var(--border-default); }
+
+[data-brand='petappro'] .portal-marketing-grid { display: grid; gap: var(--pa-space-5); align-items: start; }
+[data-brand='petappro'] .portal-logo-upload--compact { margin-block: var(--pa-space-5); }
+[data-brand='petappro'] .portal-service-picker { display: flex; flex-wrap: wrap; gap: var(--pa-space-2); margin: 0; padding: 0; border: 0; }
+[data-brand='petappro'] .portal-service-picker legend { width: 100%; margin-bottom: var(--pa-space-2); }
+[data-brand='petappro'] .portal-service-picker label { display: inline-flex; align-items: center; gap: var(--pa-space-2); padding: var(--pa-space-2) var(--pa-space-3); border-radius: var(--radius-ctl); background: var(--pa-brandy-50); }
+[data-brand='petappro'] .portal-service-picker label.is-future { opacity: .58; }
+[data-brand='petappro'] .portal-service-picker input { accent-color: var(--pa-brand-accent); }
+[data-brand='petappro'] .portal-service-picker small { color: var(--text-secondary); }
+[data-brand='petappro'] .portal-marketing-actions { display: flex; flex-wrap: wrap; gap: var(--pa-space-3); margin-top: var(--pa-space-5); }
+[data-brand='petappro'] .portal-social-preview { position: relative; width: min(520px, 100%); aspect-ratio: 958 / 1200; margin-inline: auto; overflow: hidden; border-radius: var(--pa-card-radius); box-shadow: var(--pa-card-shadow); }
+[data-brand='petappro'] .portal-social-preview > img { display: block; width: 100%; height: 100%; object-fit: cover; }
+[data-brand='petappro'] .portal-social-preview__identity { position: absolute; top: 4.5%; left: 8.5%; right: 8.5%; display: flex; align-items: center; gap: 2.1%; color: var(--pa-brandy-800); }
+[data-brand='petappro'] .portal-social-preview__identity > span { display: grid; width: 15%; aspect-ratio: 1; flex: none; padding: 1.6%; place-items: center; overflow: hidden; border-radius: 12%; background: var(--surface-card); }
+[data-brand='petappro'] .portal-social-preview__identity > span img { width: 100%; height: 100%; object-fit: contain; }
+[data-brand='petappro'] .portal-social-preview__identity > div { display: grid; min-width: 0; gap: .4vw; }
+[data-brand='petappro'] .portal-social-preview__identity strong { max-width: 18ch; overflow: hidden; font-size: clamp(16px, 3.1vw, 34px); line-height: 1; text-overflow: ellipsis; white-space: nowrap; }
+[data-brand='petappro'] .portal-social-preview__identity small { color: var(--pa-camo-600); font-size: clamp(7px, 1.1vw, 12px); font-weight: var(--type-weight-bold); letter-spacing: .08em; }
+[data-brand='petappro'] .portal-social-preview__identity > div > div { display: flex; flex-wrap: wrap; gap: 4px; }
+[data-brand='petappro'] .portal-social-preview__identity i { padding: 2px 6px; border-radius: var(--radius-ctl); background: var(--pa-brandy-600); color: var(--text-inverse); font-size: clamp(6px, 1vw, 10px); font-style: normal; font-weight: var(--type-weight-bold); text-transform: uppercase; }
+[data-brand='petappro'] .portal-social-preview__code { position: absolute; top: 46.5%; right: 7%; width: 31%; color: var(--text-primary); font-size: clamp(10px, 2vw, 22px); text-align: center; }
+
+@media (min-width: 834px) {
+  [data-brand='petappro'] .portal-topbar { min-height: var(--pa-header-desktop); padding-inline: var(--pa-space-8); }
+  [data-brand='petappro'] .portal-frame { grid-template-columns: var(--pa-portal-sidebar-width) minmax(0, 1fr); min-height: calc(100dvh - var(--pa-header-desktop)); }
+  [data-brand='petappro'] .portal-sidebar { position: sticky; top: var(--pa-header-desktop); height: calc(100dvh - var(--pa-header-desktop)); padding: var(--pa-space-8) var(--pa-space-5); border-right: 1px solid var(--border-default); border-bottom: 0; }
+  [data-brand='petappro'] .portal-nav { flex-direction: column; overflow: visible; }
+  [data-brand='petappro'] .portal-nav a { border-radius: var(--pa-card-radius); }
+  [data-brand='petappro'] .portal-page { gap: var(--pa-space-8); padding: var(--pa-space-8); }
+  [data-brand='petappro'] .portal-stat-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  [data-brand='petappro'] .portal-stat-grid--three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  [data-brand='petappro'] .portal-dashboard-grid,
+  [data-brand='petappro'] .portal-settings-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  [data-brand='petappro'] .portal-service-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  [data-brand='petappro'] .portal-service-editor-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  [data-brand='petappro'] .portal-service-editor-grid--two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  [data-brand='petappro'] .portal-service-editor-grid article { grid-template-rows: var(--pa-space-16) auto auto auto minmax(var(--pa-space-30), 1fr) auto; }
+  [data-brand='petappro'] .portal-service-editor-grid article > .portal-service-editor__heading { grid-row: 1; min-height: var(--pa-space-16); align-self: start; }
+  [data-brand='petappro'] .portal-service-editor-grid article > label:nth-of-type(1) { grid-row: 2; }
+  [data-brand='petappro'] .portal-service-editor-grid article > label:nth-of-type(2) { grid-row: 3; }
+  [data-brand='petappro'] .portal-service-editor-grid article > label:nth-of-type(3) { grid-row: 4; }
+  [data-brand='petappro'] .portal-service-editor-grid article > label:nth-of-type(4) { grid-row: 5; align-self: start; }
+  [data-brand='petappro'] .portal-service-editor-grid article > span:last-child { grid-row: 6; min-height: var(--pa-space-10); align-self: stretch; }
+  [data-brand='petappro'] .portal-walk-offering > div { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  [data-brand='petappro'] .portal-walk-settings { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  [data-brand='petappro'] .portal-walk-rate-fields { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  [data-brand='petappro'] .portal-service-surcharge__controls { grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); align-items: end; }
+  [data-brand='petappro'] .portal-service-surcharge__controls--holiday { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 2fr); }
+  [data-brand='petappro'] .portal-field-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  [data-brand='petappro'] .portal-inline-form,
+  [data-brand='petappro'] .portal-add-staff { grid-template-columns: repeat(2, minmax(0, 1fr)) auto; }
+  [data-brand='petappro'] .portal-team-list article { grid-template-columns: minmax(0, 1fr) 132px; align-items: center; }
+  [data-brand='petappro'] .portal-team-list .portal-permissions { grid-column: 1 / -1; }
+  [data-brand='petappro'] .portal-team-list .portal-remove-button { grid-column: 1 / -1; }
+  [data-brand='petappro'] .portal-marketing-grid { grid-template-columns: minmax(0, .9fr) minmax(360px, 1.1fr); }
+  [data-brand='petappro'] .portal-availability-layout { grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); }
+  [data-brand='petappro'] .portal-client-record-grid,
+  [data-brand='petappro'] .portal-map-layout,
+  [data-brand='petappro'] .portal-mfa-setup,
+  [data-brand='petappro'] .portal-report-card-grid,
+  [data-brand='petappro'] .portal-rate-mix { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  [data-brand='petappro'] .portal-report-controls { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  [data-brand='petappro'] .portal-report-periods { grid-column: 1 / 3; flex-wrap: nowrap; }
+  [data-brand='petappro'] .portal-report-date { grid-column: 3 / 5; }
+  [data-brand='petappro'] .portal-report-calendar { grid-column: 1; }
+  [data-brand='petappro'] .portal-report-controls > select:first-of-type { grid-column: 2 / 4; }
+  [data-brand='petappro'] .portal-report-controls > select:last-of-type { grid-column: 4; }
+  [data-brand='petappro'] .portal-report-kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  [data-brand='petappro'] .portal-definition-list div { flex-direction: row; justify-content: space-between; gap: var(--pa-space-4); }
+  [data-brand='petappro'] .portal-definition-list dd { text-align: right; }
+}
+
+@media (max-width: 600px) {
+  [data-brand='petappro'] .portal-topbar__brand > span { display: none; }
+  [data-brand='petappro'] .portal-stat-grid { grid-template-columns: 1fr; }
+  [data-brand='petappro'] .portal-list-row { grid-template-columns: auto minmax(0, 1fr); }
+  [data-brand='petappro'] .portal-list-row .portal-status { grid-column: 2; }
+  [data-brand='petappro'] .portal-page-header__action,
+  [data-brand='petappro'] .portal-page-header__action .btn { width: 100%; }
+  [data-brand='petappro'] .portal-summary-row { grid-template-columns: minmax(0, 1fr) auto; }
+  [data-brand='petappro'] .portal-summary-row > span.type-body { grid-column: 1 / -1; }
+  [data-brand='petappro'] .portal-summary-row .portal-status,
+  [data-brand='petappro'] .portal-summary-row > strong + .portal-status { grid-column: 2; grid-row: 1; }
+  [data-brand='petappro'] .portal-field-grid--three { grid-template-columns: 1fr; }
+  [data-brand='petappro'] .portal-theme-grid { grid-template-columns: 1fr; }
+  [data-brand='petappro'] .portal-social-preview__identity strong { font-size: 16px; }
+  [data-brand='petappro'] .portal-pet-record-grid article { grid-template-columns: auto minmax(0, 1fr); }
+  [data-brand='petappro'] .portal-pet-record-grid article .portal-text-button { grid-column: 2; justify-self: start; }
+  [data-brand='petappro'] .portal-stepper small { display: none; }
+  [data-brand='petappro'] .portal-eq { flex-direction: column; }
+  [data-brand='petappro'] .portal-eq__op { align-self: flex-start; }
+  [data-brand='petappro'] .portal-subcard__actions { width: 100%; margin-left: 0; }
+  [data-brand='petappro'] .portal-subcard__actions .btn { flex: 1; }
+  [data-brand='petappro'] .portal-calendar-grid { column-gap: var(--pa-space-2); row-gap: var(--pa-space-2); }
+  [data-brand='petappro'] .portal-calendar-grid > button { width: min(100%, var(--pa-space-10)); padding: var(--pa-space-1); }
+  [data-brand='petappro'] .portal-calendar-grid--labels span { font-size: var(--type-caption-size); }
+  [data-brand='petappro'] .portal-calendar-grid > button small { display: none; }
+  [data-brand='petappro'] .portal-connect-summary { grid-template-columns: 1fr; }
+  [data-brand='petappro'] .portal-top-clients li { grid-template-columns: minmax(0, 1fr) auto; }
+  [data-brand='petappro'] .portal-top-clients li small { grid-column: 1; }
+}
+
+@media (min-width: 1280px) {
+  [data-brand='petappro'] .portal-report-kpis { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-brand='petappro'] .portal-chart__line,
+  [data-brand='petappro'] .portal-donut,
+  [data-brand='petappro'] .portal-bar-chart i { animation: none; }
+}

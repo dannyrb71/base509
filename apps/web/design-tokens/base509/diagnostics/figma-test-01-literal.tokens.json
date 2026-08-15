@@ -1,0 +1,19 @@
+{
+  "test-literal": {
+    "$type": "color",
+    "$value": {
+      "colorSpace": "srgb",
+      "components": [
+        0.05098038911819458,
+        0.16862745583057404,
+        0.2705882489681244
+      ],
+      "alpha": 1,
+      "hex": "#0D2B45"
+    },
+    "$description": "Import diagnostic: plain color with no alias."
+  },
+  "$extensions": {
+    "com.figma.modeName": "literal-test"
+  }
+}

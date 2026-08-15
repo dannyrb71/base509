@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Services &amp; Pricing — cleanup concept</title>
+<style>
+:root{--ink:#16283a;--soft:#4a5b6b;--mute:#7b8a97;--green:#4ca154;--green-d:#3d8a45;
+--mint:#e7f4ea;--mint-l:#f2f9f4;--mint-b:#cfe8d4;--line:#e3e8ec;--bg:#f6f8f9;--teal:#0f6a75;}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Poppins','Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--ink);padding:36px 20px 70px;line-height:1.5}
+.page{max-width:1040px;margin:0 auto}
+.crumb{font-size:10px;font-weight:700;letter-spacing:.12em;color:var(--green-d)}
+h1{font-size:26px;margin:2px 0 4px}
+.sub{font-size:13px;color:var(--soft);margin-bottom:14px}
+.tabs{display:flex;gap:22px;border-bottom:1px solid var(--line);margin-bottom:22px;font-size:13.5px;font-weight:600;color:var(--mute)}
+.tabs span{padding:8px 2px}
+.tabs .on{color:var(--green-d);border-bottom:2px solid var(--green-d)}
+.shell{background:#fff;border:1px solid var(--line);border-radius:16px;padding:26px;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.eyebrow{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--mute)}
+h2{font-size:19px;margin-bottom:10px}
+.svctabs{display:flex;gap:20px;font-size:13px;font-weight:600;color:var(--mute);border-bottom:1px solid var(--line);margin-bottom:20px}
+.svctabs span{padding:7px 2px}.svctabs .on{color:var(--green-d);border-bottom:2px solid var(--green-d)}
+.svctabs i{font-style:normal;font-size:9px;color:#b9c3cb;vertical-align:2px}
+
+.subcard{border:1px solid var(--line);border-radius:14px;margin-bottom:18px;overflow:hidden}
+.subhead{display:flex;align-items:center;gap:12px;padding:14px 18px;background:var(--mint-l);border-bottom:1px solid var(--mint-b)}
+.stepnum{width:24px;height:24px;border-radius:50%;background:var(--teal);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex:none}
+.subhead h3{font-size:14.5px}
+.subhead small{display:block;font-size:11px;font-weight:400;color:var(--soft)}
+.spacer{flex:1}
+.btn{background:var(--green);color:#fff;font-size:11.5px;font-weight:600;padding:7px 15px;border-radius:18px;white-space:nowrap}
+.btn.ghost{background:#fff;color:var(--green-d);border:1.5px solid var(--mint-b)}
+.body{padding:16px 18px}
+.toggle{width:38px;height:21px;border-radius:11px;background:var(--green);position:relative;flex:none}
+.toggle::after{content:'';position:absolute;right:3px;top:3px;width:15px;height:15px;border-radius:50%;background:#fff}
+.toggle.off{background:#cdd6dd}.toggle.off::after{right:auto;left:3px}
+
+/* basics grid */
+.bgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px 18px;margin-bottom:14px}
+.f label{display:block;font-size:10px;font-weight:600;color:var(--mute);margin-bottom:4px}
+.f .v{border:1px solid var(--line);border-radius:8px;padding:7px 11px;font-size:12.5px;background:#fff}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{background:var(--mint);border:1px solid var(--mint-b);color:var(--green-d);font-size:11px;font-weight:600;padding:5px 12px;border-radius:16px}
+.chip b{font-size:9px;letter-spacing:.04em}
+.seg{display:flex;gap:10px;margin-bottom:14px}
+.seg span{flex:1;border:1.5px solid var(--line);border-radius:10px;padding:9px 12px;font-size:12.5px;font-weight:600;color:var(--mute)}
+.seg span small{display:block;font-size:10.5px;font-weight:400}
+.seg .sel{border-color:var(--green);background:var(--mint);color:var(--ink)}
+
+/* equation strip */
+.eq{display:flex;align-items:stretch;gap:10px;background:var(--mint-l);border:1px dashed var(--mint-b);border-radius:12px;padding:14px 16px;margin:2px 0 18px}
+.eqbox{flex:1;background:#fff;border:1px solid var(--mint-b);border-radius:10px;padding:10px 12px}
+.eqbox .t{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--teal);margin-bottom:3px}
+.eqbox .d{font-size:11.5px;color:var(--soft)}
+.eqbox .ex{font-size:11px;color:var(--ink);font-weight:600;margin-top:4px}
+.op{align-self:center;font-size:18px;font-weight:700;color:var(--green-d);flex:none}
+.eqbox.result{background:var(--teal);border-color:var(--teal)}
+.eqbox.result .t{color:#bfe3d2}.eqbox.result .d{color:#dcefe6}.eqbox.result .ex{color:#fff}
+
+/* collapsed rows */
+.row{display:flex;align-items:center;gap:12px;border:1px solid var(--line);border-radius:10px;padding:11px 14px;margin-bottom:8px;font-size:12.5px}
+.row .name{font-weight:700}
+.row .meta{color:var(--soft)}
+.row .pill{margin-left:auto;font-size:9.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:3px 9px;border-radius:12px;background:var(--mint);color:var(--green-d)}
+.row .pill.off{background:#eef1f3;color:var(--mute)}
+.row .chev{color:var(--mute);font-size:11px}
+.row.dim{opacity:.55}
+.note{font-size:11px;color:var(--mute);margin:4px 2px 0}
+.anno{border-left:3px solid var(--green);padding-left:12px;font-size:12px;color:var(--soft);margin:22px 0 6px}
+.anno b{color:var(--ink)}
+.save{display:flex;justify-content:flex-end;margin-top:18px}
+.info{display:inline-flex;width:16px;height:16px;border-radius:50%;border:1.5px solid var(--mint-b);color:var(--green-d);font-size:10px;font-weight:700;align-items:center;justify-content:center;vertical-align:-3px;margin-left:6px}
+@media(max-width:760px){.bgrid{grid-template-columns:1fr 1fr}.eq{flex-direction:column}.op{align-self:flex-start}}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="crumb">BUSINESS</div>
+  <h1>Business Settings</h1>
+  <p class="sub">Manage the identity, client-app appearance, service menu, pricing rules, booking policies, service area, and team structure clients rely on.</p>
+  <div class="tabs"><span>Profile &amp; Brand</span><span class="on">Services &amp; Pricing</span><span>Booking Rules</span><span>Team</span></div>
+
+  <div class="shell">
+    <div class="eyebrow">Editable service menu</div>
+    <h2>Services &amp; Pricing</h2>
+    <div class="svctabs"><span>Boarding &amp; Daycare</span><span class="on">Dog Walking</span><span>In-Home <i>SOON</i></span><span>Training <i>SOON</i></span><span>Grooming <i>SOON</i></span></div>
+
+    <!-- ① SERVICE BASICS -->
+    <div class="subcard">
+      <div class="subhead">
+        <span class="stepnum">1</span>
+        <h3>Service Basics <small>What you offer and how you operate — set once, rarely touched</small></h3>
+        <span class="spacer"></span>
+        <span style="font-size:11px;font-weight:600;color:var(--soft)">Service Active</span>
+        <span class="toggle"></span>
+      </div>
+      <div class="body">
+        <div class="seg">
+          <span>Individual <small>One household per slot</small></span>
+          <span>Group <small>Multiple households share a slot</small></span>
+          <span class="sel">Both <small>Clients choose at booking</small></span>
+        </div>
+        <div class="bgrid">
+          <div class="f"><label>SERVICE LOCATION</label><div class="v">At Client Location ▾</div></div>
+          <div class="f"><label>SERVICE ZONES</label><div class="v">3 Walking Zones ▾</div></div>
+          <div class="f"><label>DOGS PER WALKER</label><div class="v">6</div></div>
+          <div class="f"><label>TRAVEL BUFFER</label><div class="v">15 min</div></div>
+        </div>
+        <div class="chips">
+          <span class="chip">✓ Require Meet &amp; Greet</span>
+          <span class="chip">✓ Offer Recurring Walks</span>
+          <span class="chip">✓ Use Business Service Area</span>
+          <span class="chip">✓ GPS Route Tracking <b>CREW+</b></span>
+          <span class="chip" style="background:#fff;border-style:dashed;color:var(--mute)">Max Walks / Day: 6</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- EQUATION STRIP -->
+    <div class="eq">
+      <div class="eqbox">
+        <div class="t">② Rates — what a walk costs</div>
+        <div class="d">Durations &amp; prices. No days or times here.</div>
+        <div class="ex">30-min Group · $22/dog</div>
+      </div>
+      <span class="op">×</span>
+      <div class="eqbox">
+        <div class="t">③ Windows — when walks happen</div>
+        <div class="d">Days, time bands &amp; capacity. No prices here.</div>
+        <div class="ex">Midday · M–F · 10–2 · 12 dogs</div>
+      </div>
+      <span class="op">=</span>
+      <div class="eqbox result">
+        <div class="t">What clients can book</div>
+        <div class="d">Every rate is offered in every window that accepts its walk type.</div>
+        <div class="ex">“Group 30-min · Midday M/W/F · $22”</div>
+      </div>
+    </div>
+
+    <!-- ② PRICING -->
+    <div class="subcard">
+      <div class="subhead">
+        <span class="stepnum">2</span>
+        <h3>Pricing — Walking Rate Options <small>Each duration priced independently</small><span class="info">i</span></h3>
+        <span class="spacer"></span>
+        <span class="btn">Add Rate Option</span>
+      </div>
+      <div class="body">
+        <div class="row"><span class="name">Individual · 30 min</span><span class="meta">$30 · +$10 extra dog · 1 household</span><span class="pill">Bookable</span><span class="chev">▾</span></div>
+        <div class="row"><span class="name">Individual · 60 min</span><span class="meta">$50 · +$15 extra dog · 1 household</span><span class="pill">Bookable</span><span class="chev">▾</span></div>
+        <div class="row"><span class="name">Group · 30 min</span><span class="meta">$22/dog · +$8 extra dog · 6 dogs/walker</span><span class="pill">Bookable</span><span class="chev">▾</span></div>
+        <div class="row"><span class="name">Group · 60 min</span><span class="meta">$35/dog · +$12 extra dog · 6 dogs/walker</span><span class="pill">Bookable</span><span class="chev">▾</span></div>
+        <div class="row dim"><span class="name">Individual · 60 min</span><span class="meta">$50 · +$15 extra dog</span><span class="pill off">Hidden</span><span class="chev">▾</span></div>
+      </div>
+    </div>
+
+    <!-- ③ AVAILABILITY -->
+    <div class="subcard">
+      <div class="subhead">
+        <span class="stepnum">3</span>
+        <h3>Availability — Walk Windows <small>Clients book a window + days, never an exact time</small><span class="info">i</span></h3>
+        <span class="spacer"></span>
+        <span class="btn ghost">Preview Client View</span>
+        <span class="btn">Add Window</span>
+      </div>
+      <div class="body">
+        <div class="row" style="background:var(--mint-l);border-color:var(--mint-b)"><span class="name">Group Walk Policy</span><span class="meta">Min 3 walks/week to start a recurring schedule · one-offs &amp; approvals still allowed</span><span class="chev">▾</span></div>
+        <div class="row"><span class="name">Midday</span><span class="meta">M–F · 10–2 · Individual + Group · 12 dogs · 2 walkers</span><span class="pill">Bookable</span><span class="chev">▾</span></div>
+        <div class="row"><span class="name">Evening</span><span class="meta">M · W · F · 4–6:30 · 6 dogs · 1 walker</span><span class="pill">Bookable</span><span class="chev">▾</span></div>
+        <div class="row"><span class="name">Morning</span><span class="meta">M–F · 7–9 · Individual only · 1 walker</span><span class="pill">Bookable</span><span class="chev">▾</span></div>
+        <div class="row dim"><span class="name">Weekend Adventure</span><span class="meta">Sa · 9–12 · 12 dogs · 2 walkers</span><span class="pill off">Hidden</span><span class="chev">▾</span></div>
+        <p class="note">Rates and windows stay independent — windows never set prices, rates never set days.</p>
+      </div>
+    </div>
+
+    <!-- SURCHARGES collapsed -->
+    <div class="subcard">
+      <div class="subhead" style="background:#fff;border-bottom:none">
+        <span class="stepnum" style="background:#8aa0af">＋</span>
+        <h3>Service Surcharges <small>Puppy Handling · $10 · Boarding &amp; Daycare</small></h3>
+        <span class="spacer"></span><span class="toggle"></span><span class="chev" style="color:var(--mute);font-size:11px">▾</span>
+      </div>
+    </div>
+
+    <div class="save"><span class="btn" style="padding:10px 22px;font-size:12.5px">Save Services &amp; Pricing</span></div>
+  </div>
+
+  <div class="anno"><b>What changed vs. current:</b> the Pricing / Walk Windows <b>tabs are gone</b> — hiding one half was why they read as two competing setups. Both now sit as numbered sub-cards under Service Basics, always visible together, with the ② × ③ strip teaching the relationship: rates say what a walk costs, windows say when it happens, and a client books a rate <i>inside</i> a window. Cards collapse to summary rows (the new session's pattern, applied to rates too), Group Walk Policy becomes a row inside Availability, the Midday window closes by default, and "How this works" prose folds into the ⓘ icons.</div>
+</div>
+</body>
+</html>

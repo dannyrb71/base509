@@ -1,0 +1,306 @@
+/* ============================================================
+   SHARED SKELETON — consumes ONLY the semantic token layer.
+   Every rule here must work for every brand (D-056).
+   Brands supply the palette + fonts in brands/<brand>.css.
+   Never reference a brand-specific color or font here.
+   ============================================================ */
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body { margin: 0; }
+
+.brand-root {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface-page);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+.brand-root main { flex: 1; }
+
+/* ---------- typography ---------- */
+.brand-root h1, .brand-root h2, .brand-root h3, .brand-root h4 {
+  font-family: var(--font-display);
+  font-weight: var(--weight-display);
+  text-transform: var(--display-case, none);
+  letter-spacing: var(--tracking-display, 0);
+  line-height: 1.15;
+  margin: 0;
+  color: inherit;
+}
+
+.brand-root a { color: var(--text-accent); text-decoration: none; }
+.brand-root a:hover { text-decoration: underline; }
+.brand-root :focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+
+/* Skip link — keyboard users jump past the header */
+.skip-link {
+  position: absolute; left: -9999px; top: 0; z-index: 100;
+  background: var(--surface-card); color: var(--text-primary);
+  padding: 10px 16px; border-radius: var(--radius-ctl);
+}
+.skip-link:focus { left: 8px; top: 8px; }
+
+/* ---------- layout ---------- */
+.container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+
+.section { padding: 80px 0; }
+.section--tight { padding: 56px 0; }
+.section--inverse { background: var(--surface-inverse); color: var(--text-inverse); }
+.section--tint { background: var(--surface-tint); }
+
+.eyebrow {
+  font-size: 13px; font-weight: 600; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--text-accent); margin-bottom: 12px;
+}
+.section--inverse .eyebrow { color: var(--text-inverse-accent); }
+
+.section h2 { font-size: clamp(26px, 4vw, 34px); margin-bottom: 14px; }
+.section h3 { font-size: 20px; }
+
+.lead { font-size: 18px; color: var(--text-secondary); max-width: 58ch; }
+.section--inverse .lead, .section--inverse p { color: var(--text-inverse-secondary); }
+
+/* ---------- header / footer ---------- */
+.site-header {
+  background: var(--surface-header, var(--surface-page));
+  border-bottom: 1px solid var(--border-default);
+  position: sticky; top: 0; z-index: 40;
+}
+.site-header__inner { display: flex; align-items: center; gap: 32px; height: 72px; }
+.site-header__logo { display: flex; align-items: center; flex: none; }
+.site-header__nav { display: flex; gap: 24px; flex: 1; flex-wrap: wrap; }
+.site-header__nav a {
+  font-size: 14px; font-weight: 500; color: var(--text-secondary);
+  padding-bottom: 2px; border-bottom: 2px solid transparent;
+}
+.site-header__nav a:hover { color: var(--text-primary); text-decoration: none; }
+.site-header__nav a[aria-current='page'] {
+  color: var(--text-primary); font-weight: 600;
+  border-bottom-color: var(--action-cta);
+}
+.site-header__actions { display: flex; gap: 12px; align-items: center; }
+
+.site-footer {
+  background: var(--surface-inverse); color: var(--text-inverse);
+  margin-top: auto;
+}
+.site-footer__grid {
+  display: grid; grid-template-columns: 2fr repeat(3, 1fr);
+  gap: 32px; padding: 64px 0 40px;
+}
+.site-footer__col-title {
+  font-size: 12px; font-weight: 600; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--text-inverse-accent); margin-bottom: 16px;
+}
+.site-footer__col { display: flex; flex-direction: column; gap: 10px; }
+.site-footer a { color: var(--text-inverse-secondary); font-size: 14px; }
+.site-footer a:hover { color: var(--text-inverse); }
+.site-footer__legal {
+  border-top: 1px solid var(--border-inverse);
+  padding: 18px 0; font-size: 13px; color: var(--text-inverse-secondary);
+  display: flex; gap: 16px; flex-wrap: wrap; align-items: center;
+}
+
+/* ---------- buttons ---------- */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  height: 44px; padding: 0 24px; border-radius: var(--radius-ctl);
+  font-family: var(--font-body); font-weight: 600; font-size: 15px;
+  letter-spacing: 0.02em; cursor: pointer; text-decoration: none !important;
+  border: 1px solid transparent; transition: background 150ms ease, color 150ms ease;
+}
+.btn--lg { height: 52px; padding: 0 30px; font-size: 16px; }
+.btn--sm { height: 36px; padding: 0 16px; font-size: 13px; }
+.btn.btn--cta { background: var(--action-cta); color: var(--text-on-cta); }
+.btn.btn--cta:hover { background: var(--action-cta-hover); }
+.btn.btn--primary { background: var(--action-primary); color: var(--text-on-primary); }
+.btn.btn--primary:hover { background: var(--action-primary-hover); }
+.btn.btn--secondary { background: transparent; color: var(--action-primary); border-color: var(--action-primary); }
+.btn.btn--secondary:hover { background: var(--surface-tint); }
+.btn.btn--inverse { background: transparent; color: var(--text-inverse); border-color: var(--border-inverse); }
+.btn.btn--inverse:hover { background: color-mix(in srgb, var(--text-inverse) 12%, transparent); }
+
+/* ---------- cards ---------- */
+.card {
+  background: var(--surface-card); border: 1px solid var(--border-default);
+  border-radius: var(--radius-card); padding: 28px;
+  box-shadow: var(--shadow-card);
+}
+.card h3 { margin-bottom: 8px; }
+.card p { color: var(--text-secondary); margin: 0; }
+
+/* Raised card — the elevated elevation shared by the Base509 home carousel
+   cards and the clickable policy cards. The literal shadow value lives ONCE
+   per brand as --shadow-card-raised; nothing here or in a brand layer may
+   re-inline it (molecules rule). */
+.card--raised { box-shadow: var(--shadow-card-raised); }
+
+/* A card that IS a link: the whole surface is the hit area. Reset the global
+   anchor colour/underline so the card still reads as a card, and lift it a
+   little on hover/focus so it reads as clickable. */
+a.card {
+  display: flex;
+  flex-direction: column;
+  color: inherit;
+  text-decoration: none;
+  transition: transform 160ms ease, box-shadow 160ms ease;
+}
+a.card:hover { text-decoration: none; }
+a.card--raised:hover,
+a.card--raised:focus-visible {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-card-raised-hover);
+}
+@media (prefers-reduced-motion: reduce) {
+  a.card { transition: none; }
+  a.card--raised:hover,
+  a.card--raised:focus-visible { transform: none; }
+}
+
+/* Card call-to-action — pinned to the bottom so every card in a row lines up
+   and non-technical visitors get an explicit "this is clickable" cue. */
+.card__cta {
+  margin-top: auto;
+  padding-top: 16px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-accent);
+}
+a.card:hover .card__cta { text-decoration: underline; }
+
+/* Beats `.card p` (same 0,1,1) on specificity via the element qualifier. */
+.card p.policy-card__status { margin-top: 10px; font-size: 13px; }
+.card__kicker {
+  font-size: 12px; font-weight: 600; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--text-accent); margin-bottom: 10px;
+}
+
+.grid { display: grid; gap: 24px; }
+.grid--2 { grid-template-columns: repeat(2, 1fr); }
+.grid--3 { grid-template-columns: repeat(3, 1fr); }
+.grid--4 { grid-template-columns: repeat(4, 1fr); }
+
+/* ---------- media slot (screenshots / theme cards pending) ---------- */
+.slot {
+  border: 2px dashed var(--border-default); border-radius: var(--radius-card);
+  background: var(--surface-tint);
+  display: flex; align-items: center; justify-content: center; text-align: center;
+  color: var(--text-secondary); font-size: 14px; padding: 24px; min-height: 280px;
+}
+.slot--phone { aspect-ratio: 390 / 700; min-height: 0; max-width: 300px; width: 100%; }
+.slot--wide { min-height: 220px; }
+
+/* ---------- policy pages ---------- */
+.policy-banner {
+  background: var(--status-warning-bg); color: var(--status-warning-text);
+  border: 1px solid var(--status-warning-border); border-radius: var(--radius-ctl);
+  padding: 14px 18px; font-size: 14px; font-weight: 600; margin: 24px 0;
+}
+.policy-meta { font-size: 14px; color: var(--text-secondary); display: flex; gap: 16px; flex-wrap: wrap; }
+.prose { max-width: 72ch; }
+.prose h1 { font-size: clamp(28px, 4vw, 38px); margin: 0 0 16px; }
+.prose h2 { font-size: 24px; margin: 40px 0 12px; }
+.prose h3 { font-size: 19px; margin: 28px 0 10px; }
+.prose p, .prose li { font-size: 16px; line-height: 1.7; }
+.prose blockquote {
+  margin: 20px 0; padding: 12px 20px; border-left: 4px solid var(--action-cta);
+  background: var(--surface-tint); border-radius: 0 var(--radius-ctl) var(--radius-ctl) 0;
+}
+.prose code {
+  background: var(--surface-tint); padding: 2px 6px; border-radius: 4px;
+  font-size: 14px;
+}
+.prose table { border-collapse: collapse; width: 100%; margin: 20px 0; font-size: 15px; }
+.prose th, .prose td { border: 1px solid var(--border-default); padding: 8px 12px; text-align: left; vertical-align: top; }
+.prose th { background: var(--surface-tint); }
+.prose hr { border: none; border-top: 1px solid var(--border-default); margin: 32px 0; }
+
+/* ---------- tables (pricing matrix) ---------- */
+.matrix { width: 100%; border-collapse: collapse; font-size: 15px; }
+.matrix th, .matrix td { padding: 12px 14px; border-bottom: 1px solid var(--border-default); text-align: center; }
+.matrix th:first-child, .matrix td:first-child { text-align: left; }
+.matrix thead th { font-weight: 600; }
+.matrix .check { color: var(--status-success); font-weight: 700; }
+.matrix .dash { color: var(--text-secondary); }
+
+/* ---------- misc ---------- */
+.badge {
+  display: inline-flex; align-items: center; height: 24px; padding: 0 10px;
+  border-radius: 999px; font-size: 12px; font-weight: 600;
+  background: var(--surface-tint); color: var(--text-accent);
+}
+
+.underline-motif { display: flex; gap: 8px; margin-top: 16px; }
+.underline-motif span { width: 34px; height: 5px; background: var(--motif-color, var(--action-cta)); }
+
+/* ---------- responsive ---------- */
+@media (max-width: 900px) {
+  .grid--3, .grid--4 { grid-template-columns: repeat(2, 1fr); }
+  .site-footer__grid { grid-template-columns: 1fr 1fr; }
+  .section { padding: 56px 0; }
+}
+@media (max-width: 600px) {
+  .grid--2, .grid--3, .grid--4 { grid-template-columns: 1fr; }
+  .site-header__inner { height: auto; flex-wrap: wrap; padding: 12px 0; gap: 12px; }
+  .site-header { position: static; }
+  .site-footer__grid { grid-template-columns: 1fr; }
+}
+
+/* ---------- deco layer (brand background motifs) ---------- */
+.section { position: relative; overflow: hidden; }
+.section > .container { position: relative; z-index: 1; }
+.deco { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
+
+/* ---------- app screenshot framing ---------- */
+.appshot {
+  display: block; width: 100%; max-width: 320px; height: auto;
+  border-radius: 28px; box-shadow: 0 24px 60px rgba(0, 0, 0, 0.22);
+  border: 1px solid var(--border-default);
+}
+.appshot-wrap { position: relative; display: flex; justify-content: center; }
+.appshot-wrap--tilt .appshot { transform: rotate(-3deg); }
+
+/* ---------- carousel ---------- */
+.carousel__track {
+  display: flex; gap: 16px; overflow-x: auto; scroll-snap-type: x mandatory;
+  padding: 8px 4px 16px; scrollbar-width: none;
+}
+.carousel__track::-webkit-scrollbar { display: none; }
+.carousel__card {
+  flex: 0 0 88%; max-width: 420px; scroll-snap-align: center;
+}
+.carousel__controls { display: flex; align-items: center; gap: 16px; justify-content: center; }
+.carousel__btn {
+  width: 40px; height: 40px; border-radius: 999px; border: 1px solid var(--border-default);
+  background: var(--surface-card); color: var(--text-primary); font-size: 20px; line-height: 1;
+  cursor: pointer; display: inline-flex; align-items: center; justify-content: center;
+}
+.carousel__btn:disabled { opacity: 0.35; cursor: default; }
+.carousel__dots { display: flex; gap: 8px; }
+.carousel__dot {
+  width: 10px; height: 10px; border-radius: 999px; border: none; padding: 0;
+  background: var(--border-default); cursor: pointer;
+}
+.carousel__dot.is-active { background: var(--action-cta); }
+@media (prefers-reduced-motion: reduce) {
+  .carousel__track { scroll-behavior: auto; }
+}
+
+/* ---------- waitlist form ---------- */
+.waitlist { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+.waitlist input[type='email'] {
+  height: 48px; padding: 0 16px; min-width: 260px; font-size: 15px;
+  font-family: var(--font-body); color: var(--text-primary);
+  border: 1px solid var(--border-default); border-radius: var(--radius-ctl);
+  background: var(--surface-card);
+}
+.waitlist input[type='email']:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 1px; }
+.waitlist__note { font-size: 14px; color: var(--text-secondary); margin-top: 12px; }

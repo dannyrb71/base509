@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PetAppro — Walk Windows UX Sketch</title>
+<style>
+  :root{
+    --ink:#16283a; --ink-soft:#4a5b6b; --ink-mute:#7b8a97;
+    --green:#4ca154; --green-dark:#3d8a45; --mint:#e7f4ea; --mint-line:#cfe8d4;
+    --teal:#0f6a75; --line:#e3e8ec; --bg:#f6f8f9; --card:#ffffff;
+    --amber:#fff4e0; --amber-ink:#8a5a16;
+    --radius:12px;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{font-family:'Poppins','Segoe UI',system-ui,sans-serif; background:var(--bg); color:var(--ink); padding:40px 24px 80px; line-height:1.5;}
+  .page{max-width:1000px; margin:0 auto;}
+  .eyebrow{font-size:11px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:var(--green-dark);}
+  h1{font-size:28px; font-weight:700; margin:4px 0 6px;}
+  .sub{color:var(--ink-soft); font-size:14px; max-width:64ch; margin-bottom:8px;}
+  .concept-note{display:inline-block; background:var(--amber); color:var(--amber-ink); font-size:11px; font-weight:600; padding:4px 10px; border-radius:20px; margin:10px 0 30px;}
+
+  section.card{background:var(--card); border:1px solid var(--line); border-radius:16px; padding:28px; margin-bottom:36px; box-shadow:0 1px 2px rgba(0,0,0,.04);}
+  .sec-eyebrow{font-size:10px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-mute); margin-bottom:2px;}
+  .sec-head{display:flex; justify-content:space-between; align-items:flex-start; gap:16px; margin-bottom:6px;}
+  h2{font-size:20px; font-weight:700;}
+  .btn{display:inline-block; background:var(--green); color:#fff; font-size:12.5px; font-weight:600; padding:9px 18px; border-radius:22px; white-space:nowrap;}
+  .explain{background:var(--mint); border:1px solid var(--mint-line); border-radius:10px; padding:12px 16px; font-size:12.5px; color:var(--ink-soft); margin:14px 0 22px;}
+  .explain b{color:var(--ink);}
+
+  /* window row */
+  .win{border:1px solid var(--line); border-radius:var(--radius); padding:18px 20px 14px; margin-bottom:16px; position:relative;}
+  .win.active{border-color:var(--mint-line);}
+  .win-top{display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;}
+  .win-name{font-weight:700; font-size:15px;}
+  .win-name small{display:block; font-weight:400; font-size:11px; color:var(--ink-mute);}
+  .toggle{width:40px; height:22px; border-radius:11px; background:var(--green); position:relative; flex:none;}
+  .toggle::after{content:''; position:absolute; right:3px; top:3px; width:16px; height:16px; border-radius:50%; background:#fff;}
+  .toggle.off{background:#cdd6dd;}
+  .toggle.off::after{right:auto; left:3px;}
+
+  .grid{display:grid; grid-template-columns:auto 1fr; gap:10px 28px; align-items:center;}
+  .lab{font-size:10.5px; font-weight:600; letter-spacing:.02em; color:var(--ink-mute);}
+  .lab i{font-style:normal; color:#b3bec7; font-weight:500;}
+
+  .days{display:flex; gap:6px;}
+  .day{width:34px; height:30px; border:1px solid var(--line); border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:11.5px; font-weight:600; color:var(--ink-mute); background:#fff;}
+  .day.on{background:var(--teal); border-color:var(--teal); color:#fff;}
+
+  .row-inline{display:flex; gap:10px; align-items:center; flex-wrap:wrap;}
+  .field{border:1px solid var(--line); border-radius:8px; padding:7px 12px; font-size:12.5px; background:#fff; color:var(--ink);}
+  .field.select::after{content:' ▾'; color:var(--ink-mute); font-size:10px;}
+  .dash{color:var(--ink-mute); font-size:12px;}
+  .chip{background:var(--mint); border:1px solid var(--mint-line); color:var(--green-dark); font-size:11px; font-weight:600; padding:5px 11px; border-radius:16px;}
+  .chip.ghost{background:#fff; border:1px dashed var(--line); color:var(--ink-mute); font-weight:500;}
+  .svc{display:flex; gap:14px; font-size:12.5px; color:var(--ink-soft); align-items:center;}
+  .cb{width:15px; height:15px; border-radius:4px; background:var(--teal); display:inline-block; vertical-align:-2px; margin-right:6px; position:relative;}
+  .cb::after{content:'✓'; color:#fff; font-size:10px; position:absolute; left:3px; top:-1px;}
+  .cb.off{background:#fff; border:1.5px solid var(--line);}
+  .cb.off::after{content:'';}
+
+  .capline{font-size:11.5px; color:var(--ink-mute); background:var(--bg); border-radius:8px; padding:8px 12px; margin-top:12px;}
+  .capline b{color:var(--ink);}
+  .win-foot{display:flex; justify-content:space-between; align-items:center; margin-top:12px;}
+  .pill{font-size:10.5px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; padding:4px 10px; border-radius:14px; background:var(--mint); color:var(--green-dark);}
+  .pill.hidden{background:#eef1f3; color:var(--ink-mute);}
+  .links{font-size:12px; font-weight:600;}
+  .links span{color:var(--green-dark); margin-left:16px;}
+  .links .rm{color:#b05252;}
+
+  .note{font-size:11px; color:var(--ink-mute); margin-top:4px;}
+  .anno{border-left:3px solid var(--green); padding:2px 0 2px 12px; font-size:12px; color:var(--ink-soft); margin:20px 0 4px;}
+  .anno b{color:var(--ink);}
+
+  /* client preview */
+  .phone{max-width:420px; border:1px solid var(--line); border-radius:20px; padding:22px; background:#fff; box-shadow:0 2px 10px rgba(0,0,0,.06);}
+  .phone h3{font-size:16px; margin-bottom:2px;}
+  .phone .step{font-size:10px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-mute); margin:16px 0 8px;}
+  .winopt{border:1.5px solid var(--line); border-radius:12px; padding:12px 14px; display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;}
+  .winopt.sel{border-color:var(--green); background:var(--mint);}
+  .winopt .t{font-size:13.5px; font-weight:600;}
+  .winopt .t small{display:block; font-size:11px; font-weight:400; color:var(--ink-soft);}
+  .spots{font-size:10.5px; font-weight:700; color:var(--green-dark);}
+  .spots.low{color:#b07a1e;}
+  .spots.full{color:#b05252;}
+  .rec{display:flex; gap:8px;}
+  .rec span{flex:1; text-align:center; border:1.5px solid var(--line); border-radius:10px; padding:8px; font-size:12.5px; font-weight:600; color:var(--ink-mute);}
+  .rec span.sel{border-color:var(--green); background:var(--mint); color:var(--green-dark);}
+  .eta{background:var(--bg); border-radius:10px; padding:10px 12px; font-size:11.5px; color:var(--ink-soft); margin-top:14px;}
+  .cta{display:block; text-align:center; background:var(--green); color:#fff; border-radius:24px; padding:12px; font-size:14px; font-weight:600; margin-top:14px;}
+
+  /* walker day view */
+  .roster{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
+  .route{border:1px solid var(--line); border-radius:12px; padding:14px 16px;}
+  .route h4{font-size:13px; margin-bottom:2px;}
+  .route .meta{font-size:11px; color:var(--ink-mute); margin-bottom:10px;}
+  .dog{display:flex; align-items:center; gap:10px; padding:7px 0; border-top:1px dashed var(--line); font-size:12.5px;}
+  .dog .av{width:26px; height:26px; border-radius:50%; background:var(--teal); color:#fff; font-size:10px; font-weight:700; display:flex; align-items:center; justify-content:center; flex:none;}
+  .dog .zone{margin-left:auto; font-size:10px; font-weight:600; color:var(--ink-mute); background:var(--bg); padding:3px 8px; border-radius:10px;}
+  .unassigned .av{background:#c8a13c;}
+  .postmvp{font-size:10px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--amber-ink); background:var(--amber); padding:3px 9px; border-radius:12px; vertical-align:3px; margin-left:8px;}
+
+  @media (max-width:760px){ .grid{grid-template-columns:1fr; gap:6px;} .roster{grid-template-columns:1fr;} }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="eyebrow">PetAppro · Provider Portal · UX Sketch</div>
+  <h1>Walk Windows</h1>
+  <p class="sub">Availability layer for dog walking. Sits in Business Settings as a <b>sibling section</b> to Walking Rate Options — rates say <i>what a walk costs</i>, windows say <i>when walks happen and how many dogs fit</i>. Clients book a window + days, never an exact time.</p>
+  <span class="concept-note">Concept sketch only — sample content, not wired to data</span>
+
+  <!-- ================= PROVIDER: WALK WINDOWS ================= -->
+  <section class="card">
+    <div class="sec-eyebrow">Availability</div>
+    <div class="sec-head">
+      <h2>Walk Windows</h2>
+      <span class="btn">Add Window</span>
+    </div>
+    <div class="explain"><b>How this works:</b> clients choose a window and their days — you build the route. Capacity is enforced per window, per day, per walker. Individual and Group walks can share a window; group capacity comes from your Dogs&nbsp;Per&nbsp;Walker setting.</div>
+
+    <!-- Group schedule policy (per-service, not per-window) -->
+    <div class="win active" style="background:#fbfdfb">
+      <div class="win-top" style="margin-bottom:8px">
+        <div class="win-name">Group Walk Policy <small>Per service — applies across all windows</small></div>
+      </div>
+      <div class="grid">
+        <div class="lab">MIN WALKS / WEEK <i>(Optional)</i></div>
+        <div class="row-inline"><span class="field">3</span><span class="note">gates <b>starting a recurring schedule</b> only — not every booking</span></div>
+      </div>
+      <div class="capline">Regulars with an active schedule can still book one-off extras. Requests below the minimum aren't blocked — they come to you for <b>approval</b>, and you can always create bookings yourself.</div>
+    </div>
+
+    <!-- Window 1 -->
+    <div class="win active">
+      <div class="win-top">
+        <div class="win-name">Midday <small>The workday classic — most group walks live here</small></div>
+        <div class="toggle"></div>
+      </div>
+      <div class="grid">
+        <div class="lab">DAYS</div>
+        <div class="days"><span class="day on">M</span><span class="day on">T</span><span class="day on">W</span><span class="day on">T</span><span class="day on">F</span><span class="day">S</span><span class="day">S</span></div>
+        <div class="lab">TIME BAND</div>
+        <div class="row-inline"><span class="field">10:00 AM</span><span class="dash">to</span><span class="field">2:00 PM</span><span class="note">bounds <b>walk start</b> — shown to clients as “between 10–2”</span></div>
+        <div class="lab">SERVICES</div>
+        <div class="svc"><span><span class="cb"></span>Individual</span><span><span class="cb"></span>Group</span></div>
+        <div class="lab">ZONES <i>(from Service Area)</i></div>
+        <div class="row-inline"><span class="chip">Mission</span><span class="chip">Noe Valley</span><span class="chip">Castro</span><span class="chip ghost">+ Add zone</span></div>
+        <div class="lab">WALKERS ASSIGNED</div>
+        <div class="row-inline"><span class="field select">Morgan Lee, Casey Reed&nbsp;</span></div>
+      </div>
+      <div class="capline">Group capacity: <b>6 dogs</b> / walker × <b>2 walkers</b> = <b>12 group dogs</b> per day in this window &nbsp;·&nbsp; Individual walks draw from Max&nbsp;Walks&nbsp;Per&nbsp;Day</div>
+      <div class="win-foot">
+        <span class="pill">Bookable</span>
+        <span class="links"><span>Duplicate</span> <span class="rm">Remove</span></span>
+      </div>
+    </div>
+
+    <!-- Window 2 -->
+    <div class="win active">
+      <div class="win-top">
+        <div class="win-name">Morning <small>Before-work individual walks</small></div>
+        <div class="toggle"></div>
+      </div>
+      <div class="grid">
+        <div class="lab">DAYS</div>
+        <div class="days"><span class="day on">M</span><span class="day on">T</span><span class="day on">W</span><span class="day on">T</span><span class="day on">F</span><span class="day">S</span><span class="day">S</span></div>
+        <div class="lab">TIME BAND</div>
+        <div class="row-inline"><span class="field">7:00 AM</span><span class="dash">to</span><span class="field">9:00 AM</span></div>
+        <div class="lab">SERVICES</div>
+        <div class="svc"><span><span class="cb"></span>Individual</span><span><span class="cb off"></span>Group</span></div>
+        <div class="lab">ZONES</div>
+        <div class="row-inline"><span class="chip">Mission</span><span class="chip ghost">+ Add zone</span></div>
+        <div class="lab">WALKERS ASSIGNED</div>
+        <div class="row-inline"><span class="field select">Morgan Lee&nbsp;</span></div>
+      </div>
+      <div class="win-foot">
+        <span class="pill">Bookable</span>
+        <span class="links"><span>Duplicate</span> <span class="rm">Remove</span></span>
+      </div>
+    </div>
+
+    <!-- Window 3, off -->
+    <div class="win">
+      <div class="win-top">
+        <div class="win-name">Weekend Adventure <small>Sat group hikes — paused for now</small></div>
+        <div class="toggle off"></div>
+      </div>
+      <div class="win-foot" style="margin-top:2px">
+        <span class="pill hidden">Hidden</span>
+        <span class="links"><span>Duplicate</span> <span class="rm">Remove</span></span>
+      </div>
+    </div>
+
+    <!-- Solo plan variant -->
+    <div class="anno" style="margin-bottom:14px"><b>Solo plan variant:</b> the Walkers Assigned row simply doesn't render (same gating pattern as the GPS "Crew+" chip). Capacity drops the multiplication — a solo operator never sees staff machinery. Duo and up get the full row.</div>
+    <div class="win active" style="background:#fbfdfb">
+      <div class="win-top">
+        <div class="win-name">Midday <small>Same window, Solo plan</small></div>
+        <div class="toggle"></div>
+      </div>
+      <div class="grid">
+        <div class="lab">DAYS</div>
+        <div class="days"><span class="day on">M</span><span class="day on">T</span><span class="day on">W</span><span class="day on">T</span><span class="day on">F</span><span class="day">S</span><span class="day">S</span></div>
+        <div class="lab">TIME BAND</div>
+        <div class="row-inline"><span class="field">10:00 AM</span><span class="dash">to</span><span class="field">2:00 PM</span></div>
+        <div class="lab">SERVICES</div>
+        <div class="svc"><span><span class="cb"></span>Individual</span><span><span class="cb"></span>Group</span></div>
+        <div class="lab">ZONES</div>
+        <div class="row-inline"><span class="chip">Mission</span><span class="chip ghost">+ Add zone</span></div>
+      </div>
+      <div class="capline">Group capacity: <b>6 dogs</b> per day in this window <span style="color:#b3bec7">·</span> <i style="font-style:normal; color:var(--ink-mute)">Running with a team? Duo &amp; Crew assign walkers per window.</i></div>
+      <div class="win-foot">
+        <span class="pill">Bookable</span>
+        <span class="links"><span>Duplicate</span> <span class="rm">Remove</span></span>
+      </div>
+    </div>
+
+    <div class="anno"><b>Why a sibling section, not fields on each rate card:</b> a 30-min group walk at $22/dog can be offered in Midday <i>and</i> Morning. Windows × rates stay independent, so neither list explodes combinatorially.</div>
+  </section>
+
+  <!-- ================= CLIENT BOOKING ================= -->
+  <section class="card">
+    <div class="sec-eyebrow">Client App</div>
+    <div class="sec-head"><h2>What the client sees</h2></div>
+    <div class="explain">The client never picks a clock time. They pick <b>service → days → window → recurrence</b>. Capacity («spots») is the live count for group walks in their zone. GPS tracking pays off the wide window with an “on the way” heads-up.</div>
+    <div class="phone">
+      <h3>Book Group Walk</h3>
+      <div class="note">Buddy · Mission district</div>
+      <div class="step">1 · Which days?</div>
+      <div class="days"><span class="day on">M</span><span class="day">T</span><span class="day on">W</span><span class="day">T</span><span class="day on">F</span><span class="day">S</span><span class="day">S</span></div>
+      <div class="step">2 · Which window?</div>
+      <div class="winopt sel">
+        <div class="t">Midday <small>Between 10:00 AM – 2:00 PM</small></div>
+        <span class="spots">4 spots left</span>
+      </div>
+      <div class="winopt">
+        <div class="t">Evening <small>Between 4:00 – 6:30 PM</small></div>
+        <span class="spots low">1 spot left Wed</span>
+      </div>
+      <div class="winopt" style="opacity:.55">
+        <div class="t">Morning <small>Individual walks only</small></div>
+        <span class="spots full">Not offered</span>
+      </div>
+      <div class="step">3 · How often?</div>
+      <div class="rec"><span class="sel">Weekly</span><span>Just this week</span></div>
+      <div class="eta">🐾 Your walker will message you when they're on the way — live GPS during the walk.</div>
+      <div class="eta" style="margin-top:8px">📋 <b>After the walk:</b> report card with actual start &amp; end times, photos, and the route map — exact times are reported, never promised.</div>
+      <span class="cta">Request M · W · F Midday — $22/walk</span>
+      <div class="note" style="margin-top:8px">Requests confirm per your Booking Rules (24-hr notice, Meet &amp; Greet first).</div>
+    </div>
+  </section>
+
+  <!-- ================= WALKER DAY VIEW ================= -->
+  <section class="card">
+    <div class="sec-eyebrow">Provider Dashboard</div>
+    <div class="sec-head"><h2>Walker's day — group builder<span class="postmvp">Post-MVP</span></h2></div>
+    <div class="explain">Booking fills windows; <b>the walker composes the groups</b> (dog compatibility + geography are human calls). MVP ships without this — the capacity cap alone keeps windows sane, and grouping happens offline. This view is where it lands later.</div>
+    <div class="roster">
+      <div class="route">
+        <h4>Route A · Morgan</h4>
+        <div class="meta">Midday · Mission loop · 4 of 6 dogs</div>
+        <div class="dog"><span class="av">BU</span>Buddy <span class="zone">Mission</span></div>
+        <div class="dog"><span class="av">LU</span>Luna <span class="zone">Mission</span></div>
+        <div class="dog"><span class="av">MX</span>Max <span class="zone">Castro</span></div>
+        <div class="dog"><span class="av">PE</span>Penny <span class="zone">Mission</span></div>
+      </div>
+      <div class="route">
+        <h4>Unassigned · Midday</h4>
+        <div class="meta">Drag onto a route, or start Route B</div>
+        <div class="dog unassigned"><span class="av">RO</span>Rocky <span class="zone">Noe Valley</span></div>
+        <div class="dog unassigned"><span class="av">DA</span>Daisy <span class="zone">Noe Valley</span></div>
+      </div>
+    </div>
+  </section>
+
+</div>
+</body>
+</html>

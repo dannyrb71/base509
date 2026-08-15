@@ -1,0 +1,29 @@
+{
+  "test-alias": {
+    "$type": "color",
+    "$value": {
+      "colorSpace": "srgb",
+      "components": [
+        0.05098038911819458,
+        0.16862745583057404,
+        0.2705882489681244
+      ],
+      "alpha": 1,
+      "hex": "#0D2B45"
+    },
+    "$description": "Import diagnostic: alias to color/basalt/900.",
+    "$extensions": {
+      "com.figma.scopes": [
+        "ALL_SCOPES"
+      ],
+      "com.figma.aliasData": {
+        "targetVariableId": "VariableID:114:1622",
+        "targetVariableName": "color/basalt/900",
+        "targetVariableSetName": "Base509 Primitives"
+      }
+    }
+  },
+  "$extensions": {
+    "com.figma.modeName": "alias-test"
+  }
+}

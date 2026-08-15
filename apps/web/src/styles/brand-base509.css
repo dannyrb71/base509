@@ -1,0 +1,853 @@
+/* ============================================================
+   BASE509 brand layer — from Design/Website/"Base509 design system.zip"
+   Brand hexes are verbatim from the brand board. Do not alter.
+   Oswald Bold UPPERCASE headlines + Montserrat body — BASE509-ONLY rule.
+   One deliberate deviation from the DS kit (WCAG 2.1 AA):
+     --text-on-cta is ink (#152A43), not white — white on Sunset is 3.22:1
+     (fails AA); ink on Sunset is 4.51:1 (passes). Hexes unchanged.
+   ============================================================ */
+[data-brand='base509'] {
+  /* Brand palette (brand board — verbatim) */
+  --color-basalt: #0D2B45;
+  --color-columbia: #3B6EA8;
+  --color-lake: #7FB3D4;
+  --color-sand: #D6B27A;
+  --color-sunset: #D07A34;
+  --color-driftstone: #D6D8DA;
+  --color-ink: #152A43;
+  --color-logo-blue: #89B1D0;
+  --color-parchment: #F5F0E7;
+
+  /* Fonts — Base509 only. Never substitute (DS hard rule). */
+  --font-display: 'Oswald', 'Arial Narrow', sans-serif;
+  --font-body: 'Montserrat', 'Helvetica Neue', Arial, sans-serif;
+  --weight-display: 700;
+  --display-case: uppercase;
+  --tracking-display: 0.02em;
+
+  /* Semantic layer */
+  --surface-page: var(--color-parchment);
+  --surface-card: #ffffff;
+  --surface-inverse: var(--color-basalt);
+  --surface-tint: color-mix(in srgb, var(--color-lake) 22%, #fff);
+
+  --text-primary: var(--color-ink);
+  --text-secondary: color-mix(in srgb, var(--color-ink) 72%, var(--color-parchment));
+  --text-accent: var(--color-columbia);
+  --text-inverse: var(--color-parchment);
+  --text-inverse-secondary: color-mix(in srgb, var(--color-parchment) 78%, var(--color-basalt));
+  --text-inverse-accent: var(--color-logo-blue);
+  --text-on-cta: var(--color-ink);   /* AA fix — see header note */
+  --text-on-primary: #ffffff;
+
+  --action-primary: var(--color-basalt);
+  --action-primary-hover: color-mix(in srgb, var(--color-basalt) 86%, var(--color-columbia));
+  --action-cta: var(--color-sunset);
+  --action-cta-hover: color-mix(in srgb, var(--color-sunset) 80%, #fff);
+
+  --border-default: color-mix(in srgb, var(--color-ink) 18%, transparent);
+  --border-inverse: color-mix(in srgb, var(--color-parchment) 25%, transparent);
+  --focus-ring: var(--color-columbia);
+
+  --status-success: #3F7A4E;
+  --status-warning-bg: color-mix(in srgb, var(--color-sand) 30%, #fff);
+  --status-warning-border: var(--color-sand);
+  --status-warning-text: var(--color-ink);
+
+  /* Shape — utilitarian, small radii. Nothing bubbly. */
+  --radius-ctl: 4px;
+  --radius-card: 8px;
+  --shadow-card: 0 1px 2px rgba(13, 43, 69, 0.08);
+  /* Elevated card shadow — measured off the home carousel's content frame
+     (I29:793;29:505). It lives HERE and only here: the carousel cards and the
+     clickable policy cards both read it through var(--shadow-card-raised).
+     Never paste the literal value into a rule again (molecules rule). */
+  --shadow-card-raised: 0 1px 2px rgba(0, 0, 0, 0.3), 0 2px 6px 2px rgba(0, 0, 0, 0.15);
+  /* Same family, one step stronger — the hover state of a raised card. */
+  --shadow-card-raised-hover: 0 2px 4px rgba(0, 0, 0, 0.3), 0 6px 14px 3px rgba(0, 0, 0, 0.2);
+
+  --motif-color: var(--color-logo-blue); /* 509 triple-underline motif */
+}
+
+/* ============================================================
+   BASE509 home page — exact-match layer, REBUILT element-by-element from the
+   Figma frame "base509.com / Home - desktop"
+   (file G8baGBnIdgf5TABaICn7tU, page 0:1, node 1:2 — 1440 × 3129).
+   Scoped to [data-brand='base509'] so nothing here reaches PetAppro.
+   Every number below is measured from that frame. Change them only when the
+   frame changes. Section geometry:
+     Header        1:3  y=0     h=120   pad 20/120  bg #F5F0E7
+     Hero          1:4  y=120   h=711   pad 96/120  bg #0D2B45
+     What we build 1:5  y=831   h=1267  pad 80/120  bg #F5F0E7
+     Who we are    1:6  y=2098  h=399   pad 80/120  bg #0D2B45
+     Contact       1:7  y=2497  h=347   pad 80/120  bg #F5F0E7
+     Footer        1:8  y=2844  h=285   pad 56/120/32/120  bg #0D2B45
+   ============================================================ */
+
+/* ---- token corrections measured off the frame -------------------------- */
+[data-brand='base509'] {
+  /* Eyebrows + the 509 motif are Lake (#7FB3D4) on navy, not Logo Blue. */
+  --text-inverse-accent: var(--color-lake);
+  --motif-color: var(--color-lake);
+  /* Body copy on navy is Driftstone verbatim (#D6D8DA), not a mix. */
+  --text-inverse-secondary: var(--color-driftstone);
+
+  /* Frame-measured constants */
+  --b509-gutter: 120px;      /* frame side padding */
+  --b509-card-w: 312px;      /* carousel card */
+  --b509-card-h: 450px;
+  --b509-card-gap: 16px;
+  --b509-carousel-w: 450px;  /* carousel clip window (29:793) */
+  --b509-carousel-inset: 69px; /* (450 - 312) / 2 — centres the active card */
+  --b509-stack: 1384px;      /* below this the 1200px content row can't fit */
+}
+
+/* ---- container: the frame is 1440 wide with 120px gutters = 1200 content -- */
+[data-brand='base509'] .container {
+  max-width: 1440px;
+  /* 8.3333vw === 120px at 1440. Shrinks the gutter below the design width. */
+  padding-inline: clamp(20px, 8.3333vw, var(--b509-gutter));
+}
+
+/* ---- shared section furniture ------------------------------------------ */
+/* Eyebrow: Montserrat SemiBold 12/18, +1.8px tracking. Frame 11/12/9/10 stack
+   the eyebrow and the motif with a 4px gap — semantic.css uses 12 + 16. */
+[data-brand='base509'] .eyebrow {
+  font-size: 12px;
+  line-height: 18px;
+  font-weight: 600;
+  letter-spacing: 1.8px;
+  margin-bottom: 0;
+}
+[data-brand='base509'] .underline-motif { margin-top: 4px; gap: 8px; }
+[data-brand='base509'] .underline-motif span { width: 34px; height: 5px; }
+
+/* Oswald in this file always sits at 0 tracking. */
+[data-brand='base509'] .b509-h1,
+[data-brand='base509'] .b509-h2,
+[data-brand='base509'] .b509-product__name,
+[data-brand='base509'] .carousel__card h3 { letter-spacing: 0; }
+
+/* Buttons: the frame hugs its labels at 0 tracking; .btn ships 0.02em, which
+   pushes every measured width out by 3–5px. */
+[data-brand='base509'] .btn { letter-spacing: 0; }
+
+/* CTA on navy — 1:20 / 120:4860: #FFB273 @ #152D3C (7.9:1, AA large + small). */
+[data-brand='base509'] .section--inverse .btn.btn--cta {
+  background: #ffb273;
+  color: #152d3c;
+}
+[data-brand='base509'] .section--inverse .btn.btn--cta:hover {
+  background: color-mix(in srgb, #ffb273 86%, #fff);
+}
+/* Outline button on navy — 1:22: 1px #D6D8DA, label #F5F0E7. */
+[data-brand='base509'] .section--inverse .btn.btn--inverse {
+  border-color: var(--color-driftstone);
+  color: var(--color-parchment);
+}
+
+/* ---- decorative vector layers ------------------------------------------ */
+/* Pinned to a 1440-wide grid centred on the (centred) container so the
+   frame coordinates below stay true at any viewport width. */
+[data-brand='base509'] .b509-deco {
+  position: absolute;
+  left: 50%;
+  margin-left: -720px;
+  width: 1440px;
+  height: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+[data-brand='base509'] .b509-deco--hero { top: -96px; }   /* section pad-top */
+[data-brand='base509'] .b509-deco--build { top: -80px; }
+
+/* Decoration is now Danny's exported SVG art, positioned on frame coords.
+   The .b509-deco layer is already pinned to a 1440-wide centred grid. */
+[data-brand='base509'] .b509-deco img { position: absolute; display: block; }
+/* Group 6 (94:1314) — 597×577 at frame (845, 68) */
+[data-brand='base509'] .b509-deco--hero img { left: auto; right: 0; top: 68px; }
+/* Groups 5+4 — 561×420 at (120, 677) */
+[data-brand='base509'] .b509-deco__left { left: 120px; top: 677px; }
+/* Group 3 — 290×250 at (980, 478) */
+[data-brand='base509'] .b509-deco__right { left: 980px; top: 478px; }
+
+[data-brand='base509'] .b509-hero__row {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: flex-start;
+  gap: 48px;              /* 693 + 48 + 459 = 1200 */
+}
+[data-brand='base509'] .b509-hero__col { flex: 0 0 693px; max-width: 693px; }
+
+/* 1:17 — Oswald Bold 60/66, hard break authored after "that". */
+[data-brand='base509'] .b509-h1 {
+  font-size: 60px;
+  line-height: 66px;
+  margin: 16px 0 0;
+  color: var(--color-parchment);
+}
+/* 1:18 — Montserrat 18/30 Driftstone, 12px paragraph spacing. */
+[data-brand='base509'] .b509-hero__body {
+  font-size: 18px;
+  line-height: 30px;
+  color: var(--color-driftstone);
+  margin: 16px 0 0;
+  max-width: 693px;
+}
+[data-brand='base509'] .b509-hero__body + .b509-hero__body { margin-top: 12px; }
+/* 1:19 — CTA row, 48px below the copy block, 16px gutter. */
+[data-brand='base509'] .b509-hero__ctas {
+  display: flex;
+  gap: 16px;
+  margin-top: 48px;
+  flex-wrap: wrap;
+}
+/* Frame 8 (171:8019) — 459×519, contents centred. */
+[data-brand='base509'] .b509-hero__art {
+  flex: 0 0 459px;
+  height: 519px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ======================= 2 · WHAT WE BUILD (1:5) ======================= */
+[data-brand='base509'] #products > .container > * { position: relative; z-index: 1; }
+
+/* Frame 5 (62:1292): eyebrow block + H2, 36px trailing pad, then the 16px
+   section gap → 52px to the wordmark. */
+[data-brand='base509'] .b509-build__head { padding-bottom: 36px; }
+[data-brand='base509'] .b509-h2 { margin: 16px 0 0; }
+[data-brand='base509'] .b509-h2--build { font-size: 48px; line-height: 54px; color: #152d3c; }
+[data-brand='base509'] .b509-h2--sm { font-size: 32px; line-height: 38px; }
+[data-brand='base509'] .section--inverse .b509-h2 { color: var(--color-parchment); }
+[data-brand='base509'] #contact .b509-h2 { color: #152d3c; }
+
+[data-brand='base509'] .b509-wordmark { margin-top: 16px; }
+
+/* Frame 2 (2:333) — product name + descriptor, 8px apart. */
+[data-brand='base509'] .b509-product { margin-top: 16px; }
+[data-brand='base509'] .b509-product__name {
+  font-size: 32px;
+  line-height: 38px;
+  margin: 0;
+  color: #152d3c;
+}
+[data-brand='base509'] .b509-product__desc {
+  font-size: 16px;
+  line-height: 26px;
+  color: #253f58;
+  margin: 8px 0 0;
+  max-width: 1200px;
+}
+
+/* section 2-column (3:13) — 523 | 629, h=782, both cells vertically centred. */
+[data-brand='base509'] .b509-build-row {
+  display: flex;
+  align-items: center;
+  height: 782px;
+  margin-top: 16px;
+}
+/* Frame 1 (2:26) — 523 wide, 50px side pad, phone + 24px + button, centred. */
+[data-brand='base509'] .b509-build-row__media {
+  flex: 0 0 523px;
+  padding: 0 50px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+}
+/* Feature cards (3:16) — 629 wide, 53px bottom pad, carousel centred. */
+[data-brand='base509'] .b509-build-row__cards {
+  flex: 0 0 629px;
+  align-self: stretch;
+  padding-bottom: 53px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* COPY-AUDIT §16 — not in the frame, required by the copy audit. */
+[data-brand='base509'] .b509-disclaimer {
+  font-size: 13px;
+  line-height: 20px;
+  color: #4d5c70;
+  margin: 16px 0 0;
+}
+
+/* ---- carousel (instance 29:793): 450×500 window, 312×450 cards ---------- */
+[data-brand='base509'] .carousel { min-width: 0; width: var(--b509-carousel-w); }
+[data-brand='base509'] .carousel__track {
+  gap: var(--b509-card-gap);
+  padding: 8px var(--b509-carousel-inset) 16px;
+  scroll-padding-inline: var(--b509-carousel-inset);
+  /* Rectangle 5 (I29:793;29:891): parchment fade, opaque→clear by 10%,
+     clear→opaque from 90.4%. */
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 10%, #000 90.4%, transparent 100%);
+  mask-image: linear-gradient(to right, transparent 0%, #000 10%, #000 90.4%, transparent 100%);
+}
+[data-brand='base509'] .carousel__card {
+  flex: 0 0 var(--b509-card-w);
+  width: var(--b509-card-w);
+  max-width: var(--b509-card-w);
+  min-height: var(--b509-card-h);
+  padding: 24px 28px;
+  border-radius: 8px;
+  border: 1px solid color-mix(in srgb, var(--color-ink) 18%, transparent);
+  /* per-card shadow + the two shadows on the content frame (I29:793;29:505),
+     now held once as --shadow-card-raised and shared with the policy cards. */
+  box-shadow: var(--shadow-card-raised);
+  scroll-snap-align: center;
+}
+/* pre-wrap keeps the frame's literal double spaces ("Fair pricing,  all
+   around.", "…and choose  a theme…") — they are what makes those two titles
+   break where the frame breaks them. */
+[data-brand='base509'] .carousel__card h3 {
+  font-size: 32px; line-height: 38px; margin-bottom: 0; color: var(--color-ink);
+  white-space: pre-wrap;
+  /* Figma counts the trailing space when deciding whether a word fits; CSS
+     lets it hang. Reserving one space width reproduces the frame's break in
+     "FAIR PRICING, / ALL AROUND." without changing any other card's wrap. */
+  padding-inline-end: 8px;
+}
+[data-brand='base509'] .carousel__card p {
+  font-size: 18px; line-height: 30px; margin-top: 8px; color: #4d5c70;
+}
+/* Pagination (I29:793;29:521): 5 dots, 6px gap, active is a 16×8 pill.
+   The frame has no arrow controls — hide them; the dots and the focusable
+   track keep the component operable by keyboard. */
+[data-brand='base509'] .carousel__btn { display: none; }
+[data-brand='base509'] .carousel__controls { margin-top: 8px; }
+[data-brand='base509'] .carousel__dots { gap: 6px; }
+[data-brand='base509'] .carousel__dot {
+  width: 8px; height: 8px; border-radius: 8px;
+  background: #304249; opacity: 0.3;
+}
+[data-brand='base509'] .carousel__dot.is-active {
+  width: 16px; background: var(--color-sunset); opacity: 1;
+}
+
+/* ========================= 3 · WHO WE ARE (1:6) ========================= */
+[data-brand='base509'] .b509-who-row {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  gap: 16px;              /* 640 + 16 + 544 = 1200 */
+  align-items: stretch;
+}
+[data-brand='base509'] .b509-who-row__text { flex: 0 1 640px; max-width: 640px; }
+/* CTAs (120:4859) — 544 wide, 46px side pad, single button centred both axes.
+   The frame's second button (120:4862) is visible:false. */
+[data-brand='base509'] .b509-who-row__cta {
+  flex: 0 1 544px;
+  padding: 0 46px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+[data-brand='base509'] .b509-who__body {
+  font-size: 16px;
+  line-height: 26px;
+  color: var(--color-driftstone);
+  margin: 16px 0 0;
+  max-width: 640px;
+}
+[data-brand='base509'] .b509-who__body + .b509-who__body { margin-top: 12px; }
+
+/* ========================== 4 · CONTACT (1:7) ========================== */
+[data-brand='base509'] .b509-contact__body {
+  font-size: 16px;
+  line-height: 26px;
+  color: #253f58;
+  margin: 16px 0 0;
+  max-width: 620px;
+}
+[data-brand='base509'] .b509-contact__body + .b509-contact__body { margin-top: 12px; }
+/* The frame draws the address in body colour with no rule; keep a hairline
+   underline so the link is not colour-only (WCAG 1.4.1). */
+[data-brand='base509'] .b509-contact__body a {
+  color: #253f58;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-thickness: 1px;
+}
+
+/* ===================== Header (1:3) / Footer (1:8) ===================== */
+/* Markup lives in src/app/base509/layout.tsx; only the styling is ours. */
+/* 1:3 is 120 tall with a 1px INSIDE stroke → 119 of inner + the 1px border. */
+[data-brand='base509'] .site-header__inner { height: 119px; gap: 32px; }
+[data-brand='base509'] .site-header__logo img { width: 140px; height: 38px; }
+[data-brand='base509'] .site-header__nav { justify-content: flex-end; gap: 24px; }
+[data-brand='base509'] .site-header__nav a {
+  font-size: 14px; line-height: 22px; font-weight: 400; color: #253f58;
+}
+/* Button / Get in touch (1:14) — 162×40, #A35B1F, white label (6.4:1). */
+[data-brand='base509'] .site-header .btn.btn--cta {
+  height: 40px; padding: 0 30px; font-size: 16px; line-height: 22px;
+  background: #a35b1f; color: #fff;
+}
+[data-brand='base509'] .site-header .btn.btn--cta:hover {
+  background: color-mix(in srgb, #a35b1f 88%, #000);
+}
+/* Footer columns (3:45): PRODUCTS · COMPANY · LEGAL left, wordmark hard right,
+   64px gutters. NB use padding-block — a shorthand here would wipe out the
+   .container gutter these blocks inherit. */
+[data-brand='base509'] .site-footer__grid {
+  display: flex;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 32px 64px;
+  padding-block: 56px 0;
+}
+[data-brand='base509'] .site-footer__grid > :first-child {
+  order: 4;
+  margin-left: auto;
+  text-align: right;
+}
+[data-brand='base509'] .site-footer__grid > :first-child p { margin-left: auto; }
+/* Caption type style (design system: 12px / 1.4 / bold / 0.14em tracking).
+   Defined once and shared by the footer column headers and the brand tagline
+   so the value is not duplicated. */
+[data-brand='base509'] .site-footer__col-title,
+[data-brand='base509'] .site-footer__tagline {
+  font-size: 12px; line-height: 18px; letter-spacing: 1.8px;
+}
+[data-brand='base509'] .site-footer__col-title { margin-bottom: 10px; }
+[data-brand='base509'] .site-footer__tagline {
+  margin-top: 16px;
+  margin-left: auto;
+  max-width: 13ch;   /* desktop: stacks to three lines, per the Figma footer */
+}
+[data-brand='base509'] .site-footer__col { gap: 10px; }
+[data-brand='base509'] .site-footer a { font-size: 14px; line-height: 22px; }
+/* Rule 3:61 sits 32px under the columns; the legal line 3:62 32px under that,
+   then the frame's 32px bottom padding. */
+[data-brand='base509'] .site-footer__legal {
+  margin-top: 32px; padding-block: 32px; font-size: 12px; line-height: 18px;
+  gap: 16px;
+  border-top-color: color-mix(in srgb, var(--color-parchment) 25%, transparent);
+}
+[data-brand='base509'] .site-footer__legal a { font-size: 12px; line-height: 18px; }
+
+/* ---- asset placeholders ------------------------------------------------ */
+/* A correctly-sized hole is required until Danny exports the raster from
+   Figma — never substitute a different screenshot. */
+[data-brand='base509'] .b509-slot {
+  display: flex; align-items: center; justify-content: center; text-align: center;
+  box-sizing: border-box; padding: 8px; flex: none; overflow: hidden;
+  font-family: var(--font-body); font-size: 11px; line-height: 1.45;
+  border: 2px dashed color-mix(in srgb, var(--color-ink) 30%, transparent);
+  background: color-mix(in srgb, var(--color-lake) 14%, transparent);
+  color: var(--color-ink);
+}
+[data-brand='base509'] .b509-slot code {
+  display: block; margin-top: 8px; font-size: 11px; opacity: 0.72;
+  word-break: break-word;
+}
+[data-brand='base509'] .b509-slot--on-dark {
+  border-color: color-mix(in srgb, var(--color-parchment) 40%, transparent);
+  background: color-mix(in srgb, var(--color-parchment) 7%, transparent);
+  color: var(--color-parchment);
+}
+/* 3:14 ships two drop shadows: 0/1/3 @30% and 0/4/8 spread 3 @15%. */
+[data-brand='base509'] .b509-slot--shadow {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3), 0 4px 8px 3px rgba(0, 0, 0, 0.15);
+}
+
+/* ============================ responsive =============================== */
+/* The frame is desktop-only (1440). Below the width where the 1200px content
+   row fits, stack the two-column rows and drop the frame-coordinate deco. */
+@media (max-width: 1384px) {
+  [data-brand='base509'] .b509-deco { display: none; }
+  [data-brand='base509'] .b509-hero__row { flex-direction: column; gap: 48px; }
+  [data-brand='base509'] .b509-hero__col { flex: 1 1 auto; max-width: 693px; }
+  [data-brand='base509'] .b509-hero__art { flex: 1 1 auto; width: 100%; }
+  [data-brand='base509'] .b509-build-row {
+    flex-direction: column; height: auto; gap: 56px; align-items: center;
+  }
+  [data-brand='base509'] .b509-build-row__media,
+  [data-brand='base509'] .b509-build-row__cards { flex: 1 1 auto; padding: 0; }
+  [data-brand='base509'] .b509-who-row { flex-direction: column; gap: 32px; }
+  [data-brand='base509'] .b509-who-row__text,
+  [data-brand='base509'] .b509-who-row__cta {
+    flex: 1 1 auto; padding: 0; justify-content: flex-start;
+  }
+}
+@media (max-width: 900px) {
+  [data-brand='base509'] #hero { padding: 64px 0; }
+  [data-brand='base509'] .b509-h1 { font-size: 44px; line-height: 50px; }
+  [data-brand='base509'] .b509-h2--build { font-size: 36px; line-height: 42px; }
+}
+@media (max-width: 560px) {
+  [data-brand='base509'] .b509-h1 { font-size: 34px; line-height: 40px; }
+  [data-brand='base509'] .b509-h2--build { font-size: 28px; line-height: 34px; }
+  [data-brand='base509'] .b509-h2--sm { font-size: 26px; line-height: 32px; }
+  [data-brand='base509'] .b509-product__name { font-size: 26px; line-height: 32px; }
+  [data-brand='base509'] .b509-hero__ctas .btn { width: 100%; }
+  [data-brand='base509'] .site-footer__grid > :first-child {
+    order: 0; margin-left: 0; text-align: left;
+  }
+  [data-brand='base509'] .site-footer__grid > :first-child p { margin-left: 0; }
+  /* Placeholders and the carousel must not force a horizontal scrollbar. */
+  [data-brand='base509'] .b509-slot { max-width: 100%; }
+  [data-brand='base509'] .carousel { width: 100%; }
+  [data-brand='base509'] .carousel__track {
+    padding-inline: 0; scroll-padding-inline: 0;
+    -webkit-mask-image: none; mask-image: none;
+  }
+  [data-brand='base509'] .carousel__card {
+    flex-basis: 100%; width: 100%; max-width: 100%; min-height: 0;
+  }
+  [data-brand='base509'] .carousel__card h3 { font-size: 26px; line-height: 32px; }
+  [data-brand='base509'] .carousel__card p { font-size: 16px; line-height: 26px; }
+}
+
+
+
+/* ---- real exports: intrinsic sizes, never upscaled ---------------------- */
+[data-brand='base509'] .b509-hero__phones {
+  display: block; width: 459px; height: auto; max-width: 100%;
+}
+/* The export already includes the device outline and its shadow — adding a
+   CSS radius + shadow on top produced a double edge. Keep it flat. */
+[data-brand='base509'] .b509-appshot {
+  display: block; width: 319px; height: auto; max-width: 100%;
+  border-radius: 0; box-shadow: none;
+}
+[data-brand='base509'] .b509-wordmark img { display: block; width: 300px; height: auto; }
+@media (max-width: 1100px) {
+  [data-brand='base509'] .b509-deco { display: none; }
+  [data-brand='base509'] .b509-hero__phones { width: 100%; max-width: 459px; }
+}
+
+/* ==========================================================================
+   MOBILE — Figma frame "base509.com / Home - mobile" (132:591, 390 wide)
+   and the nav overlay (191:554). Single 24px body gutter the whole way down.
+   ========================================================================== */
+[data-brand='base509'] { --b509-gutter: 24px; }
+
+/* hamburger is desktop-hidden by default */
+[data-brand='base509'] .b509-mobilenav { display: none; }
+
+@media (max-width: 900px) {
+  [data-brand='base509'] .site-header__nav,
+  [data-brand='base509'] .site-header__actions { display: none; }
+  [data-brand='base509'] .b509-mobilenav { display: block; margin-left: auto; }
+  [data-brand='base509'] .site-header__inner { height: 64px; gap: 12px; flex-wrap: nowrap; }
+
+  [data-brand='base509'] .b509-mobilenav__toggle {
+    width: 44px; height: 44px; display: inline-flex; align-items: center;
+    justify-content: center; background: none; border: 0; cursor: pointer;
+  }
+  [data-brand='base509'] .b509-mobilenav__toggle span {
+    display: block; width: 24px; height: 16px; position: relative;
+  }
+  [data-brand='base509'] .b509-mobilenav__toggle i {
+    position: absolute; left: 0; width: 24px; height: 2px; border-radius: 2px;
+    background: var(--color-ink); transition: transform 160ms ease, opacity 160ms ease;
+  }
+  [data-brand='base509'] .b509-mobilenav__toggle i:nth-child(1) { top: 0; }
+  [data-brand='base509'] .b509-mobilenav__toggle i:nth-child(2) { top: 7px; }
+  [data-brand='base509'] .b509-mobilenav__toggle i:nth-child(3) { top: 14px; }
+  [data-brand='base509'] .b509-mobilenav__toggle .is-open i:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+  [data-brand='base509'] .b509-mobilenav__toggle .is-open i:nth-child(2) { opacity: 0; }
+  [data-brand='base509'] .b509-mobilenav__toggle .is-open i:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+  /* overlay panel — full bleed, white, links centred (191:554) */
+  [data-brand='base509'] .b509-mobilenav__panel {
+    position: absolute; left: 0; right: 0; top: 100%;
+    background: #fff; padding: 40px var(--b509-gutter) 48px;
+    box-shadow: 0 18px 40px rgba(13, 43, 69, 0.18); z-index: 60;
+  }
+  [data-brand='base509'] .b509-mobilenav__panel nav {
+    display: flex; flex-direction: column; align-items: center; gap: 36px;
+  }
+  [data-brand='base509'] .b509-mobilenav__panel a {
+    font-family: var(--font-body); font-weight: 700; font-size: 17px;
+    color: var(--color-ink); text-align: center;
+  }
+  [data-brand='base509'] .b509-mobilenav__panel .btn { margin-top: 32px; width: 100%; }
+}
+
+@media (max-width: 700px) {
+  /* one gutter, everywhere */
+  [data-brand='base509'] .container { padding-left: var(--b509-gutter); padding-right: var(--b509-gutter); }
+  [data-brand='base509'] .section { padding: 48px 0; }
+
+  /* decoration is desktop-only composition — it does not scale down cleanly */
+  [data-brand='base509'] .b509-deco { display: none; }
+
+  /* hero: stacked, no phone art (the mobile frame omits it), full-width CTAs */
+  [data-brand='base509'] .b509-hero__row { display: block; }
+  [data-brand='base509'] .b509-hero__col { width: 100%; max-width: none; }
+  [data-brand='base509'] .b509-hero__art { display: none; }
+  [data-brand='base509'] .b509-h1 { font-size: 34px; line-height: 40px; }
+  [data-brand='base509'] .b509-hero__body { font-size: 16px; line-height: 26px; max-width: none; }
+  [data-brand='base509'] .b509-hero__ctas { display: flex; flex-direction: column; gap: 12px; }
+  [data-brand='base509'] .b509-hero__ctas .btn { width: 100%; }
+
+  /* what we build: single column, media above cards */
+  [data-brand='base509'] .b509-h2--build { font-size: 28px; line-height: 34px; }
+  [data-brand='base509'] .b509-product__name { font-size: 24px; line-height: 30px; }
+  [data-brand='base509'] .b509-product__desc { font-size: 16px; line-height: 26px; }
+  [data-brand='base509'] .b509-wordmark img { width: 220px; }
+  [data-brand='base509'] .b509-build-row { display: block; }
+  [data-brand='base509'] .b509-build-row__media {
+    display: flex; flex-direction: column; align-items: center; gap: 20px;
+  }
+  [data-brand='base509'] .b509-appshot { width: 100%; max-width: 320px; }
+  [data-brand='base509'] .b509-build-row__cards { margin-top: 32px; }
+
+  /* carousel: one card per view, edge to edge inside the gutter, no peek */
+  [data-brand='base509'] .carousel { width: 100%; max-width: none; }
+  [data-brand='base509'] .carousel__track {
+    padding-inline: 0; scroll-padding-inline: 0;
+    -webkit-mask-image: none; mask-image: none;
+  }
+  [data-brand='base509'] .carousel__card {
+    flex: 0 0 100%; width: 100%; max-width: 100%; min-height: 0;
+  }
+  [data-brand='base509'] .carousel__card h3 { font-size: 26px; line-height: 32px; }
+  [data-brand='base509'] .carousel__card p { font-size: 16px; line-height: 26px; }
+
+  /* who we are: stacked, full-width CTA */
+  [data-brand='base509'] .b509-who-row,
+  [data-brand='base509'] .b509-who__row { display: block; }
+  [data-brand='base509'] .b509-h2--sm { font-size: 26px; line-height: 32px; }
+  [data-brand='base509'] .b509-who__cta .btn,
+  [data-brand='base509'] .b509-who-row .btn { width: 100%; margin-top: 28px; }
+
+  /* footer: logo, then PRODUCTS | COMPANY side by side, LEGAL beneath */
+  [data-brand='base509'] .site-footer__grid {
+    grid-template-columns: 1fr 1fr; gap: 28px 24px; padding: 40px 0 28px;
+  }
+  [data-brand='base509'] .site-footer__grid > :first-child { grid-column: 1 / -1; }
+  [data-brand='base509'] .site-footer__grid > :nth-child(4) { grid-column: 1 / -1; }
+  [data-brand='base509'] .site-footer__legal {
+    flex-direction: column; align-items: flex-start; gap: 6px;
+  }
+}
+
+/* ---- hero art: stop clipping it ----------------------------------------
+   .b509-hero had overflow:hidden, which cut the background art at the
+   section box. overflow-x:clip on the brand root keeps the page from
+   gaining a horizontal scrollbar without creating a scroll container. */
+[data-brand='base509'] .b509-deco { overflow: visible; }
+[data-brand='base509'] .b509-deco--hero img {
+  left: calc(50% - 720px + 845px); right: auto; top: 68px;
+}
+
+/* ---- MOBILE FOOTER — exact structure from the Figma mobile frame -------
+   Footer: column, 48px 24px 32px, gap 32.  Columns block wraps into two
+   147px tracks with 32px/48px gaps: PRODUCTS and COMPANY stack in the
+   first track, LEGAL occupies the second. */
+@media (max-width: 700px) {
+  [data-brand='base509'] .site-footer__grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 147px));
+    column-gap: 48px;
+    row-gap: 32px;
+    padding: 48px var(--b509-gutter) 0;
+    align-content: start;
+    justify-content: start;
+  }
+  [data-brand='base509'] .site-footer__grid > :nth-child(1) { grid-column: 1 / -1; grid-row: 1; }
+  [data-brand='base509'] .site-footer__grid > :nth-child(2) { grid-column: 1; grid-row: 2; }
+  [data-brand='base509'] .site-footer__grid > :nth-child(3) { grid-column: 1; grid-row: 3; }
+  [data-brand='base509'] .site-footer__grid > :nth-child(4) { grid-column: 2; grid-row: 2 / span 2; }
+  /* nothing in the footer may exceed the 342px content box */
+  [data-brand='base509'] .site-footer__grid > * { min-width: 0; max-width: 100%; }
+  [data-brand='base509'] .site-footer__grid p { max-width: 100%; }
+  [data-brand='base509'] .site-footer__col-title { margin-bottom: 10px; }
+  [data-brand='base509'] .site-footer__col { gap: 10px; }
+  [data-brand='base509'] .site-footer__legal { padding: 32px var(--b509-gutter); gap: 8px; }
+}
+
+/* Programmatic smooth scroll needs proximity snap — mandatory snap grabs the
+   scroll mid-animation, which is the jump/jiggle on dot clicks. */
+[data-brand='base509'] .carousel__track {
+  scroll-snap-type: x proximity;
+  scroll-behavior: smooth;
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-brand='base509'] .carousel__track { scroll-behavior: auto; }
+}
+
+/* ---- footer wordmark: kill the built-in indent --------------------------
+   The <img> is authored 150×34 (ratio 4.41) but base509-logo-reverse.svg has
+   a 311×87 viewBox (ratio 3.575). The SVG letterboxes inside the taller box
+   and centres, leaving ~14px of transparent space each side — which reads as
+   an indent against the paragraph below. height:auto lets the box take the
+   SVG's own ratio so the artwork starts flush at the content edge. */
+[data-brand='base509'] .site-footer__grid > :first-child img {
+  display: block;
+  /* block-level + fixed width ignores the parent's text-align:right,
+     so push it right explicitly to sit flush with the container edge. */
+  margin-left: auto;
+  width: 150px;
+  height: auto;
+  /* height:auto alone inherits next/image's 150x34 attribute ratio (4.41),
+     which keeps the letterbox. Pin the SVG's real viewBox ratio instead. */
+  aspect-ratio: 311 / 87;
+}
+@media (max-width: 700px) {
+  /* Figma mobile: 130px wide, logo left-aligned, tagline on a single line */
+  [data-brand='base509'] .site-footer__grid > :first-child img { width: 130px; margin-left: 0; }
+  [data-brand='base509'] .site-footer__tagline { margin-left: 0; max-width: none; }
+}
+
+/* ---- pagination dots: animate the swap ----------------------------------
+   Outgoing dot shrinks 16→8 and fades back to grey; incoming grows 8→16 and
+   takes the orange. Width/background/opacity all transition together. */
+[data-brand='base509'] .carousel__dot {
+  transform: scale(1);
+  transition: width 300ms cubic-bezier(0.4, 0, 0.2, 1),
+              background-color 300ms ease,
+              opacity 300ms ease,
+              transform 300ms ease;
+  will-change: width, transform;
+}
+[data-brand='base509'] .carousel__dot.is-active { transform: scale(1.12); }
+@media (prefers-reduced-motion: reduce) {
+  [data-brand='base509'] .carousel__dot { transition: none; }
+}
+
+/* ---- mobile nav overlay: anchor to the header, dim the page -------------
+   The panel was position:absolute inside an unpositioned parent, so top:100%
+   resolved against a tall ancestor and dropped it far down the page. Fixed
+   pins it under the header regardless of scroll position. */
+@media (max-width: 900px) {
+  [data-brand='base509'] .b509-mobilenav__backdrop {
+    position: fixed; inset: 0; z-index: 50;
+    background: rgba(13, 43, 69, 0.5);
+  }
+  [data-brand='base509'] .b509-mobilenav__panel {
+    position: fixed;
+    top: 64px;
+    left: 0; right: 0; bottom: auto;
+    z-index: 60;
+    max-height: calc(100dvh - 64px);
+    overflow-y: auto;
+  }
+  [data-brand='base509'] .b509-mobilenav__toggle { position: relative; z-index: 70; }
+  [data-brand='base509'] .site-header { z-index: 70; }
+}
+
+/* ---- sticky header on mobile too ---------------------------------------
+   The shared skeleton drops the header to position:static under 700px.
+   Base509 wants it pinned at every width; the fixed nav panel is anchored
+   to the 64px header height, so this keeps the two in sync while scrolling. */
+@media (max-width: 700px) {
+  [data-brand='base509'] .site-header { position: sticky; top: 0; }
+}
+
+/* ---- scroll-padding for the sticky header ------------------------------
+   Anchor jumps must clear the pinned header. :has() scopes it to Base509
+   pages so PetAppro's scroll behaviour is untouched. */
+html:has([data-brand='base509']) { scroll-padding-top: 128px; }
+@media (max-width: 700px) {
+  html:has([data-brand='base509']) { scroll-padding-top: 72px; }
+}
+
+/* ---- back-to-top: mobile only ------------------------------------------
+   The SVG has its own drop shadow baked in (filter0_dd) — never add a CSS
+   box-shadow here or it stacks, the way the phone screenshot did. */
+[data-brand='base509'] .b509-scrolltop { display: none; }
+@media (max-width: 700px) {
+  [data-brand='base509'] .b509-scrolltop.is-visible {
+    display: block;
+    position: fixed;
+    right: 12px;
+    bottom: 12px;
+    z-index: 45;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+    line-height: 0;
+    animation: b509-scrolltop-in 180ms ease-out;
+  }
+  [data-brand='base509'] .b509-scrolltop img { display: block; width: 63px; height: 59px; }
+}
+@keyframes b509-scrolltop-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-brand='base509'] .b509-scrolltop.is-visible { animation: none; }
+}
+
+/* ---- mobile: no background decoration ----------------------------------
+   Too busy at phone width (Danny, 2026-08-13). Covers every deco layer
+   regardless of which section it belongs to. */
+@media (max-width: 700px) {
+  [data-brand='base509'] .b509-deco,
+  [data-brand='base509'] .b509-deco--hero,
+  [data-brand='base509'] .b509-deco--build,
+  [data-brand='base509'] .b509-hero-deco,
+  [data-brand='base509'] .b509-build-deco,
+  [data-brand='base509'] .b509-hero__art { display: none !important; }
+}
+
+/* ==========================================================================
+   POLICY PAGES — Privacy (117:1841) · Terms of Use (120:2045) ·
+   Additional Policies (211:522). These pages were still rendering on the
+   shared .prose styles; this puts them on the Base509 scale.
+   ========================================================================== */
+[data-brand='base509'] .prose {
+  /* The brand layer widens .container to 1440 so the home page's deco grid
+     lines up; policy pages need the frame's 1200 column back (content sits
+     at x=120 on a 1440 canvas), so constrain the article itself. */
+  max-width: 1200px;
+  width: 100%;
+  margin-inline: auto;
+  display: flex;
+  flex-direction: column;
+}
+/* Figma order is: effective date (eyebrow) → motif → H1 → body.
+   The component emits H1 first, so reorder here rather than fork the
+   shared PolicyArticle, which PetAppro also renders. */
+[data-brand='base509'] .prose .policy-meta { order: -2; }
+[data-brand='base509'] .prose h1 { order: -1; }
+
+[data-brand='base509'] .prose .policy-meta {
+  font-family: var(--font-body);
+  font-size: 12px; line-height: 18px; letter-spacing: 1.8px;
+  font-weight: 600; text-transform: uppercase;
+  color: var(--text-accent);
+  gap: 12px; margin: 0 0 12px;
+  position: relative; padding-bottom: 25px;
+}
+/* the three-dash motif, drawn rather than added to the markup */
+[data-brand='base509'] .prose .policy-meta::after {
+  content: ''; position: absolute; left: 0; bottom: 0;
+  width: 118px; height: 5px;
+  background-image: linear-gradient(to right, var(--color-lake) 0 34px, transparent 34px 42px,
+    var(--color-lake) 42px 76px, transparent 76px 84px, var(--color-lake) 84px 118px);
+}
+
+[data-brand='base509'] .prose h1 {
+  font-size: 48px; line-height: 54px; letter-spacing: 0;
+  margin: 0 0 20px; color: var(--text-primary);
+}
+[data-brand='base509'] .prose h2 {
+  font-size: 24px; line-height: 30px; letter-spacing: 0;
+  margin: 34px 0 10px; color: var(--text-primary);
+}
+[data-brand='base509'] .prose h3 {
+  font-size: 18px; line-height: 24px; letter-spacing: 0;
+  margin: 26px 0 8px; color: var(--text-primary);
+}
+[data-brand='base509'] .prose p,
+[data-brand='base509'] .prose li {
+  font-size: 16px; line-height: 26px; color: var(--text-secondary);
+}
+[data-brand='base509'] .prose ul { padding-left: 22px; margin: 8px 0; }
+[data-brand='base509'] .prose li { margin: 2px 0; }
+[data-brand='base509'] .prose strong { color: var(--text-primary); font-weight: 600; }
+
+@media (max-width: 700px) {
+  [data-brand='base509'] .prose h1 { font-size: 32px; line-height: 38px; }
+  [data-brand='base509'] .prose h2 { font-size: 20px; line-height: 26px; }
+}
