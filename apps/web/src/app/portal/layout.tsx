@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { PortalPlanProvider } from '@/components/PortalPlanProvider';
 import { PortalShell } from '@/components/PortalShell';
 
 export const metadata: Metadata = {
@@ -17,7 +18,7 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
         href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"
       />
       <a href="#main" className="skip-link">Skip to content</a>
-      <PortalShell>{children}</PortalShell>
+      <PortalPlanProvider><PortalShell>{children}</PortalShell></PortalPlanProvider>
     </div>
   );
 }

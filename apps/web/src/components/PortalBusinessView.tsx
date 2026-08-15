@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
+import { usePortalPlan } from '@/components/PortalPlanProvider';
 import { PortalModal, PortalPageHeader, PortalPanel } from '@/components/PortalShell';
 import { PortalWalkingRates } from '@/components/PortalWalkingRates';
 import { INITIAL_SERVICE_ZONES, PortalZoneManager } from '@/components/PortalZoneManager';
@@ -63,13 +64,14 @@ export function PortalBusinessView() {
   ]);
   const [newStaffName, setNewStaffName] = useState('');
   const [newStaffEmail, setNewStaffEmail] = useState('');
-  const seatLimit = 5;
-  const subscriptionPlan = 'crew' as const;
+  const { tier, entitlements } = usePortalPlan();
+  const seatLimit = entitlements.seatLimit;
+  const subscriptionPlan = entitlements.walkerPlan;
   const initials = initialsFor(businessName);
 
   const updateService = (index: number, patch: Partial<Service>) => setServices((items) => items.map((item, itemIndex) => itemIndex === index ? { ...item, ...patch } : item));
   const addStaff = () => {
-    if (staff.length >= seatLimit) { setNotice('No seats remain on Crew. Upgrade to add another staff member.'); return; }
+    if (staff.length >= seatLimit) { setNotice(`No seats remain on ${tier.name}. Upgrade to add another staff member.`); return; }
     if (!newStaffName || !newStaffEmail) { setNotice('Enter a staff name and email first.'); return; }
     setStaff((items) => [...items, { id: Date.now(), name: newStaffName, email: newStaffEmail, role: 'Staff' }]);
     setNewStaffName(''); setNewStaffEmail(''); setNotice('Staff invitation sent.');
@@ -155,7 +157,7 @@ export function PortalBusinessView() {
           <p className="portal-role-note type-body"><strong>Owner</strong> has ownership and billing control. <strong>Admin</strong> manages configuration and operations. <strong>Staff</strong> handles bookings and clients. Custom permission sets arrive after launch.</p>
           <div className="portal-team-list">{staff.map((person) => <article key={person.id}><div><strong className="type-body-bold">{person.name}</strong><span className="type-caption">{person.email}</span></div><select className="portal-role-select" value={person.role} disabled={person.role === 'Owner'} aria-label={`${person.name} role`} onChange={(event) => setStaff((items) => items.map((item) => item.id === person.id ? { ...item, role: event.target.value as Role } : item))}>{person.role === 'Owner' && <option>Owner</option>}<option>Admin</option><option>Staff</option></select><div className="portal-permissions">{(['Bookings', 'Billing', 'Clients'] as Permission[]).map((permission) => <label className="portal-checkbox" key={permission}><input type="checkbox" checked={ROLE_PERMISSIONS[person.role].includes(permission)} readOnly /><span aria-hidden="true" />{permission}</label>)}</div>{person.role !== 'Owner' && <button className="portal-remove-button type-body-bold" type="button" onClick={() => setStaff((items) => items.filter((item) => item.id !== person.id))}>Remove Staff Member</button>}</article>)}</div>
           <div className="portal-add-staff"><input placeholder="Staff name" value={newStaffName} onChange={(event) => setNewStaffName(event.target.value)} /><input type="email" placeholder="Email address" value={newStaffEmail} onChange={(event) => setNewStaffEmail(event.target.value)} /><button className="btn btn--cta type-button" type="button" onClick={addStaff}>Add Staff</button></div>
-          {staff.length >= seatLimit && <div className="portal-seat-warning"><p className="type-body">You’ve used every Crew seat. Upgrade to Team before adding another person.</p><Link className="btn btn--cta type-button" href="/portal/billing">Upgrade Plan</Link></div>}
+          {staff.length >= seatLimit && <div className="portal-seat-warning"><p className="type-body">You’ve used every {tier.name} seat. Upgrade before adding another person.</p><Link className="btn btn--cta type-button" href="/portal/billing">Upgrade Plan</Link></div>}
         </PortalPanel>
         <div className="portal-tab-save"><button className="btn btn--cta type-button" type="button" onClick={() => setNotice('Team saved.')}>Save Team</button></div>
       </div>}

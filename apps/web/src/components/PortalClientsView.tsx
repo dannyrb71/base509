@@ -43,31 +43,52 @@ const EXTRA_STATUS_CLIENTS: Client[] = [
   { client: 'Marley Quinn', pets: 'Pickle', petNames: ['Pickle'], service: 'Boarding', date: 'Aug 22', status: 'Meet & Greet', group: 'meet', email: 'marley@example.com', phone: '(415) 555-0193', address: '740 Church Street, San Francisco', emergency: 'Jesse Quinn · (415) 555-0129', notes: 'Meet & Greet scheduled for August 22.' },
 ];
 
-const CLIENTS: readonly Client[] = [...BASE_CLIENTS, ...GENERATED_CLIENTS, ...EXTRA_STATUS_CLIENTS].sort((a, b) => a.client.localeCompare(b.client));
+const INITIAL_CLIENTS: Client[] = [...BASE_CLIENTS, ...GENERATED_CLIENTS, ...EXTRA_STATUS_CLIENTS].sort((a, b) => a.client.localeCompare(b.client));
 
 type ClientTab = 'overview' | 'pets' | 'history';
 
 const FILTERS = {
-  active: ['Active Clients', '42', 'Across 58 pet profiles'],
-  pending: ['Pending Invites', '4', 'Invitations awaiting acceptance'],
-  meet: ['Meet & Greets', '3', 'Required before first service'],
+  active: ['Active Clients', 'Across 58 pet profiles'],
+  pending: ['Pending Invites', 'Invitations awaiting acceptance'],
+  meet: ['Meet & Greets', 'Required before first service'],
 } as const;
 
 export function PortalClientsView() {
+  const [clients, setClients] = useState<Client[]>(INITIAL_CLIENTS);
   const [filter, setFilter] = useState<keyof typeof FILTERS>('active');
   const [query, setQuery] = useState('');
   const [notice, setNotice] = useState('');
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [clientTab, setClientTab] = useState<ClientTab>('overview');
-  const rows = useMemo(() => CLIENTS.filter((client) => {
+  const [addOpen, setAddOpen] = useState(false);
+  const [draft, setDraft] = useState({ name: '', email: '', phone: '', pet: '' });
+  const counts = useMemo(() => ({
+    active: clients.filter((client) => client.group === 'active').length,
+    pending: clients.filter((client) => client.group === 'pending').length,
+    meet: clients.filter((client) => client.group === 'meet').length,
+  }), [clients]);
+  const rows = useMemo(() => clients.filter((client) => {
     const matchesFilter = client.group === filter;
     const needle = query.trim().toLowerCase();
     return matchesFilter && (!needle || `${client.client} ${client.pets}`.toLowerCase().includes(needle));
-  }), [filter, query]);
+  }), [clients, filter, query]);
+
+  const addClient = () => {
+    const name = draft.name.trim();
+    const email = draft.email.trim();
+    if (!name || !email) { setNotice('Add a client name and email to send the invitation.'); return; }
+    const pet = draft.pet.trim() || 'Not yet provided';
+    const invited: Client = { client: name, pets: pet, petNames: draft.pet.trim() ? [draft.pet.trim()] : [], service: '—', date: '—', status: 'Invite Pending', group: 'pending', email, phone: draft.phone.trim() || 'Not yet provided', address: 'Not yet provided', emergency: 'Not yet provided', notes: 'Invitation sent today.' };
+    setClients((items) => [...items, invited].sort((a, b) => a.client.localeCompare(b.client)));
+    setDraft({ name: '', email: '', phone: '', pet: '' });
+    setAddOpen(false);
+    setFilter('pending');
+    setNotice(`Invitation sent to ${name}.`);
+  };
 
   const downloadCsv = () => {
     const header = ['Client', 'Email', 'Phone', 'Pets', 'Last Service', 'Last Booking', 'Status'];
-    const lines = CLIENTS.map((client) => [client.client, client.email, client.phone, client.pets, client.service, client.date, client.status]);
+    const lines = clients.map((client) => [client.client, client.email, client.phone, client.pets, client.service, client.date, client.status]);
     const csv = [header, ...lines].map((line) => line.map((cell) => `"${cell.replaceAll('"', '""')}"`).join(',')).join('\n');
     const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
     const anchor = document.createElement('a');
@@ -86,11 +107,11 @@ export function PortalClientsView() {
 
   return (
     <div className="portal-page">
-      <PortalPageHeader eyebrow="Clients" title="Clients & Roster" body="Manage households, pets, invitations, meet-and-greets, and the records your team needs." action={<button className="btn btn--cta type-button" type="button" onClick={() => setNotice('Add Client opened.')}>Add Client</button>} />
+      <PortalPageHeader eyebrow="Clients" title="Clients & Roster" body="Manage households, pets, invitations, meet-and-greets, and the records your team needs." action={<button className="btn btn--cta type-button" type="button" onClick={() => { setNotice(''); setAddOpen(true); }}>Add Client</button>} />
       <div className="portal-stat-grid portal-stat-grid--three">
         {(Object.keys(FILTERS) as (keyof typeof FILTERS)[]).map((key) => {
-          const [label, value, detail] = FILTERS[key];
-          return <PortalStatCard key={key} label={label} value={value} detail={detail} tone={key === 'active' ? 'accent' : 'default'} active={filter === key} onClick={() => setFilter(key)} />;
+          const [label, detail] = FILTERS[key];
+          return <PortalStatCard key={key} label={label} value={String(counts[key])} detail={detail} tone={key === 'active' ? 'accent' : 'default'} active={filter === key} onClick={() => setFilter(key)} />;
         })}
       </div>
       <PortalPanel title="Client Roster" eyebrow={FILTERS[filter][0]} action={<button className="btn btn--cta type-button portal-download-button" type="button" onClick={downloadCsv}><span aria-hidden="true">↓</span> Download CSV</button>}>
@@ -118,7 +139,19 @@ export function PortalClientsView() {
         </>}
       </PortalModal>
 
-      {notice && <p className="portal-inline-notice type-body" role="status">{notice}</p>}
+      <PortalModal open={addOpen} onClose={() => setAddOpen(false)} eyebrow="Clients" title="Add Client">
+        <p className="type-body">Send a client an invitation to connect with your business. They complete their household and pet details when they accept.</p>
+        <div className="portal-field-grid">
+          <label className="type-body"><span>Client Name</span><input value={draft.name} onChange={(event) => setDraft((current) => ({ ...current, name: event.target.value }))} /></label>
+          <label className="type-body"><span>Email</span><input type="email" value={draft.email} onChange={(event) => setDraft((current) => ({ ...current, email: event.target.value }))} /></label>
+          <label className="type-body"><span>Phone <small>(Optional)</small></span><input type="tel" value={draft.phone} onChange={(event) => setDraft((current) => ({ ...current, phone: event.target.value }))} /></label>
+          <label className="type-body"><span>Pet Name <small>(Optional)</small></span><input value={draft.pet} onChange={(event) => setDraft((current) => ({ ...current, pet: event.target.value }))} /></label>
+        </div>
+        {notice && addOpen && <p className="portal-inline-notice type-caption" role="status">{notice}</p>}
+        <div className="portal-modal-actions"><button className="btn btn--secondary type-button" type="button" onClick={() => setAddOpen(false)}>Cancel</button><button className="btn btn--cta type-button" type="button" onClick={addClient}>Send Invitation</button></div>
+      </PortalModal>
+
+      {notice && !addOpen && <p className="portal-inline-notice type-body" role="status">{notice}</p>}
     </div>
   );
 }

@@ -28,12 +28,20 @@ export function PortalAccountView() {
   const [closeConfirmation, setCloseConfirmation] = useState('');
   const [notice, setNotice] = useState('');
   const [notifications, setNotifications] = useState({ bookings: true, payments: true, billing: true });
+  const [profile, setProfile] = useState({ name: 'Danny Baker', email: 'danny@example.com', timeZone: 'America/Los_Angeles' });
 
   return (
     <div className="portal-page">
       <PortalPageHeader eyebrow="Account" title="Account & Security" body="Manage personal details, multi-factor authentication, passkeys, active sessions, and provider-portal notifications." action={<button className="btn btn--cta type-button" type="button" onClick={() => setNotice('Account preferences saved.')}>Save Changes</button>} />
       <div className="portal-settings-grid">
-        <PortalPanel title="Personal Details" eyebrow="Profile"><dl className="portal-definition-list"><div><dt>Name</dt><dd>Danny Baker</dd></div><div><dt>Email</dt><dd>danny@example.com</dd></div><div><dt>Role</dt><dd>Owner</dd></div><div><dt>Time Zone</dt><dd>America/Los_Angeles</dd></div></dl></PortalPanel>
+        <PortalPanel title="Personal Details" eyebrow="Profile">
+          <div className="portal-field-grid">
+            <label className="type-body"><span>Name</span><input value={profile.name} onChange={(event) => setProfile((current) => ({ ...current, name: event.target.value }))} /></label>
+            <label className="type-body"><span>Email</span><input type="email" value={profile.email} onChange={(event) => setProfile((current) => ({ ...current, email: event.target.value }))} /></label>
+            <label className="type-body"><span>Role</span><input value="Owner" disabled /></label>
+            <label className="type-body"><span>Time Zone</span><select value={profile.timeZone} onChange={(event) => setProfile((current) => ({ ...current, timeZone: event.target.value }))}><option>America/Los_Angeles</option><option>America/Denver</option><option>America/Chicago</option><option>America/New_York</option></select></label>
+          </div>
+        </PortalPanel>
         <PortalPanel title="Multi-Factor Authentication" eyebrow="Required for Owner & Admin"><div className="portal-security-status"><span className={`portal-status${mfaEnabled ? ' portal-status--paid' : ' portal-status--pending'}`}>{mfaEnabled ? 'Enabled' : 'Setup Required'}</span><p className="type-body">Six-digit codes from your authenticator app protect personal-information changes, exports, billing, payouts, refunds, and team permission changes.</p></div><button className="btn btn--cta type-button" type="button" onClick={() => setMfaOpen(true)}>{mfaEnabled ? 'Manage MFA' : 'Set Up MFA'}</button></PortalPanel>
       </div>
       <div className="portal-settings-grid">
@@ -53,7 +61,7 @@ export function PortalAccountView() {
       </PortalPanel>
 
       <PortalModal open={mfaOpen} onClose={() => setMfaOpen(false)} eyebrow="Account Security" title={mfaEnabled ? 'Manage MFA' : 'Set Up Authenticator App'}>
-        <div className="portal-mfa-setup"><AuthenticatorQrPreview /><div><h3 className="type-title">Scan With Your Authenticator</h3><p className="type-body">PetAppro generates a unique enrollment QR code for your account when setup begins. Scan it with your authenticator app, then enter the six-digit code it shows.</p><p className="type-caption">You’ll also receive one-time recovery codes — store them somewhere safe.</p><label className="type-body-bold">Verification Code<input inputMode="numeric" autoComplete="one-time-code" placeholder="000000" maxLength={6} /></label></div></div>
+        <div className="portal-mfa-setup"><AuthenticatorQrPreview /><div><h3 className="type-title">Scan With Your Authenticator</h3><p className="type-body">PetAppro generates a unique enrollment QR code for your account when setup begins. Scan it with your authenticator app, then enter the six-digit code it shows.</p><p className="type-caption">Works with any authenticator app — Google Authenticator, 1Password, Microsoft Authenticator, or Authy.</p><p className="type-caption">You’ll also receive one-time recovery codes — store them somewhere safe.</p><label className="type-body-bold">Verification Code<input inputMode="numeric" autoComplete="one-time-code" placeholder="000000" maxLength={6} /></label></div></div>
         <div className="portal-modal-actions"><button className="btn btn--secondary type-button" type="button" onClick={() => setMfaOpen(false)}>Cancel</button><button className="btn btn--cta type-button" type="button" onClick={() => { setMfaEnabled(true); setMfaOpen(false); setNotice('MFA enabled.'); }}>{mfaEnabled ? 'Regenerate Recovery Codes' : 'Verify & Enable MFA'}</button></div>
       </PortalModal>
 

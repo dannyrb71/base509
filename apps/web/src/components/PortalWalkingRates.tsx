@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import { useState } from 'react';
+import { usePortalPlan } from '@/components/PortalPlanProvider';
 import { PortalInfo } from '@/components/PortalShell';
 import { PortalWalkWindows, WALKERS } from '@/components/PortalWalkWindows';
 import type { ServiceZone } from '@/components/PortalZoneManager';
@@ -52,9 +53,11 @@ export function PortalWalkingRates({ dogsPerWalker, onDogsPerWalkerChange, walks
   const [pricingInfoOpen, setPricingInfoOpen] = useState(false);
   const [walkerCapacities, setWalkerCapacities] = useState<Record<string, string>>({ 'Morgan Lee': '6', 'Casey Reed': '4' });
 
+  const { entitlements } = usePortalPlan();
   const hasTeam = subscriptionPlan !== 'solo';
   const offersBoth = offering === 'Both';
   const offersGroup = offering !== 'Individual';
+  const visiblePreferences = PREFERENCES.filter(([key]) => key !== 'gps' || entitlements.gpsTracking);
   const visibleRates = rates.filter((rate) => offersBoth || rate.type === offering);
   const hiddenRateCount = rates.length - visibleRates.length;
   const restoreNotice = offering === 'Individual'
@@ -101,7 +104,7 @@ export function PortalWalkingRates({ dogsPerWalker, onDogsPerWalkerChange, walks
           </div>
 
           <div className="portal-option-list">
-            {PREFERENCES.map(([key, label]) => <button className={`portal-chip${preferences[key] ? ' is-active' : ''}`} type="button" aria-pressed={preferences[key]} key={key} onClick={() => setPreferences((current) => ({ ...current, [key]: !current[key] }))}>{preferences[key] ? '✓ ' : ''}{label}{key === 'gps' && <small className="portal-status">Crew+</small>}</button>)}
+            {visiblePreferences.map(([key, label]) => <button className={`portal-chip${preferences[key] ? ' is-active' : ''}`} type="button" aria-pressed={preferences[key]} key={key} onClick={() => setPreferences((current) => ({ ...current, [key]: !current[key] }))}>{preferences[key] ? '✓ ' : ''}{label}{key === 'gps' && <small className="portal-status">Crew+</small>}</button>)}
           </div>
         </div>
       </section>
