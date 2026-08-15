@@ -353,3 +353,7 @@ What's verified: `npm run build` green (54 pages); 1440 × 900 structure, rows, 
 What's next: Danny's calls on the flagged details (Max Walks input vs chip, new microcopy, truncated Zone Manager instruction) plus the carried-over Walk Windows IA and per-service-zones questions.
 
 Cumulative FILES TOUCHED today (both sessions): `apps/web/src/components/PortalShell.tsx` · `apps/web/src/components/PortalBusinessView.tsx` · `apps/web/src/components/PortalWalkingRates.tsx` · `apps/web/src/components/PortalWalkWindows.tsx` · `apps/web/src/styles/brand-petappro.css` · `apps/web/src/app/petappro/pricing/page.tsx` · `docs/BUILD-LOG-overnight.md`
+
+## Commit Record — 2026-08-15
+
+Portal concepts committed at Danny's direction as `cda4b78` (apps/web + this build log + the two portal design mocks; 181 files). The rest of the shared worktree remains uncommitted for its owners. Not pushed.
