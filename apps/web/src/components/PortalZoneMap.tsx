@@ -15,6 +15,8 @@ function brandColors() {
   return {
     accent: styles?.getPropertyValue('--pa-brand-accent').trim() || '#4ca154',
     muted: styles?.getPropertyValue('--pa-brandy-800').trim() || '#16283a',
+    danger: styles?.getPropertyValue('--pa-coco-600').trim() || '#D95137',
+    surface: styles?.getPropertyValue('--surface-card').trim() || '#ffffff',
   };
 }
 
@@ -31,6 +33,7 @@ export function PortalZoneMap({ zones, selectedZoneId, drawing, anchor, onBounda
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<google.maps.Map | null>(null);
   const markerRef = useRef<google.maps.Marker | null>(null);
+  const checkMarkerRef = useRef<google.maps.Marker | null>(null);
   const shapesRef = useRef<Array<google.maps.Circle | google.maps.Polygon>>([]);
   const drawRef = useRef<TerraDraw | null>(null);
   const sessionTokenRef = useRef<google.maps.places.AutocompleteSessionToken | null>(null);
@@ -168,7 +171,7 @@ export function PortalZoneMap({ zones, selectedZoneId, drawing, anchor, onBounda
       const [{ Geocoder }, geometry] = await Promise.all([importLibrary('geocoding'), importLibrary('geometry')]);
       const { results } = await new Geocoder().geocode({ address });
       const location = results[0]?.geometry.location;
-      if (!location) { setCheckResult('That address couldn’t be found.'); return; }
+      if (!location) { setCheckResult('That address couldn’t be found.'); checkMarkerRef.current?.setMap(null); return; }
       const inside = zones.filter((zone) => {
         if (zone.mode === 'custom' && zone.boundary && zone.boundary.length > 2) {
           const polygon = new google.maps.Polygon({ paths: zone.boundary.map(([lng, lat]) => ({ lat, lng })) });
@@ -177,6 +180,15 @@ export function PortalZoneMap({ zones, selectedZoneId, drawing, anchor, onBounda
         const center = zone.center ?? anchor;
         return geometry.spherical.computeDistanceBetween(location, new google.maps.LatLng(center)) <= zone.radius * MILES_TO_METERS;
       }).map((zone) => zone.name);
+      const colors = brandColors();
+      checkMarkerRef.current?.setMap(null);
+      checkMarkerRef.current = new google.maps.Marker({
+        map: mapRef.current,
+        position: location,
+        title: results[0].formatted_address,
+        icon: { path: google.maps.SymbolPath.CIRCLE, scale: 9, fillColor: inside.length ? colors.accent : colors.danger, fillOpacity: 1, strokeColor: colors.surface, strokeWeight: 2 },
+      });
+      mapRef.current?.panTo(location);
       setCheckResult(inside.length ? `${results[0].formatted_address} is inside: ${inside.join(', ')}.` : `${results[0].formatted_address} is outside your service area.`);
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
@@ -214,6 +226,7 @@ export function PortalZoneMap({ zones, selectedZoneId, drawing, anchor, onBounda
         <button className="btn btn--secondary type-button" type="button" onClick={checkAddress}>Check Coverage</button>
       </div>
       {checkResult && <p className="type-caption portal-zone-check__result" role="status">{checkResult}</p>}
+      <p className="type-caption portal-zone-check__result">The red map pin is your business address. Coverage checks drop a green dot when the address is inside your service area, or a red dot when it’s outside.</p>
     </div>
   );
 }

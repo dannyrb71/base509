@@ -304,6 +304,13 @@ The portal shares PetAppro tokens, `.type-*` typography, button styles, icons, p
 - Business-address autocomplete still blocked: Google reports "Places API (New) has not been used in project 639258435940 before or it is disabled" — the classic Places API and Places API (New) are separate products; the New one still needs enabling (direct link surfaced in the error, recorded for Danny). Everything else on the map stack is now verified working.
 - FILES TOUCHED (this session): `apps/web/src/components/PortalZoneMap.tsx` · `apps/web/src/styles/brand-petappro.css` · `docs/BUILD-LOG-overnight.md`
 
+### Coverage Pin + Full Map-Stack Verification (2026-08-15, same session — all APIs live)
+
+- Check Coverage now drops a pin: a token-colored dot marker at the geocoded address (Brand Accent green when inside the service area, Coco danger red when outside), the map pans to it, and each new check replaces the previous pin. Verified live both ways: green dot at 2500 Mission St inside the Mission polygon; red dot at the Ferry Building with the outside message.
+- Danny enabled Places API (New) (the classic/New split was the culprit) — the business-address autocomplete is now fully live: typing "3800 24th St San Francisco" produced real suggestions, selecting one closed the list, ended the session token, filled the field with the formatted address, and re-anchored the business marker and radius zones ("Anchored to 3800 24th St, San Francisco, CA 94114, USA").
+- The entire approved map stack is now verified working end to end: base map, Terra Draw polygon drawing to GeoJSON, radius circles, Places (New) session-token autocomplete, Geocoding + geometry containment with the result pin, and the GeoJSON FeatureCollection save stub. Remaining production items: Supabase/PostGIS persistence, Vercel env var, AdvancedMarkerElement migration (low priority).
+- FILES TOUCHED (this session): `apps/web/src/components/PortalZoneMap.tsx` · `docs/BUILD-LOG-overnight.md`
+
 ## Open Questions for Danny
 
 - **Base509 admin dashboard (Danny, 2026-08-15).** Managing discount codes (promos, courtesy credits, free tester access) needs an internal Base509 dashboard — Danny explicitly wants his own management surface for PetAppro. Logged as a roadmap item for PM; the portal side ships with sample codes only.
