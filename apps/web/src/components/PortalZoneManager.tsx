@@ -3,6 +3,9 @@
 import { useEffect, useState, type Dispatch, type SetStateAction } from 'react';
 import { PortalModal } from '@/components/PortalShell';
 import { PortalZoneMap } from '@/components/PortalZoneMap';
+import { buildServiceArea, saveServiceArea } from '@/lib/service-area';
+
+const BUSINESS_ANCHOR = { lat: 37.7585, lng: -122.4233 };
 
 export type ZoneMode = 'radius' | 'custom';
 export type ServiceZone = { id: number; name: string; mode: ZoneMode; radius: number; center?: { lat: number; lng: number }; boundary?: [number, number][] };
@@ -22,6 +25,8 @@ export function PortalZoneManager({ open, onClose, zones, setZones }: {
   const [selectedZoneId, setSelectedZoneId] = useState(zones[0]?.id ?? 0);
   const [zoneName, setZoneName] = useState('');
   const [drawing, setDrawing] = useState(false);
+  const [anchor, setAnchor] = useState(BUSINESS_ANCHOR);
+  const [anchorLabel, setAnchorLabel] = useState('');
   const selectedZone = zones.find((zone) => zone.id === selectedZoneId) ?? zones[0];
 
   useEffect(() => {
@@ -51,9 +56,9 @@ export function PortalZoneManager({ open, onClose, zones, setZones }: {
           <div className="portal-inline-form portal-zone-add"><label><span className="type-label">New Zone Name</span><input value={zoneName} placeholder="e.g. Bernal Heights" onChange={(event) => setZoneName(event.target.value)} /></label><button className="btn btn--secondary type-button" type="button" onClick={addZone}>Add Zone</button></div>
           {selectedZone && <><div className="portal-segmented" role="group" aria-label="Zone boundary type"><button className={selectedZone.mode === 'radius' ? 'is-active' : undefined} type="button" aria-pressed={selectedZone.mode === 'radius'} onClick={() => { updateSelectedZone({ mode: 'radius' }); setDrawing(false); }}>Radius</button><button className={selectedZone.mode === 'custom' ? 'is-active' : undefined} type="button" aria-pressed={selectedZone.mode === 'custom'} onClick={() => updateSelectedZone({ mode: 'custom' })}>Custom Boundary</button></div>{selectedZone.mode === 'radius' ? <label><span className="type-label">Radius · {selectedZone.radius} miles</span><input type="range" min="1" max="12" value={selectedZone.radius} onChange={(event) => updateSelectedZone({ radius: Number(event.target.value) })} /></label> : <button className="btn btn--secondary type-button" type="button" onClick={() => setDrawing((current) => !current)}>{drawing ? 'Cancel Drawing' : 'Draw Boundary'}</button>}<p className="type-caption">Radius zones circle your business address; custom boundaries are drawn directly on the map.</p></>}
         </div>
-        <PortalZoneMap zones={zones} selectedZoneId={selectedZone?.id} drawing={drawing} onBoundaryDrawn={(boundary) => { updateSelectedZone({ mode: 'custom', boundary }); setDrawing(false); }} />
+        <PortalZoneMap zones={zones} selectedZoneId={selectedZone?.id} drawing={drawing} anchor={anchor} onBoundaryDrawn={(boundary) => { updateSelectedZone({ mode: 'custom', boundary }); setDrawing(false); }} onAnchorChange={(nextAnchor, label) => { setAnchor(nextAnchor); setAnchorLabel(label); }} />
       </div>
-      <div className="portal-modal-actions"><button className="btn btn--cta type-button" type="button" onClick={() => { setDrawing(false); onClose(); }}>Done</button></div>
+      <div className="portal-modal-actions">{anchorLabel && <span className="type-caption portal-zone-anchor-label">Anchored to {anchorLabel}</span>}<button className="btn btn--cta type-button" type="button" onClick={() => { saveServiceArea(buildServiceArea(zones, anchor)); setDrawing(false); onClose(); }}>Done</button></div>
     </PortalModal>
   );
 }
