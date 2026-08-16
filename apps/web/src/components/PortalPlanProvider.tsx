@@ -8,7 +8,11 @@ export type PlanEntitlements = {
   gpsTracking: boolean;
   seatLimit: number;
   walkerPlan: 'solo' | 'duo' | 'crew';
+  /** undefined = full theme library (Danny 2026-08-15: Solo-tier accounts get Brandy Blue, Husky, Irish Setter; everyone else gets everything). */
+  themeAllowlist?: readonly string[];
 };
+
+const SOLO_THEMES = ['Brandy Blue', 'Husky', 'Irish Setter'] as const;
 
 function matrixIncludes(feature: string, tierIndex: number) {
   return MATRIX.find((row) => row.feature.startsWith(feature))?.cells[tierIndex] === true;
@@ -23,6 +27,7 @@ function entitlementsFor(planKey: string): PlanEntitlements {
     gpsTracking: matrixIncludes('GPS walk tracking', tierIndex),
     seatLimit,
     walkerPlan: seatLimit <= 1 ? 'solo' : seatLimit === 2 ? 'duo' : 'crew',
+    themeAllowlist: planKey === 'starter' || planKey === 'solo' ? SOLO_THEMES : undefined,
   };
 }
 

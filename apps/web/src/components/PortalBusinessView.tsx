@@ -163,7 +163,7 @@ export function PortalBusinessView() {
       </div>}
 
       <PortalModal open={themeOpen} onClose={() => setThemeOpen(false)} eyebrow="Client App" title="Choose a Theme" wide>
-        <div className="portal-theme-picker"><ThemeGallery initialTheme={theme} initialMode={mode} onChange={(nextTheme, nextMode) => { setTheme(nextTheme); setMode(nextMode); }} /></div>
+        <div className="portal-theme-picker"><ThemeGallery initialTheme={theme} initialMode={mode} allowedThemes={entitlements.themeAllowlist as readonly ThemeName[] | undefined} onChange={(nextTheme, nextMode) => { setTheme(nextTheme); setMode(nextMode); }} /></div>
         <div className="portal-modal-actions"><button className="btn btn--cta type-button" type="button" onClick={() => setThemeOpen(false)}>Apply Theme</button></div>
       </PortalModal>
 

@@ -1851,6 +1851,9 @@
 [data-brand='petappro'] .matrix tbody td.is-plan-selected { background: color-mix(in srgb, var(--pa-brand-accent) 10%, var(--surface-card)); }
 [data-brand='petappro'] .matrix tbody tr:last-child td.is-plan-selected { border-bottom: 2px solid var(--pa-brand-accent); }
 [data-brand='petappro'] .matrix tbody td.is-plan-current { background: var(--pa-brandy-50); }
+[data-brand='petappro'] .plan-popular-badge { display: block; width: fit-content; margin: var(--pa-space-1) auto 0; padding: var(--pa-space-1) var(--pa-space-2); border-radius: var(--radius-ctl); background: var(--pa-brand-accent); color: var(--text-inverse); font-size: var(--type-caption-size); font-weight: var(--type-weight-semibold); line-height: 1.2; }
+[data-brand='petappro'] .matrix thead th { vertical-align: top; }
+[data-brand='petappro'] .matrix tbody td.is-plan-popular { background: var(--pa-brandy-50); }
 [data-brand='petappro'] .portal-plan-confirm { display: grid; gap: var(--pa-space-2); margin-top: var(--pa-space-4); padding: var(--pa-space-4); border: 2px solid var(--pa-brand-accent); border-radius: var(--pa-card-radius); background: var(--pa-brandy-50); }
 [data-brand='petappro'] .portal-discount-form { align-items: flex-end; }
 [data-brand='petappro'] .portal-field-error { color: var(--pa-coco-600); font-weight: var(--type-weight-semibold); }

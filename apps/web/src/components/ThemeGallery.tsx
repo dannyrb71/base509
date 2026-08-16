@@ -28,14 +28,16 @@ type PreviewVars = CSSProperties & Record<`--preview-${string}`, string>;
 export type ThemeName = (typeof THEMES)[number]['name'];
 export type ThemeMode = 'light' | 'dark';
 
-export function ThemeGallery({ initialTheme = 'Brandy Blue', initialMode = 'dark', onChange }: {
+export function ThemeGallery({ initialTheme = 'Brandy Blue', initialMode = 'dark', onChange, allowedThemes }: {
   initialTheme?: ThemeName;
   initialMode?: ThemeMode;
   onChange?: (theme: ThemeName, mode: ThemeMode) => void;
+  allowedThemes?: readonly ThemeName[];
 } = {}) {
   const [selectedName, setSelectedName] = useState<ThemeName>(initialTheme);
   const [mode, setMode] = useState<ThemeMode>(initialMode);
-  const theme = THEMES.find((item) => item.name === selectedName) ?? THEMES[0];
+  const themes = allowedThemes ? THEMES.filter((item) => allowedThemes.includes(item.name)) : THEMES;
+  const theme = themes.find((item) => item.name === selectedName) ?? themes[0];
   const previewStyle: PreviewVars = {
     '--preview-light': theme.light,
     '--preview-mid': theme.mid,
@@ -51,7 +53,7 @@ export function ThemeGallery({ initialTheme = 'Brandy Blue', initialMode = 'dark
   return (
     <div className="figma-themes__gallery-layout">
       <div className="figma-themes__swatches" aria-label="Choose a theme">
-        {THEMES.map((item) => {
+        {themes.map((item) => {
           const selected = item.name === selectedName;
           return (
             <button

@@ -43,7 +43,7 @@ export default function PricingPage() {
 
       <Section className="figma-pricing__compare">
         <div className="subpage-heading"><Eyebrow>Compare plans</Eyebrow><h2 className="type-headline">The full feature matrix</h2></div>
-        <PlanComparisonTable />
+        <PlanComparisonTable showPrices highlightKeys={['duo', 'crew']} />
         <p className="pricing-footnote type-caption">GPS walk tracking ships at launch; in-app messaging arrives after launch. Draft pricing — final pricing is confirmed at launch.</p>
       </Section>
 

@@ -35,8 +35,8 @@ export function AccountMenu({ variant }: { variant: 'marketing' | 'portal' }) {
         aria-controls={`${variant}-account-menu`}
         onClick={() => setOpen((value) => !value)}
       >
-        <span className="account-menu__avatar" aria-hidden="true">DB</span>
-        <span className="account-menu__name type-body-bold">Danny</span>
+        {variant === 'portal' && <span className="account-menu__avatar" aria-hidden="true">DB</span>}
+        <span className="account-menu__name type-body-bold">{variant === 'portal' ? 'Danny' : 'Sign In'}</span>
         <span className="account-menu__chevron" aria-hidden="true"><Image src="/brands/petappro.com/icon-chevron-down.svg" alt="" width={24} height={24} /></span>
       </button>
 
