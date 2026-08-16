@@ -1,39 +1,60 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
+import { Resend } from 'resend';
 
-/**
- * Waitlist capture endpoint (pre-launch mode).
- *
- * ⚠️ DEPLOY BLOCKER (Claude Code, MKT-4): before the sites go live, set
- * WAITLIST_WEBHOOK_URL (or replace this with a Supabase insert / email-provider
- * call). Without it this returns 501 and the form falls back to a mailto path —
- * honest, but not what we want at launch.
- */
-export async function POST(req: NextRequest) {
-  let email: unknown;
-  try {
-    ({ email } = await req.json());
-  } catch {
-    return NextResponse.json({ error: 'bad request' }, { status: 400 });
-  }
-  if (typeof email !== 'string' || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    return NextResponse.json({ error: 'invalid email' }, { status: 400 });
+export const runtime = 'nodejs';
+
+/** Humans don't complete an email field in under 2.5 seconds. */
+const MIN_FILL_MS = 2500;
+
+const CONFIRMATION_TEXT = `Hi!
+
+You're on the waitlist for PetAppro — the booking app for dog-care providers. We'll email you the day the doors open.
+
+Questions in the meantime? Just reply to this email.
+
+— The PetAppro team (a Base509 product)`;
+
+export async function POST(request: Request) {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!supabaseUrl || !supabaseAnonKey) return NextResponse.json({ error: 'capture backend not configured' }, { status: 501 });
+
+  let body: { email?: unknown; source?: unknown; company?: unknown; startedAt?: unknown };
+  try { body = await request.json(); } catch { return NextResponse.json({ error: 'bad request' }, { status: 400 }); }
+
+  const email = typeof body.email === 'string' ? body.email.trim().toLowerCase() : '';
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length > 254) return NextResponse.json({ error: 'invalid email' }, { status: 400 });
+
+  // Spam guards. Submissions missing our form's markers, carrying honeypot
+  // content, or arriving inhumanly fast get a silent "success" — nothing is
+  // stored and bots get no signal to iterate on.
+  const startedAt = typeof body.startedAt === 'number' ? body.startedAt : 0;
+  const tooFast = !startedAt || Date.now() - startedAt < MIN_FILL_MS;
+  if ((typeof body.company === 'string' && body.company.length > 0) || tooFast) return NextResponse.json({ ok: true });
+
+  const source = typeof body.source === 'string' ? body.source.slice(0, 40) : null;
+  const supabase = createClient(supabaseUrl, supabaseAnonKey, { auth: { persistSession: false } });
+  const { error } = await supabase.from('waitlist').insert({ email, source });
+  const duplicate = error?.code === '23505';
+  if (error && !duplicate) return NextResponse.json({ error: 'could not save signup' }, { status: 502 });
+
+  // Confirmation email is best-effort: the signup is already stored, so a mail
+  // failure must not fail the request. Duplicates don't get re-mailed.
+  const resendKey = process.env.RESEND_API_KEY;
+  if (resendKey && !duplicate) {
+    try {
+      await new Resend(resendKey).emails.send({
+        from: 'PetAppro <hello@base509.com>',
+        replyTo: 'support@base509.com',
+        to: email,
+        subject: 'You’re on the PetAppro waitlist',
+        text: CONFIRMATION_TEXT,
+      });
+    } catch {
+      // best-effort — see above
+    }
   }
 
-  const webhook = process.env.WAITLIST_WEBHOOK_URL;
-  if (!webhook) {
-    // No capture backend configured — tell the client so it can offer mailto.
-    return NextResponse.json({ error: 'capture not configured' }, { status: 501 });
-  }
-
-  try {
-    const res = await fetch(webhook, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, source: 'petappro-waitlist', at: new Date().toISOString() }),
-    });
-    if (!res.ok) throw new Error(`webhook ${res.status}`);
-    return NextResponse.json({ ok: true });
-  } catch {
-    return NextResponse.json({ error: 'capture failed' }, { status: 502 });
-  }
+  return NextResponse.json({ ok: true });
 }

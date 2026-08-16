@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 
 /**
  * Pre-launch email capture (portal not live at launch — Danny, 2026-07-18).
@@ -18,7 +18,9 @@ export function WaitlistForm({
   idPrefix?: string;
 }) {
   const [email, setEmail] = useState('');
+  const [honeypot, setHoneypot] = useState('');
   const [state, setState] = useState<'idle' | 'busy' | 'done' | 'fallback' | 'error'>('idle');
+  const startedAt = useRef(Date.now());
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -28,7 +30,7 @@ export function WaitlistForm({
       const res = await fetch('/api/waitlist', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email, source: idPrefix, company: honeypot, startedAt: startedAt.current }),
       });
       if (res.ok) setState('done');
       else if (res.status === 501) setState('fallback');
@@ -53,6 +55,18 @@ export function WaitlistForm({
   return (
     <div>
       <form className="waitlist" onSubmit={submit}>
+        {/* Honeypot: hidden from real users; bots that fill it are dropped server-side. */}
+        <input
+          className="visually-hidden"
+          id={`${idPrefix}-company`}
+          aria-hidden="true"
+          tabIndex={-1}
+          type="text"
+          name="company"
+          autoComplete="off"
+          value={honeypot}
+          onChange={(e) => setHoneypot(e.target.value)}
+        />
         <input
           id={`${idPrefix}-email`}
           aria-label="Email address"
