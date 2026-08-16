@@ -297,6 +297,13 @@ The portal shares PetAppro tokens, `.type-*` typography, button styles, icons, p
 - Minor console notes: `google.maps.Marker` deprecation warning (AdvancedMarkerElement is the successor but requires a mapId — follow-up, not urgent; Marker remains supported), and a benign duplicate-`setOptions` warning from dev hot-reload.
 - FILES TOUCHED (this session): `docs/BUILD-LOG-overnight.md` (verification record only — no code changes since the prior commit).
 
+### Coverage Checker Fixes + API Verification (2026-08-15, same session)
+
+- Fixed the stretched "Check a client address" field: the map frame's grid was distributing the modal's leftover height into the input rows; the frame now assigns the flexible track to the map (`auto 1fr auto auto`), so inputs sit at normal control height (measured 52px) and the map absorbs extra space.
+- Check Coverage was never logically broken — it was failing on the not-yet-enabled Geocoding API with a generic message. The error now says so specifically when Google denies the lookup. After Danny enabled the API (≈1–2 min propagation), verified both directions live: "2500 Mission St … is inside: Mission, Noe Valley." (polygon containment + radius distance both correct) and "1 Ferry Building … is outside your service area."
+- Business-address autocomplete still blocked: Google reports "Places API (New) has not been used in project 639258435940 before or it is disabled" — the classic Places API and Places API (New) are separate products; the New one still needs enabling (direct link surfaced in the error, recorded for Danny). Everything else on the map stack is now verified working.
+- FILES TOUCHED (this session): `apps/web/src/components/PortalZoneMap.tsx` · `apps/web/src/styles/brand-petappro.css` · `docs/BUILD-LOG-overnight.md`
+
 ## Open Questions for Danny
 
 - **Base509 admin dashboard (Danny, 2026-08-15).** Managing discount codes (promos, courtesy credits, free tester access) needs an internal Base509 dashboard — Danny explicitly wants his own management surface for PetAppro. Logged as a roadmap item for PM; the portal side ships with sample codes only.

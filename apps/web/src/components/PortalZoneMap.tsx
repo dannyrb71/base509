@@ -178,8 +178,11 @@ export function PortalZoneMap({ zones, selectedZoneId, drawing, anchor, onBounda
         return geometry.spherical.computeDistanceBetween(location, new google.maps.LatLng(center)) <= zone.radius * MILES_TO_METERS;
       }).map((zone) => zone.name);
       setCheckResult(inside.length ? `${results[0].formatted_address} is inside: ${inside.join(', ')}.` : `${results[0].formatted_address} is outside your service area.`);
-    } catch {
-      setCheckResult('Address check failed. Try again.');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      setCheckResult(/denied|not activated|not authorized/i.test(message)
+        ? 'Address lookup isn’t available yet — the Geocoding API needs to be enabled for this Google Maps key.'
+        : 'Address check failed. Try again.');
     }
   };
 

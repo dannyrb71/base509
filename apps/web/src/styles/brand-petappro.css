@@ -1863,7 +1863,8 @@
 [data-brand='petappro'] .portal-zone-gmap-frame { position: relative; display: grid; }
 [data-brand='petappro'] .portal-zone-gmap { width: 100%; min-height: var(--pa-map-height); border: 1px solid var(--border-default); border-radius: var(--pa-card-radius); overflow: hidden; }
 [data-brand='petappro'] .portal-zone-gmap__hint { position: absolute; bottom: calc(var(--pa-space-16) + var(--pa-space-4)); left: 50%; transform: translateX(-50%); padding: var(--pa-space-2) var(--pa-space-4); border-radius: var(--radius-ctl); background: var(--surface-card); box-shadow: var(--pa-card-shadow); color: var(--text-primary); }
-[data-brand='petappro'] .portal-zone-gmap-frame { gap: var(--pa-space-3); }
+[data-brand='petappro'] .portal-zone-gmap-frame { gap: var(--pa-space-3); grid-template-rows: auto 1fr auto auto; }
+[data-brand='petappro'] .portal-zone-check { align-items: center; }
 [data-brand='petappro'] .portal-zone-search { position: relative; z-index: 2; }
 [data-brand='petappro'] .portal-zone-search input,
 [data-brand='petappro'] .portal-zone-check input { min-height: var(--pa-control-height); width: 100%; min-width: 0; padding: var(--pa-space-3) var(--pa-space-4); border: 1px solid var(--border-default); border-radius: var(--radius-ctl); background: var(--surface-card); color: var(--text-primary); font: inherit; }
