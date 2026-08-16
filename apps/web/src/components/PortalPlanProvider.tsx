@@ -8,11 +8,12 @@ export type PlanEntitlements = {
   gpsTracking: boolean;
   seatLimit: number;
   walkerPlan: 'solo' | 'duo' | 'crew';
-  /** undefined = full theme library (Danny 2026-08-15: Solo-tier accounts get Brandy Blue, Husky, Irish Setter; everyone else gets everything). */
+  /** undefined = full theme library. Derived from the locked pricing MATRIX rows (Danny 2026-08-15: the matrix stands; the portal conforms). */
   themeAllowlist?: readonly string[];
 };
 
-const SOLO_THEMES = ['Brandy Blue', 'Husky', 'Irish Setter'] as const;
+const BREED_THEMES = ['Husky', 'Irish Setter'] as const;
+const ALL_BREED_THEMES = ['Bichon Frise', 'Blue Heeler', 'Chessie'] as const;
 
 function matrixIncludes(feature: string, tierIndex: number) {
   return MATRIX.find((row) => row.feature.startsWith(feature))?.cells[tierIndex] === true;
@@ -27,7 +28,11 @@ function entitlementsFor(planKey: string): PlanEntitlements {
     gpsTracking: matrixIncludes('GPS walk tracking', tierIndex),
     seatLimit,
     walkerPlan: seatLimit <= 1 ? 'solo' : seatLimit === 2 ? 'duo' : 'crew',
-    themeAllowlist: planKey === 'starter' || planKey === 'solo' ? SOLO_THEMES : undefined,
+    themeAllowlist: matrixIncludes('Full library', tierIndex) ? undefined : [
+      'Brandy Blue',
+      ...(matrixIncludes('Breed themes', tierIndex) ? BREED_THEMES : []),
+      ...(matrixIncludes('All breed themes', tierIndex) ? ALL_BREED_THEMES : []),
+    ],
   };
 }
 
