@@ -288,6 +288,15 @@ The portal shares PetAppro tokens, `.type-*` typography, button styles, icons, p
 - Checks: `npm run build` PASS (54 pages); live map mounts (fallback correctly suppressed when the key is present); console confirms the exact referrer error; `.env.local` confirmed gitignored and absent from staging.
 - FILES TOUCHED (this session): `apps/web/src/lib/service-area.ts` (new) · `apps/web/src/components/PortalZoneMap.tsx` · `PortalZoneManager.tsx` · `apps/web/src/styles/brand-petappro.css` · `docs/BUILD-LOG-overnight.md`
 
+### Live Map Verification (2026-08-15, same session — after Danny added localhost:3003 to the key)
+
+- The live map is UP: real Google base map with tiles and attribution, business marker, the Mission/Castro polygons and the Noe Valley radius circle rendering from zone data, active-zone highlighting in Brand Accent.
+- Terra Draw verified end to end with real pointer clicks: Draw Boundary → five clicks on the map (closing on the first vertex) finished a polygon, the GeoJSON ring replaced the Mission zone's boundary, and the new shape re-rendered through the GeoJSON path immediately.
+- Done captures and logs the persistence payload: `[service-area] GeoJSON captured, persistence pending — FeatureCollection, 3 features` (drawn polygon + circle converted to a spherical ring + polygon), exactly the shape the future Supabase/PostGIS save consumes.
+- ⚠️ Two Google Cloud enables still needed on the project (key referrer is now fine): **Geocoding API** ("This API is not activated on your API project" — blocks the client-address coverage check) and **Places API (New)** (autocomplete requests return 403 — blocks the business-address search). Both must also be listed in the key's API restrictions. The UI paths are built and degrade quietly until then.
+- Minor console notes: `google.maps.Marker` deprecation warning (AdvancedMarkerElement is the successor but requires a mapId — follow-up, not urgent; Marker remains supported), and a benign duplicate-`setOptions` warning from dev hot-reload.
+- FILES TOUCHED (this session): `docs/BUILD-LOG-overnight.md` (verification record only — no code changes since the prior commit).
+
 ## Open Questions for Danny
 
 - **Base509 admin dashboard (Danny, 2026-08-15).** Managing discount codes (promos, courtesy credits, free tester access) needs an internal Base509 dashboard — Danny explicitly wants his own management surface for PetAppro. Logged as a roadmap item for PM; the portal side ships with sample codes only.
