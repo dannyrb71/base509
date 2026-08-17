@@ -473,11 +473,21 @@
   /* 60/66 is the 1440 display size; between 900 and 1384 track the narrower
      column so "SHOWS UP FOR YOU." never breaks to a third line. */
   [data-brand='base509'] .b509-h1 { font-size: clamp(40px, 4.4vw, 60px); line-height: 1.12; }
-  [data-brand='base509'] .b509-build-row {
-    flex-direction: column; height: auto; gap: 56px; align-items: center;
+  /* What we build: same treatment as the hero — media | cards stay side by
+     side and BOTH scale (min-width:0); the fixed 523px/629px bases become
+     flex bases with caps. Stacking moves down to the 900px query. The fixed
+     782px frame height goes auto so vertical centring tracks the content. */
+  [data-brand='base509'] .b509-build-row { height: auto; gap: 40px; }
+  [data-brand='base509'] .b509-build-row__media {
+    flex: 1 1 320px; min-width: 0; max-width: 523px; padding: 0;
   }
-  [data-brand='base509'] .b509-build-row__media,
-  [data-brand='base509'] .b509-build-row__cards { flex: 1 1 auto; padding: 0; }
+  [data-brand='base509'] .b509-build-row__cards {
+    flex: 1 1 380px; min-width: 0; max-width: 629px; padding: 0;
+  }
+  /* the 450px clip window must shrink with its cell or it forces overflow */
+  [data-brand='base509'] .carousel { width: 100%; max-width: var(--b509-carousel-w); }
+  /* the appshot scales too — its rule lives with the export base sizes
+     below, which come later in the file and would override it here */
   [data-brand='base509'] .b509-who-row { flex-direction: column; gap: 32px; }
   [data-brand='base509'] .b509-who-row__text,
   [data-brand='base509'] .b509-who-row__cta {
@@ -488,10 +498,19 @@
   [data-brand='base509'] #hero { padding: 64px 0; }
   [data-brand='base509'] .b509-h1 { font-size: 44px; line-height: 50px; }
   [data-brand='base509'] .b509-h2--build { font-size: 36px; line-height: 42px; }
-  /* below tablet the hero stacks: full-width copy, art centred beneath */
-  [data-brand='base509'] .b509-hero__row { flex-direction: column; gap: 48px; }
-  [data-brand='base509'] .b509-hero__col { flex: 1 1 auto; }
-  [data-brand='base509'] .b509-hero__art { flex: 1 1 auto; width: 100%; max-width: none; }
+  /* below tablet the hero drops the art, same as the mobile frame — a
+     stacked 459px phone dominated the 700–900 range. Copy goes full width. */
+  [data-brand='base509'] .b509-hero__row { display: block; }
+  [data-brand='base509'] .b509-hero__col { width: 100%; max-width: none; }
+  [data-brand='base509'] .b509-hero__art { display: none; }
+  /* the build row stacks here: media above cards, both centred; the phone
+     keeps tracking the window (viewport-based now that its cell is full
+     width) until the ≤700 mobile rules take over */
+  [data-brand='base509'] .b509-build-row {
+    flex-direction: column; gap: 56px; align-items: center;
+  }
+  [data-brand='base509'] .b509-build-row__media,
+  [data-brand='base509'] .b509-build-row__cards { flex: 1 1 auto; max-width: none; }
 }
 @media (max-width: 560px) {
   [data-brand='base509'] .b509-h1 { font-size: 34px; line-height: 40px; }
@@ -533,6 +552,18 @@
 @media (max-width: 1100px) {
   [data-brand='base509'] .b509-deco { display: none; }
   [data-brand='base509'] .b509-hero__phones { width: 100%; max-width: 459px; }
+}
+/* Appshot scaling lives here, after its 319px base above, or it loses the
+   cascade. Side-by-side range: track the viewport (24vw = 319px at ~1330,
+   so it starts shrinking as soon as the window does). Stacked 700–900:
+   larger share (36vw) since the phone is the row's sole centred element —
+   it re-enters at frame size and shrinks to ~252px before the ≤700 mobile
+   rules take over at their approved 320px. Never upscaled past 319px. */
+@media (max-width: 1384px) {
+  [data-brand='base509'] .b509-appshot { width: min(319px, 24vw); }
+}
+@media (max-width: 900px) {
+  [data-brand='base509'] .b509-appshot { width: clamp(200px, 36vw, 319px); }
 }
 
 /* ==========================================================================
