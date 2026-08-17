@@ -53,8 +53,6 @@ export function FeatureSpotlightCarousel() {
     return () => window.clearInterval(timer);
   }, [active, paused, show]);
 
-  const slide = SLIDES[active];
-
   return (
     <div
       className="feature-spotlight-carousel"
@@ -82,13 +80,26 @@ export function FeatureSpotlightCarousel() {
         show(distance > 0 ? active - 1 : active + 1);
       }}
     >
-      <div className="feature-spotlight-carousel__slide" aria-live="polite" key={slide.title}>
-        <div className="feature-spotlight-carousel__image">
-          <Image src={slide.image} alt={slide.alt} width={slide.width} height={slide.height} priority={active === 0} />
-        </div>
-        <div className="feature-spotlight-carousel__copy">
-          <h2 className="type-title">{slide.title}</h2>
-          <p className="type-body">{slide.body}</p>
+      {/* All slides stay mounted on a translating track so changes slide
+          left/right instead of hard-swapping. Motion is CSS-only, so
+          prefers-reduced-motion can disable it in the stylesheet. */}
+      <div className="feature-spotlight-carousel__viewport">
+        <div
+          className="feature-spotlight-carousel__track"
+          aria-live="polite"
+          style={{ transform: `translateX(-${active * 100}%)` }}
+        >
+          {SLIDES.map((item, index) => (
+            <div className="feature-spotlight-carousel__slide" key={item.title} aria-hidden={index !== active}>
+              <div className="feature-spotlight-carousel__image">
+                <Image src={item.image} alt={item.alt} width={item.width} height={item.height} priority={index === 0} />
+              </div>
+              <div className="feature-spotlight-carousel__copy">
+                <h2 className="type-title">{item.title}</h2>
+                <p className="type-body">{item.body}</p>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
       <div className="feature-spotlight-carousel__dots" aria-label="Choose a feature slide">
