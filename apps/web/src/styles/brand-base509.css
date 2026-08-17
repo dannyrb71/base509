@@ -505,9 +505,12 @@
   [data-brand='base509'] .b509-hero__art { display: none; }
   /* the build row stacks here: media above cards, both centred; the phone
      keeps tracking the window (viewport-based now that its cell is full
-     width) until the ≤700 mobile rules take over */
+     width) until the ≤700 mobile rules take over. Tighter vertical rhythm
+     than the desktop frame — 56px of section padding and gap read as holes
+     at these widths. */
+  [data-brand='base509'] .section { padding: 48px 0; }
   [data-brand='base509'] .b509-build-row {
-    flex-direction: column; gap: 56px; align-items: center;
+    flex-direction: column; gap: 32px; align-items: center;
   }
   [data-brand='base509'] .b509-build-row__media,
   [data-brand='base509'] .b509-build-row__cards { flex: 1 1 auto; max-width: none; }
@@ -563,7 +566,9 @@
   [data-brand='base509'] .b509-appshot { width: min(319px, 24vw); }
 }
 @media (max-width: 900px) {
-  [data-brand='base509'] .b509-appshot { width: clamp(200px, 36vw, 319px); }
+  /* stacked range (700–900): smaller share — near-frame size dominated the
+     column (Danny 2026-08-17). The ≤700 mobile rules below still win there. */
+  [data-brand='base509'] .b509-appshot { width: clamp(180px, 28vw, 260px); }
 }
 
 /* ==========================================================================
@@ -637,12 +642,18 @@
   [data-brand='base509'] .b509-product__name { font-size: 24px; line-height: 30px; }
   [data-brand='base509'] .b509-product__desc { font-size: 16px; line-height: 26px; }
   [data-brand='base509'] .b509-wordmark img { width: 220px; }
-  [data-brand='base509'] .b509-build-row { display: block; }
+  /* mobile order flips: carousel first, then phone + button (Danny
+     2026-08-17). Flex column instead of block so `order` works; the gap
+     replaces the old margin-top on the cards. */
+  [data-brand='base509'] .b509-build-row {
+    display: flex; flex-direction: column; gap: 32px;
+    align-items: stretch; /* ≤900 sets center; mobile children stay full width */
+  }
+  [data-brand='base509'] .b509-build-row__cards { order: -1; }
   [data-brand='base509'] .b509-build-row__media {
     display: flex; flex-direction: column; align-items: center; gap: 20px;
   }
   [data-brand='base509'] .b509-appshot { width: 100%; max-width: 320px; }
-  [data-brand='base509'] .b509-build-row__cards { margin-top: 32px; }
 
   /* carousel: one card per view, edge to edge inside the gutter, no peek */
   [data-brand='base509'] .carousel { width: 100%; max-width: none; }
