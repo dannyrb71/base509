@@ -460,9 +460,19 @@
    row fits, stack the two-column rows and drop the frame-coordinate deco. */
 @media (max-width: 1384px) {
   [data-brand='base509'] .b509-deco { display: none; }
-  [data-brand='base509'] .b509-hero__row { flex-direction: column; gap: 48px; }
-  [data-brand='base509'] .b509-hero__col { flex: 1 1 auto; max-width: 693px; }
-  [data-brand='base509'] .b509-hero__art { flex: 1 1 auto; width: 100%; }
+  /* Hero: keep the halves side by side and let BOTH scale. The fixed
+     693px/459px bases meant the art column wrapped/shrank alone while the
+     copy column held its width. Both now flex (min-width:0 so they can
+     actually shrink); stacking moves down to the existing 900px query. */
+  [data-brand='base509'] .b509-hero__row { gap: 40px; }
+  [data-brand='base509'] .b509-hero__col { flex: 1 1 400px; min-width: 0; max-width: 693px; }
+  [data-brand='base509'] .b509-hero__art {
+    flex: 1 1 320px; min-width: 0; max-width: 459px; height: auto;
+  }
+  [data-brand='base509'] .b509-hero__phones { width: 100%; max-width: 459px; }
+  /* 60/66 is the 1440 display size; between 900 and 1384 track the narrower
+     column so "SHOWS UP FOR YOU." never breaks to a third line. */
+  [data-brand='base509'] .b509-h1 { font-size: clamp(40px, 4.4vw, 60px); line-height: 1.12; }
   [data-brand='base509'] .b509-build-row {
     flex-direction: column; height: auto; gap: 56px; align-items: center;
   }
@@ -478,6 +488,10 @@
   [data-brand='base509'] #hero { padding: 64px 0; }
   [data-brand='base509'] .b509-h1 { font-size: 44px; line-height: 50px; }
   [data-brand='base509'] .b509-h2--build { font-size: 36px; line-height: 42px; }
+  /* below tablet the hero stacks: full-width copy, art centred beneath */
+  [data-brand='base509'] .b509-hero__row { flex-direction: column; gap: 48px; }
+  [data-brand='base509'] .b509-hero__col { flex: 1 1 auto; }
+  [data-brand='base509'] .b509-hero__art { flex: 1 1 auto; width: 100%; max-width: none; }
 }
 @media (max-width: 560px) {
   [data-brand='base509'] .b509-h1 { font-size: 34px; line-height: 40px; }
@@ -746,7 +760,9 @@
    Anchor jumps must clear the pinned header. :has() scopes it to Base509
    pages so PetAppro's scroll behaviour is untouched. */
 html:has([data-brand='base509']) { scroll-padding-top: 128px; }
-@media (max-width: 700px) {
+/* the header drops to 64px at 900 (hamburger), not 700 — keep anchor
+   clearance in step with it or tablet jumps land 64px short */
+@media (max-width: 900px) {
   html:has([data-brand='base509']) { scroll-padding-top: 72px; }
 }
 
