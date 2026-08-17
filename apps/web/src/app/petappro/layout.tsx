@@ -101,14 +101,17 @@ export default function PetApproLayout({ children }: { children: React.ReactNode
             <p className="site-footer__social type-caption">
               Follow: <a href="https://instagram.com/petappro" target="_blank" rel="noopener noreferrer">Instagram</a> · <a href="https://facebook.com/petappro" target="_blank" rel="noopener noreferrer">Facebook</a>
             </p>
-            <Image
-              className="site-footer__base509"
-              src="/brands/base509/base509-logo-reverse.svg"
-              alt="Base509"
-              width={73}
-              height={20}
-              unoptimized
-            />
+            {/* /base509 canonicalizes to base509.com on branded domains (middleware). */}
+            <Link href="/base509" aria-label="Base509 — the company behind PetAppro">
+              <Image
+                className="site-footer__base509"
+                src="/brands/base509/base509-logo-reverse.svg"
+                alt="Base509"
+                width={73}
+                height={20}
+                unoptimized
+              />
+            </Link>
             <p className="type-caption">© 2026 Base509 LLC<br />The company behind the software.</p>
           </div>
         </div>
