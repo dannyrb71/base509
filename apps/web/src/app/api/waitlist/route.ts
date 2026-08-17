@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { Resend } from 'resend';
+import { WAITLIST_CONFIRMATION_HTML } from '@/lib/waitlist-email';
 
 export const runtime = 'nodejs';
 
@@ -49,7 +50,9 @@ export async function POST(request: Request) {
         replyTo: 'support@base509.com',
         to: email,
         subject: 'You’re on the PetAppro waitlist',
-        text: CONFIRMATION_TEXT,
+        html: WAITLIST_CONFIRMATION_HTML,
+        text: CONFIRMATION_TEXT, // plain-text fallback
+
       });
     } catch {
       // best-effort — see above
