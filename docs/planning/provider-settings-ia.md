@@ -9,7 +9,7 @@
 
 **Recommendation: yes, providers get a web portal** (login tied to their provider record) that is **the configuration/editor surface**. The **native app stays basic** — operational use (bookings, check-in/out, report cards, messaging) plus light device preferences (e.g., notifications). Both are clients over the **same Supabase provider DB** — not two systems. This mirrors how Woof WeTreats already works.
 
-**Danny's call (2026-07-10):** **all provider editing is online**, via their **subscription-management portal** (same login that manages billing). **In-app "settings" is merely app preferences** — notifications and **location sharing** (the latter for future walkers / house sitters, tied to the GPS v1.1 fast-follow). The app is not a config editor at launch — this deliberately shrinks MVP app scope and keeps the store-fee posture clean (§0 fee note, D-042).
+**Danny's call (2026-07-10; GPS timing superseded by D-054):** **all provider editing is online**, via their **subscription-management portal** (same login that manages billing). **In-app "settings" is merely app preferences** — notifications and **location sharing** for launch walking GPS. The app is not a config editor at launch — this deliberately shrinks MVP app scope and keeps the store-fee posture clean (§0 fee note, D-042).
 
 Two reasons it's the right call, not just convenience:
 
@@ -26,12 +26,41 @@ Two reasons it's the right call, not just convenience:
 | Hours of operation + off-hours surcharge | **Primary** | — | powers public services page |
 | Pricing (rates, tiers, travel fee, extra-pet) | **Primary** | — | per D-039 |
 | Availability rules (conflict groups) | **Primary** | — | |
+| Walk Windows (walking availability: windows + days + recurrence, never clock slots) | **Primary** | — | `specs/walk-windows-scheduling.md` (2026-08-15) |
 | T&C / policies | **Primary** | view | template + tokens (D-009) |
-| Device preferences (notifications, location sharing) | — | **Primary** | the app's only "settings" for MVP; location sharing → GPS v1.1 |
+| Device preferences (notifications, location sharing) | — | **Primary** | the app's only "settings" for MVP; location sharing supports D-054 launch GPS |
 | Secure access codes (per booking) | — | **entered in app** | at the booking, biometric-gated |
 | Day-to-day ops: bookings, check-in/out, report cards, messaging, calendar | link out | **Primary** | app is the operational surface |
 
 **MVP scope (Danny, 2026-07-10):** **all editors are web** — billing, onboarding, Services CMS, hours/pricing/T&C, availability. The app carries **operations + basic device prefs only** (no config editors at launch). In-app editing is post-MVP. Cleaner split, smaller app scope.
+
+### 0a. In-app "App Settings" composition + gating (2026-07-28, Danny — FLOW REVIEW 46)
+
+The App Settings screen must be **personal + permission-derived**, not a dumping ground for business config. Three problems caught in the current frame:
+
+1. **Notification toggles must be derived from what the user can actually receive.**
+   - ❌ **"Payments received"** must NOT appear for **Manager or Staff** — they have **no financial visibility** (role matrix). Financial notifications = Owner/Admin only.
+   - ⚠️ **"Client messages"** toggle presupposes **in-app messaging, which is post-MVP (D-053).** Don't ship a toggle for a feature that isn't there — either remove for MVP or scope it to the D-053-safe "client contacted you" notification. Reconcile before build.
+   - "New booking requests," "Daily agenda" are fine (scope booking-request notifs to who can approve).
+2. **Business DEFAULT toggles STAY in App Settings, but permission-gated (Danny, 2026-07-28).** "**Booking approval mode (Auto/Manual)**" (auto-book, onboarding §5.4) and "**Walk Tracking default**" are kept as **in-app quick-toggles** — Danny wants them here (handy operational controls). They are **owner/admin-only** business-level toggles, tier/service-gated where relevant (Walk Tracking = Crew+, D-054, only if walking offered). *Reconciles with the surface-split rule above:* these are **lightweight operational toggles, not full config editors** — the editors still live on web; a couple of quick on/off switches are permitted in-app.
+3. **"Business Account & Billing" = Owner ONLY.** Admin **cannot** edit billing/subscription/financial connections (role model). It links out to the web portal; gate the entry to Owner (Admin/Manager/Staff don't see it).
+4. **"Daily Summary (7:00 AM)" = a morning-digest notification, NOT staff meetings.** A 7am push summarizing the day's schedule. **Label LOCKED "Daily Summary"** (Danny, 2026-08-01 — rejected "Daily agenda," which implied a meeting, and "Today's schedule").
+
+**⭐ Rule — App Settings is PERMISSION-DERIVED, per-item (Danny, 2026-07-28).** The screen renders each control only if the user's role/permissions/tier/offered-services warrant it — it is NOT a fixed list. Worked example:
+
+| Control | Staff (minimal) | Manager | Owner / Admin |
+|---|---|---|---|
+| New booking requests (notif) | ✅ | ✅ | ✅ |
+| Walk Tracking **default** | ❌ | ❌ | ✅ *(if walks + Crew+)* |
+| Daily summary (7 AM) | ✅ | ✅ | ✅ |
+| Payments received (notif) | ❌ *(no financial visibility)* | ❌ | ✅ |
+| Client messages | — *(post-MVP, D-053)* | — | — |
+| Booking approval mode (default) | ❌ | ❌ | ✅ |
+| Business Account & Billing | ❌ | ❌ | **Owner only** |
+
+So a **minimal-permission Staff** sees roughly **New booking requests + Daily summary**; **Owner/Admin** sees the full set. Fable derives the screen from these inputs — App Settings = the user's **own** device/personal prefs **plus** any business toggles their permission unlocks; nothing they can't act on ever renders.
+
+> ⚠️ **Walk Tracking conflict resolved (Danny/Cowork, 2026-08-01 — parked #4).** The App Settings **"Walk Tracking default"** toggle is a **business default** (whether walks are tracked by default) → **Owner/Admin only**, matching item 2. Do **not** give it to Staff/Manager. This is distinct from the **operational live tracking** a walker runs *during* a walk (that happens on the walk screen, one-way, per D-054 — not an App Settings toggle). The earlier worked-example row that gave Staff ✅ conflated the two; corrected above.
 
 ---
 
@@ -135,7 +164,16 @@ Not priced individually for MVP — presented as included courtesy tasks; a prov
 
 - **Encryption at rest** for access fields (lockbox / alarm / gate codes, entry instructions) — non-negotiable; never stored or logged in plaintext.
 - **Biometric reveal gate** (Face ID / re-auth to display a code in the app) — ties into D-031 step-up; not a substitute for encryption.
-- **Transparency:** the input form tells **both provider and client** how the data is stored and protected (e.g., "Encrypted and only shown to your assigned provider, unlocked with Face ID"). Logged in D-044.
+- **Transparency:** the input form tells **both provider and client** how the data is stored and protected (e.g., "Encrypted and only shown to your assigned provider/staff, unlocked with Face ID"). Logged in D-044.
+
+**Staff-facing access at the point of need (Danny, 2026-08-01 — added to the Walk check-in screen):**
+- Surfaced as a **"Secure area — Access information" card** on the staff **pre-service / arrival screen** (the `Walk · [pet]` step with *Mark en route / Mark arrived / **Next***), a `Card content/List row` instance with a lock icon → **biometric-gated reveal** — reuse, not a new component. **Placed here (Danny, 2026-08-01) — arrival is when staff need the code to get in; removed from the duplicate check-in screen so it lives in one place.**
+  - **This is a PREP step — CTA is "Next," not "Start care" (Danny, 2026-08-01)** so the staff don't feel like they start twice. The actual start happens on the **next** care screen (STAFF-CARE-01) — **one start action.** Update the helper microcopy accordingly (it still reads "Start care hands off…").
+  - **⭐ Verb pair LOCKED: "Check in" / "Check out" (Danny, 2026-08-01)** for all timestamped at-client services — **walks now; in-home sitting + drop-in visits when added.** Replaces "Start care / End care." "Check in" = start timestamp (staff + client) + GPS start if tracked; "Check out" = end timestamp (drives past-due timing §7, stops GPS). One consistent mental model across these services.
+- ⛔ **Never display the code in plaintext on the booking card.** The current wireframe shows "lockbox 4482" inline as plain text — that's a downgrade; **replace with the gated Secure-area card.** Codes are revealed only behind the biometric gate, one at a time.
+- **Conditional:** show only for **at-client-location** services (`location_model = at_client` — walk / drop-in / in-home sitting) **and** when access info exists for the booking. Provider-location services (boarding/daycare) don't get it.
+- **Assigned staff** performing the booking can reveal it (not owner-only) — scoped to the assigned staff for that booking.
+- **Access is logged** (who revealed which code, when) and **time-boxed** to the booking window — ties LG-9 (home-access RLS) + D-044 audit. Available around the service, not indefinitely.
 
 ---
 

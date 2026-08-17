@@ -4,7 +4,7 @@ Phased planning roadmap for PetAppro as a multi-tenant SaaS platform for indepen
 
 Woof Wetreats (`reference/woof-wetreats-reference`) is the behavioral reference for proven booking, staff, and client workflows. PetAppro must rebuild those patterns with tenant separation from day one — not copy single-business architecture.
 
-**Status:** Planning phase transitioning to build. **Launch targets (D-023): Target 1 = Oct 1, 2026; Target 2 = Oct 21, 2026** — the date flexes to Target 2 to ship *with* in-app payments (Stripe Connect, D-007 Option A). See "Launch Timeline & Store Clock" below.
+**Status (updated 2026-08-15): the October launch is RED / tightening. Oct 21 remains the working target.** The Base509 site, published-policy registry, and PetAppro marketing implementation are ready locally, and the provider portal is in progress. The immediate launch bottleneck is the first GitHub push of `apps/web` (Claude Code, only on Danny's go); it gates Vercel (`Root Directory = apps/web`) → preview/domains → Supabase/Resend waitlist activation.
 
 **Canonical roadmap:** this file. The dated delivery schedule, sprint breakdown, and paste-ready schema/backlog tables live in the annex `docs/roadmap/PetAppro-Roadmap-and-Project-Plan.md`. Business strategy, framework choice, and GTM live in `docs/planning/PetAppro-Strategy-and-Business-Plan.md`.
 
@@ -21,46 +21,74 @@ Woof Wetreats (`reference/woof-wetreats-reference`) is the behavioral reference 
 
 ## Phase Overview
 
+**Re-baselined 2026-07-31.** Product/specification output is ahead of implementation; the board is now reconciled to repository evidence.
+
 | Phase | Name | Status |
 |---|---|---|
-| 0 | Product Definition | In progress |
-| 1 | Architecture Planning | Not started |
-| 2 | UX Flows | Not started |
-| 3 | Design System Foundation | Not started |
-| 4 | MVP Specification | Not started |
-| 5 | Build Planning | Not started |
-| 6 | MVP Build | Future / not started |
-| **LR** | **Launch Readiness (parallel track)** | **Not started — runs alongside P1–P6; gates Oct 1** |
+| 0 | Product Definition | ✅ **Done** — product brief, positioning, D-029/D-058 guardrails, JTBD research |
+| 1 | Architecture Planning | ⚠️ **Design done; implementation foundation RED** — architecture/data-model docs exist, but there is no `supabase/`, migration layer, tenant schema, or RLS. |
+| 2 | UX Flows | ✅ **Coverage complete** — Wireframes 2.0 + Phase 2 cover the core provider/client/staff/web flows; refinements continue without gating CFG-1. |
+| 3 | Design System Foundation | ✅ **Published as a library** — governed tokens/components are available for product and web implementation; support continues. |
+| 4 | MVP Specification | ✅ **Largely done** — onboarding, dashboard, reports, transactions/payments, capacity, component, and legal build-gate specifications exist. |
+| 5 | Build Planning | 🔄 **Re-cut active** — Jul 31–Aug 14 Foundation Recovery Sprint replaces the stale Sprint 1 board. |
+| 6 | MVP Build | ⚠️ **Partially started / foundation blocked** — pricing, tokens, UI, CI, and web scaffold exist; `supabase/`, `packages/booking`, generated data types, and the mobile app scaffold do not. |
+| **LR** | **Launch Readiness (parallel)** | ⚠️ **BLOCKED at first web push** — Base509/policies and PetAppro marketing are ready locally; `apps/web` has never reached GitHub. That push gates Vercel, domains, and waitlist activation. |
 
-Phases 0–6 are the **product-build spine** (sequential, gate-driven). **Launch Readiness (LR)** is a **parallel track**, not a later phase: its items are hard dependencies for the Oct 1 launch (store listings literally cannot be submitted without live legal/support URLs), so they must be worked concurrently with the build — not deferred to post-launch. See the dedicated **Launch Readiness Track** section below.
+### Sequencing ruling — 2026-07-31
+
+Design and specification ran far ahead of build. The recoverable response is a **re-cut**, not pretending the old dates remain credible: protect the unpushed local work, then keep all implementation capacity on the tenant foundation through Aug 15.
+
+Verified 2026-07-31: `packages/pricing`, `packages/tokens`, `packages/ui`, CI workflows, and the web scaffold exist. `supabase/` and `packages/booking` do not; `apps/mobile` contains configuration but not the app scaffold. The active risk is therefore the missing tenant/schema/RLS foundation and the large unpushed batch, not flow coverage.
+
+Architectural guardrail: boarding, daycare, and walking are presets/instances of a generic service engine. Persist the five axes as first-class configuration. Capacity is `bounded | unlimited` with an optional tenant-scoped `capacity_group_id`; do not reuse scheduling `conflict_group_id`, and do not hard-code the launch service types into persistence or authorization.
+
+### Web + money sequencing update — 2026-08-15
+
+The local Base509 multi-domain site is push-ready, policies are published in the local registry, and the PetAppro marketing site is built from real Figma content. The Aug 12 type error is resolved; Codex verified a green production build on Aug 15 (53 routes). The design system is published as a library. These assets are not yet deployed.
+
+The controlling sequence is now: **Danny go → Claude Code first-pushes `apps/web` → connect Vercel with `Root Directory = apps/web` → preview → domains/HTTPS/route QA → approved production promotion → hosted Supabase/Resend waitlist activation.** The provider portal continues in parallel with optional/offline booking payments; provider SaaS Billing remains a separate authenticated web-only rail. This track does not displace the tenant schema/RBAC/RLS foundation.
+
+Money boundary is non-negotiable:
+
+- **Stripe Billing:** provider business pays Base509 for PetAppro SaaS; authenticated web only.
+- **Stripe Connect:** provider's client pays the provider for physical pet-care services.
+- The two rails must not share Customers, saved payment methods, webhooks, ledgers, authorization logic, or subscription/booking state. Expo ships no SaaS checkout, Customer Portal link, purchase/upgrade CTA, or direction to buy.
+
+Phases 0–6 are the **product-build spine** (sequential, gate-driven). **Launch Readiness (LR)** is a **parallel track**, not a later phase: its items are hard dependencies for store submission and launch, so they must be worked concurrently with the build. See the dedicated **Launch Readiness Track** section below.
 
 ---
 
-## Launch Timeline & Store Clock (Oct 1 target)
+## Launch Timeline & Store Clock (recovery baseline)
 
-> **The one strategic decision to make here:** the phase gates above are deliberately unhurried ("no build started; don't scaffold `app/` yet"). The Oct 1 target requires compressing Phases 0–1 planning into ~2 weeks and starting the build (`app/` scaffold + shared-package extraction) in **mid-July**. Two honest options:
-> - **A — Hit Oct 1 (deadline-driven):** run the phases in fast, overlapping passes on the calendar below. Higher pace, tighter risk.
-> - **B — Keep the gate discipline (quality-driven):** finish each phase's exit criteria before the next; Oct 1 likely moves to late Oct / Nov.
->
-> This calendar assumes Option A. Whichever you choose, the **app-store clock is the binding constraint, not the code** — accounts and D-U-N-S must start in early August regardless.
+The calendar is re-cut around the non-negotiable foundation. Oct 1 remains the failed Target-1 benchmark; Oct 21 is conditional, not promised.
 
-**Binding external deadlines:**
-- **~Sept 10** — first app-store submission (leaves room for one rejection + resubmit before Oct 1).
-- **Early August** — start LLC → D-U-N-S → Apple/Google **Organization** accounts (long lead; see App-Store Walkthrough).
-- **Oct 1** — public launch.
+**Binding checkpoints:**
+- **Aug 15** — formal foundation GO/NO-GO.
+- **~Oct 1–3** — Target-2 store submission window, leaving roughly 2–3 weeks for review/fixes.
+- **Oct 21** — conditional public-launch target.
 
-**Phase → calendar mapping (Option A):**
+**Recovery calendar:**
 
 | Roadmap phase | Calendar window | Runs as |
 |---|---|---|
-| P0 Product Definition + P1 Architecture | Jul 7–25 | Compressed; most planning docs already drafted |
-| P1→build: monorepo + extract pricing/booking packages (tested) | Jul 7–18 | Sprint 1 |
-| Tenant-aware schema + RBAC/RLS | Jul 21 – Aug 15 | Sprints 2–3 |
-| P2 UX flows + P3 design system | overlaps Aug | Reuse Woof design tokens |
-| P4 specs + P6 build: Expo MVP (auth→onboarding→booking→dashboard; manual payments) | Aug 4 – Sep 5 | Sprints 3–4 |
-| Business/app-store track (LLC, D-U-N-S, accounts, listing) | Aug 1 – Sep 8 | Parallel — Danny owns |
-| P6 beta + submit | Aug 25 – Sep 12 | Sprint 5 — **submit ~Sep 10** |
-| Review buffer + GTM + launch | Sep 12 – Oct 1 | Sprint 6 + launch week |
+| Foundation Recovery | Jul 31 – Aug 14 | Sync local work; migrations; generic service/capacity schema; identity/membership/RBAC; RLS; generated types; D-063 tests |
+| Formal gate | Aug 15 | Both D-U-N-S and tenant schema/RBAC/RLS must be green |
+| Core vertical slice | Aug 15 – Aug 28 | Auth/tenant context, onboarding shell, boarding configuration on the generic engine |
+| Booking + money slice | Aug 29 – Sep 11 | Booking/capacity/pricing/transactions and Stripe test path |
+| Operations + launch gates | Sep 12 – Sep 25 | Dashboard, report cards, transactional reminders; GPS/store-policy verification early |
+| Device beta + integration | Sep 21 – Oct 2 | Real iOS/Android tenant-isolation and paid-booking proof |
+| Target-2 submission + buffer | ~Oct 1 – Oct 21 | Submit ~Oct 1–3; review, rejection/fix buffer; launch Oct 21 only if green |
+
+**Parallel web critical path:**
+
+| Milestone | Target | Exit criteria |
+|---|---|---|
+| **First `apps/web` GitHub push — CURRENT BOTTLENECK** | Immediate on Danny's go | Claude Code pushes the previously untracked web app; no commit/push by other agents |
+| Vercel preview + domains | Immediately after first push | Connect with `Root Directory = apps/web`; preview passes; domains, HTTPS, host routing, policies, support/contact routes verified |
+| Base509 production + Apple unblock | Immediately after approved preview | HTTPS/DNS healthy, policy URLs stable, no dead links, Danny authorizes promotion |
+| PetAppro Figma→code site | Built locally; QA after preview | Real Figma content, responsive approved design, pricing/legal/support/waitlist surfaces, accessibility/performance/visual QA |
+| Supabase/Resend waitlist | After preview/domains | Hosted secrets configured; consent, duplicate/error handling, persistence, and email delivery pass end to end |
+| Provider portal + Stripe provider subscription/billing | In progress / before launch integration freeze | Optional/offline booking-payments model plus web-only SaaS Checkout/Portal, verified webhooks, Test Clock coverage, entitlement reconciliation |
 
 Full week-by-week sprints, milestones, and the de-scope order (what to cut first if Oct 1 is at risk) are in the annex `PetAppro-Roadmap-and-Project-Plan.md`. **Never cut:** multi-tenancy, RBAC/RLS, the single shared pricing package, or its regression tests.
 
@@ -68,33 +96,33 @@ Full week-by-week sprints, milestones, and the de-scope order (what to cut first
 
 **Pivot checkpoints — re-decide at each; speed up if ahead, cut scope if behind:**
 1. **~Jul 18 (end Sprint 1):** pricing package extracted, tested, CI green? Behind → start cutting scope now.
-2. **~Aug 15 — GO/NO-GO for Oct 1:** tenant schema + RBAC/RLS done *and* D-U-N-S in hand? If not both green → cut hard or deliberately move the launch date.
-3. **~Sep 1:** beta build working on a real device? Yes → submit ~Sep 10. No → store clock decides.
+2. **~Aug 15 — GO/NO-GO:** tenant schema + RBAC/RLS done *and* D-U-N-S in hand? D-U-N-S is GREEN; schema/RLS is RED as of Jul 31. Green means versioned additive migrations, tenant keys, identity/membership/RBAC helpers, RLS + `WITH CHECK`, cross-tenant negative read/write tests, five-axis service/capacity schema, generated types, and CI all complete.
+3. **~Sep 21:** integrated real-device beta ready? If not, Oct 21 is no longer credible.
 
-The **~Sept 10 submission window is the one deadline that cannot flex** — before it, pivoting is a controlled choice; after it, a slip is forced.
+If Aug 15 is red, move the date again or remove non-foundation scope. Never cut multi-tenancy, RBAC/RLS, the shared pricing package, or its regression tests.
 
 ---
 
-## Launch Readiness Track (parallel — gates Oct 1)
+## Launch Readiness Track (parallel — gates store submission)
 
-**Why this is a track, not post-launch work:** the app cannot be *submitted* — let alone launched — without several of these items live. Apple and Google both require a **privacy-policy URL** and a **support URL** in the listing, so those pages must exist **before the ~Sep 10 store submission**, not at launch week. Marketing/company pages and store-account setup have long lead times (D-U-N-S, org enrollment, review cycles) that also front-load into August. Treating any of this as "after we ship" would miss the launch. These items are therefore first-class launch dependencies, tracked here and cross-linked to the MKT/BIZ tracks in `../../TASKS.md`.
+The store clock runs in parallel with the recovery build. Immediate order: **Aug 13 GitHub + Vercel Pro connection → Base509 preview/review → Danny-approved production deployment → Apple Organization enrollment → Google Play Organization enrollment.** PetAppro site and web-only Stripe Billing follow as the next launch-critical web milestones. Complete BIZ-10b address propagation before either store submission.
 
 **Ownership:** content/legal/site drafts by Cowork → Danny/attorney review; build/deploy by Claude Code; store accounts + listings by Danny. Detailed workstreams and hosting live in `website-and-store-launch-plan.md`; dated targets in the annex `PetAppro-Roadmap-and-Project-Plan.md` §7.5.
 
 | LR item | What it covers | Hard-live by | Blocks | Status |
 |---|---|---|---|---|
-| **LR-1 — Legal pages** | Privacy Policy + Terms & Conditions on petappro.com (`/privacy`, `/terms`) | **~Sep 5** (pre-submission) | Store submission (Apple + Google) | Not started |
+| **LR-1 — Legal pages** | Versioned policy registry; stable PetAppro Privacy + Terms paths | Pre-submission | Store submission (Apple + Google) | **Review queued** — interim docs + six v1.0 policies registered locally; not pushed/live |
 | **LR-2 — Support page** | `/support` — contact route + basic help/FAQ; the store-listing "support URL" | **~Sep 5** (pre-submission) | Store submission | Not started |
 | **LR-3 — Contact page** | Reachable contact (form/email) on both petappro.com and base509.com | **~Sep 5** | Store submission (support/contact expected); trust | Not started |
-| **LR-4 — App landing page(s)** | PetAppro product/download page (value prop, features, App Store + Play badge links; badges are placeholders until approval) | **~Sep 25** | Launch-day conversion | Not started |
-| **LR-5 — Base509 marketing website** | base509.com company hub — what Base509 is + product list linking to PetAppro + contact; structured to grow with future "Appro" apps | **~Sep 25** (before launch) | Brand/company credibility at launch | Not started |
-| **LR-6 — Apple App Store preparation** | Apple Developer org account ($99), App Store Connect record + bundle ID, privacy nutrition labels, in-app account-deletion flow, screenshots/icon, TestFlight beta | **Submit ~Sep 10** | Public launch | Blocked on D-U-N-S (BIZ-4/5) |
-| **LR-7 — Google Play preparation** | Play Console org account ($25), closed-testing track, Data Safety form, store listing + graphics | **Submit ~Sep 10** | Public launch | Blocked on D-U-N-S (BIZ-4/6) |
-| **LR-8 — App Store review buffer** | Explicit calendar buffer between ~Sep 10 submission and Oct 1 launch to absorb one rejection + resubmit on each store; set release date = Oct 1 and hold | **Sep 12 – Oct 1** | The launch date itself | Not started |
+| **LR-4 — PetAppro marketing site** | Real Figma→code product/pricing/legal/support/waitlist experience | Launch integration freeze | Conversion + subscription acquisition | **Built locally; blocked on first push/preview QA** |
+| **LR-5 — Base509 marketing website** | Multi-domain company hub plus canonical policy registry | Immediate preview after first push; production after approval | Apple Organization enrollment | **Push-ready/build-green; first `apps/web` push is the bottleneck** |
+| **LR-6 — Apple App Store preparation** | Apple Developer org account ($99), App Store Connect record + bundle ID, privacy nutrition labels, in-app account-deletion flow, screenshots/icon, TestFlight beta | **Enroll immediately after LR-5; submit ~Oct 1–3** | Public launch | **D-U-N-S green; blocked on live base509.com** |
+| **LR-7 — Google Play preparation** | Play Console org account ($25), closed-testing track, Data Safety form, store listing + graphics | **Enroll after Apple is initiated; submit ~Oct 1–3** | Public launch | **D-U-N-S green; ready after account-sequence step** |
+| **LR-8 — App Store review buffer** | Buffer after Target-2 submission to absorb rejection + resubmit; hold release until launch gate is green | **~Oct 3–21** | Oct 21 target | Not started |
 
-**Dependency chain (the binding path):** D-U-N-S (BIZ-4) → Apple/Google org accounts (LR-6/7) → live legal + support + contact URLs (LR-1/2/3) → create store listings → **submit ~Sep 10** → **review buffer (LR-8)** → **launch Oct 1**. Legal/support/contact URLs and the store accounts are on the critical path; the fuller marketing site (LR-4/5) can trail slightly but must be live before launch day.
+**Dependency chain:** Danny go → Claude Code first `apps/web` push → Vercel (`Root Directory = apps/web`) → preview/domains → approved Base509/PetAppro production deploy → Supabase/Resend waitlist; then store URLs/enrollment/listings and remaining launch gates. Provider portal/Billing and the non-cuttable tenant/RBAC/RLS foundation continue in parallel.
 
-**Gate — Launch Readiness exit criteria:** legal, support, and contact pages live at stable petappro.com paths; both org accounts active; both listings created with privacy/data-safety forms complete and URLs pasted; account-deletion flow shipped (Apple); builds submitted with release gated to Oct 1; review buffer reserved on the calendar.
+**Gate — Launch Readiness exit criteria:** legal, support, and contact pages live at stable petappro.com paths; both org accounts active; BIZ-10b complete; both listings created with privacy/data-safety forms complete and URLs pasted; account-deletion flow shipped; builds submitted with release held for the approved launch date; review buffer reserved on the calendar.
 
 ---
 
@@ -486,7 +514,7 @@ Use this as the default in/out scope anchor during Phases 0 and 4. Adjust only t
 - Business setup
 - Invite-code onboarding (client and staff)
 - Client onboarding and pet profiles
-- Boarding, daycare, and dog-walking bookings (walking = service only, **no GPS/live tracking**; schema should allow future service types)
+- Boarding, daycare, and dog-walking bookings, with **GPS/live walk tracking at launch for Crew+** (D-054); schema and service configuration remain generic so provider-defined service types do not require a rewrite
 - Staff dashboard and daily schedule
 - Pricing engine with server authority and stored breakdowns
 - Blocked dates with server enforcement
@@ -523,21 +551,20 @@ Phase 4  MVP Specification
    ↓
 Phase 5  Build Planning
    ↓
-Phase 6  MVP Build         ← future / not started
+Phase 6  MVP Build         ← partially started; Foundation Recovery is active
 
-  ══ Launch Readiness (LR) ═════════════════════════  ← PARALLEL, starts now (Aug front-load)
-     D-U-N-S → store org accounts → legal/support/contact URLs →
-     store listings → submit ~Sep 10 → review buffer → launch Oct 1
+  ══ Launch Readiness (LR) ═════════════════════════  ← PARALLEL, active now
+     Vercel Pro → minimal base509.com → Apple Org → Google Play →
+     address/legal/support checks → submit ~Oct 1–3 → buffer → Oct 21 target
 ```
 
 Phases 2 and 3 may run with light overlap after Phase 1 exit criteria are met, but specs (Phase 4) should not begin until flows and design foundations are review-ready. **Launch Readiness runs across the whole timeline** — its store-clock items (D-U-N-S, org accounts, review buffer) are the binding external constraint and must not wait on the build phases.
 
 ---
 
-## Immediate Next Steps (Phase 0)
+## Immediate Next Steps (updated 2026-08-15)
 
-1. Create `docs/planning/product_brief.md`
-2. Record platform decision (web vs native) in `docs/decisions/`
-3. Finalize MVP in-scope / out-of-scope against the list above
-4. Resolve open questions from `docs/planning/woof-wetreats-to-petappro-rebuild-plan.md`
-5. Mark Phase 0 exit criteria complete before starting architecture work
+1. Danny gives the go; Claude Code performs the first GitHub push of `apps/web`. This is the current bottleneck.
+2. Connect Vercel with `Root Directory = apps/web`; review preview, attach domains, verify HTTPS/host routing/policy/support/contact routes, and promote only with Danny's explicit approval.
+3. Configure and validate hosted Supabase/Resend waitlist end to end after preview/domains are available.
+4. Continue the provider portal and web-only Stripe Billing boundaries in parallel with the non-cuttable CFG-1/RBAC/RLS foundation.

@@ -39,7 +39,7 @@ The audit is the technical spine of this plan. The critical items:
 | 1 | **No multi-tenant boundary** (global `pricing_rates.id=1`, single-business assumptions) | You cannot host many businesses safely without `business_id` everywhere | Tenant-scoped schema + RLS on every table (§5) |
 | 2 | **Inconsistent authorization** (`is_admin` vs email vs `ADMIN_EMAIL`) | Role drift is a classic production security failure | Centralized RBAC: tenant membership → role → permission, enforced by RLS |
 | 3 | **Duplicated pricing logic** (3 copies that can disagree on money) | Client preview, staff edit, and server booking could quote different totals | One shared `@petappro/pricing` package consumed everywhere |
-| 4 | **Stale, un-integrated tests** (expect a removed 15-night cap) | Your money logic has tests encoding old behavior | Regression tests + CI before any refactor |
+| 4 | ~~**Stale tests** (expect a removed 15-night cap)~~ **RESOLVED — phantom** (verified 2026-07-31, Codex + Claude Code): no 15-night cap or test exists in `packages/pricing`; it was a mis-transcription of Woof's 14-night self-service cap, never ported | — | No fix needed; regression suite (39 pass / 8 skip) is clean |
 | 5 | **Client-side direct DB writes** everywhere | Relies on perfect RLS; hard to reuse on mobile | Route mutations through typed server actions / Edge Functions |
 | 6–8 | Huge files, local `useState` sprawl, no generated DB types | Painful to port to Expo; schema drift goes uncaught | Split screens; **TanStack Query** + small **Zustand** store; generate Supabase types |
 | 9 | **Low white-label readiness** (hardcoded "Woof Wetreats") | Every new industry/brand needs configurable brand, copy, services, terms | Tenant theme/content/config tables + brand resolver |

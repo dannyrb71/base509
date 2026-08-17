@@ -76,6 +76,17 @@ Primary channel for operational urgency at MVP.
 - Deep link to relevant booking, client, or meet-and-greet context
 - Works for owner, admin, staff, and client (each sees their relevant subset)
 
+> **⭐ Notification center vs. the Home "Needs your attention" queue — distinct surfaces (Danny, 2026-08-01, FR41).** They look similar but do different jobs; keep them behaviorally distinct or they read as duplicates:
+> - **Notification center** = the **full chronological feed** — everything that happened (photos, "report card ready," confirmations, reminders, *and* action items). Time-ordered, tap → deep-link. A **log/history**; acting on something does **not** remove it.
+> - **Home "Needs your attention"** = only the **action-required subset** — items that *block progress* (pick an M&G slot, approve a price change, approve a pending booking, expiring requests). Promoted above the fold on Home so they aren't buried in the feed. **Task cards with a clear CTA** ("pick a time →", "review & accept →") that **clear from the queue when resolved** (the underlying notification stays in the log).
+> - **Navigation:** the attention view is **NOT a separate screen** — it's the client **Home dashboard's attention state** (Home renders normal / empty / live-service / attention from the client's data; archetype-10 system-states). You reach it by opening Home when blocking items exist.
+> - **Same component, different variant (Danny, 2026-08-01 — "closer visually: yes").** Both surfaces use the **same card component** (`Card content/Notification row`) so they look consistent/coherent — reuse-first, one card family. The difference is a **variant/state, not a different design:**
+>   - **Action-required variant** (Home attention queue): a clear **CTA** ("pick a time →", "review & accept →") + light emphasis; **self-clears** when resolved. It's a task.
+>   - **Informational variant** (Notification center): plainer, no task CTA; **persists** as history. It's a log entry.
+>   An item can appear as both (the log entry + the promoted task). The semantics live in the **variant**, not in two unrelated card designs — that's what prevents redundancy while keeping the look unified.
+
+> **Scheduled care-task reminders = a notification type (Danny, 2026-08-01).** Feed times, medication times, and similar scheduled nudges are **notifications**, NOT content on the provider Today board. Today stays focused on dogs in/out + capacity; care reminders are reached via the **notifications bell** on the Today top bar (`provider-dashboard.md` §B). Build when the notification system supports scheduled nudges — can be a fast-follow, decoupled from the board.
+
 **Working default (D-001):** Web-first responsive UI. In-app center is the reliable baseline regardless of push support.
 
 ### Email (MVP — paper trail only)

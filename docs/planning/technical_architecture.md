@@ -290,7 +290,7 @@ The single shared pricing package is the crown jewel (Sprint 1; never cut).
 - **Stored breakdowns.** Final total + line-item breakdown are persisted on the booking (`booking_price_breakdowns`) so a charge is always auditable and reproducible.
 - **Manual overrides** by staff/owner are allowed with an audit trail (D-018, default Yes): store original computed price, override value, actor, timestamp.
 - **Server-authoritative booking creation** and **server-side blocked-date enforcement** carry forward from Woof Wetreats (rebuild plan "What to Preserve").
-- **Regression tests first** (S1-2/S1-3): the extraction is test-driven; the stale 15-night-cap test is fixed as part of this (from Codex audit).
+- **Regression tests first** (S1-2/S1-3): the extraction is test-driven. *(The "stale 15-night-cap test" was a **phantom** — verified 2026-07-31 (Codex + Claude Code): no such cap or test exists in `packages/pricing`; it was a mis-transcription of Woof's 14-night self-service cap, never ported. Nothing to fix; S1-3 satisfied by clean extraction.)*
 - **What "single shared" means.** One pricing *engine* (`packages/pricing`) reused everywhere — **not** one universal price. Each provider's own rates live in `business_service_pricing`, tethered by `business_id`. This engine computes what a provider's customer pays the provider; it is **not** our SaaS subscription price (that's Stripe Billing, D-020).
 - **Multi-currency (D-025).** Money is stored as integer minor units + a per-business `currency`, so providers in the US / Canada / EU / AU price in their own currency. Tax (GST/VAT) and our subscription currency are later GTM items; the schema won't block them.
 
@@ -376,7 +376,7 @@ supabase/
 | D-010 multi-location | Deferred | Single location; no `location_id` in MVP |
 | D-013/D-014 invite codes | Proposed | Carry `max_uses`/`expires_at` columns now |
 | D-018 price override | Default Yes | Override allowed with audit trail |
-| D-022 services | Default multi | Services as rows; ship boarding+daycare |
+| D-022/D-054 services | **Decided — generic instances** | Five-axis service rows; launch presets boarding+daycare+walking; Crew+ GPS at launch; provider-defined types must not require schema/API branches |
 | D-024 support/break-glass role | **New — Proposed** | Platform-side assist; redacted, audited, time-boxed; schema assumes it |
 | D-025 multi-currency | **New — Proposed** | Per-business currency; minor-unit money; tax deferred |
 | D-026 connect method | **New — Proposed** | Invite code + QR only; never search-by-name |

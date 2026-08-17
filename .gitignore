@@ -20,3 +20,8 @@ build/
 docs/user-flows/*.pdf
 .vercel
 .env*
+
+# Machine-local agent/tooling caches
+.agent-backups/
+.pnpm-store/
+.fuse_hidden*

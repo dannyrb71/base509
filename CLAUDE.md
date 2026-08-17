@@ -23,24 +23,33 @@ You are the implementer. Codex reviews your work (especially money/security code
 9. **No secrets in the app bundle or the repo.** Service-role keys, Pushover/Twilio tokens, admin config live in Supabase Edge Function secrets or platform env vars.
 10. **Payments:** client→provider booking payments go through **Stripe Connect (Standard)** into the provider's own account (real-world-services exemption — not Apple IAP). The provider **SaaS subscription is sold on the web portal only**, never as an in-app purchase in the iOS binary.
 
-## Architecture (monorepo)
-```
-apps/mobile   ← Expo (React Native), iOS + Android
-apps/web      ← Next.js: marketing + provider billing/admin portal
-packages/pricing   ← extracted, tested pricing engine (crown jewel)
-packages/booking   ← booking validation + availability/capacity
-packages/auth-rbac ← tenant membership, roles, permissions
-packages/data      ← typed Supabase access + generated types
-packages/ui        ← design tokens + shared primitives
-supabase/          ← versioned migrations + Edge Functions
-```
+## Architecture (monorepo) — ⚠️ TARGET STATE, NOT CURRENT STATE
+
+> **Verified 2026-07-20.** This block describes where we're going. **Do not assume any of it exists — check the repo.** An earlier version of this file was written in the present tense and sent an agent hunting for four directories that aren't there, costing a full build cycle.
+
+| Path | Purpose | Status |
+|---|---|---|
+| `apps/web` | Next.js: marketing + provider billing/admin portal | ✅ **built** |
+| `packages/pricing` | extracted, tested pricing engine (crown jewel) | ✅ **built** |
+| `packages/ui` | design tokens + shared primitives | ✅ exists |
+| `packages/tokens` | design tokens | ✅ exists |
+| `apps/mobile` | Expo (React Native), iOS + Android | ⚠️ **stub — `eas.json` only** |
+| `supabase/` | versioned migrations + Edge Functions | 📋 **PLANNED — does not exist.** No `.sql` anywhere; no migration tooling. CFG-1 Phase 0 creates it |
+| `packages/data` | typed Supabase access + generated types | 📋 **PLANNED — does not exist.** Types are hand-written today |
+| `packages/booking` | booking validation + availability/capacity | 📋 **PLANNED — does not exist** |
+| `packages/auth-rbac` | tenant membership, roles, permissions | 📋 **PLANNED — does not exist** |
+
+**Also not yet wired:** no root `package.json`, no `pnpm-workspace.yaml` — this is **not currently a workspace**; CI installs `packages/pricing` standalone. No `@supabase/*` dependency in any manifest. **No tenancy tables exist** (`businesses`, `base509_accounts`, `auth_identities`, `business_memberships` are designed in `docs/planning/technical_architecture.md` + `data_model_draft.md`, but unbuilt).
 
 - **Server state:** TanStack Query. **UI/session state:** a small Zustand store only. Do not sprawl `useState`/`useEffect` for server data.
 - **Sensitive mutations** (reservations, payments, blocking, staff records) go through typed server actions / Edge Functions — not direct client DB writes.
 - Split large screens into container + hooks + presentational components. No 1000-line files.
 
 ## The services/capacity engine (why generalization matters)
-Model every service by: **pricing_model** (per_night · per_session · per_hour · per_head · per_unit · tiered · flat), **capacity_model** (one_to_one · fixed_n · unlimited_overlap · shared_exception), **duration_model**, **location_model** (at_provider · at_client · either), and **buffers** (travel/setup). Dog logic (overlap boarding, walking ≤6, grooming 1:1 unless same-home exception, holiday windows) must be expressible as config on this generic engine — not special-cased in code.
+Model every service by **pricing_model · capacity_model · duration_model · location_model · buffers**. Dog logic (overlap boarding, walking caps, grooming 1:1 unless same-home exception, holiday windows) must be expressible as config on this generic engine — not special-cased in code.
+
+> ⛔ **`pricing_model` values are NOT listed here.** The canonical list is the `PricingModel` type in **`packages/pricing/src/types.ts`** — code wins, always. It currently has **nine** values including `duration_tiered` (walking 30/60/90, D-022) and `partial_unit_overage` (boarding late-pickup), **both MVP**.
+> This file previously copied a **seven-value** list that omitted both. That copy drifted from the code and would have forced a follow-up migration on the first walking service. **Derive from the type; never restate it.** See `docs/CANONICAL-SOURCES.md`.
 
 ## Domain rules to preserve from Woof
 - Price is **stored at booking time** (`total_price`); never retroactively recalculated when rates change.
@@ -52,6 +61,9 @@ Merged behind green CI (typecheck + lint + tests); pricing/booking changes cover
 
 ## Workflow
 Plan → approval → feature branch → implement with tests → CI green → Codex review → Danny manual device/browser check → "ready to deploy" → merge (CI deploys). Keep PRs small and vertically sliced (one full flow at a time).
+
+## ⛔ Before writing a fact into any doc — read `docs/CANONICAL-SOURCES.md`
+Every fact has **one** authoritative home. Link to it; never copy it. **Code beats docs.** Verify with `grep` before asserting — every drift incident in this project was one grep away from being caught.
 
 ## Reference (canonical map)
 - **Product definition / positioning / scope:** `docs/planning/product_brief.md`

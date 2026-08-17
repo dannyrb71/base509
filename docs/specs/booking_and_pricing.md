@@ -12,7 +12,7 @@
 
 George v2 is adopted wholesale **except** these four changes, which reflect decisions made after he wrote it:
 
-1. **Dog walking is IN the MVP (D-022).** George scoped MVP to boarding + daycare and put walking under "later." **Walking is now an MVP vertical** (service only — *no GPS / live route tracking*). Consequence: pull **`per_session`** (already MVP) and **`duration_tiered`** (walk lengths are **provider-defined** — the provider builds their walk service with **≥1 duration tier**, sets each tier's label + duration + price, and can add more; PetAppro presets no tiers) **into MVP**. Group/multi-dog walks price via **participant scaling** (per-dog) and/or per-session; **group concurrency/capacity** (e.g., "up to 6 dogs on one walk") is a **scheduling/capacity concern, not pricing** — the pricing engine just prices the session + per-dog; the capacity engine (annex §5 `capacity_model`) governs how many share a slot. They interact but stay separate. **Walk type is provider-configured:** the provider chooses which they offer — **Group**, **Individual**, or **Both** (a single generic walk if they don't differentiate). Group → per-dog pricing + concurrency cap; Individual → per-session/duration for one household. When both are offered, the client selects the type at booking (flow's "solo or group"). This is a walk-service config field feeding provider setup + the booking flow.
+1. **Dog walking is IN the MVP (D-022), with GPS at launch under D-054.** George scoped MVP to boarding + daycare and put walking under "later." Consequence: pull **`per_session`** (already MVP) and **`duration_tiered`** (walk lengths are **provider-defined** — the provider builds their walk service with **≥1 duration tier**, sets each tier's label + duration + price, and can add more; PetAppro presets no tiers) **into MVP**. GPS execution/entitlement remains outside pricing math. Group/multi-dog walks price via **participant scaling** (per-dog) and/or per-session; **group concurrency/capacity** (e.g., "up to 6 dogs on one walk") is a **scheduling/capacity concern, not pricing** — the pricing engine just prices the session + per-dog; the capacity engine (annex §5 `capacity_model`) governs how many share a slot. They interact but stay separate. **Walk type is provider-configured:** the provider chooses which they offer — **Group**, **Individual**, or **Both** (a single generic walk if they don't differentiate). Group → per-dog pricing + concurrency cap; Individual → per-session/duration for one household. When both are offered, the client selects the type at booking (flow's "solo or group"). This is a walk-service config field feeding provider setup + the booking flow.
 
 2. **No deposits in the MVP (D-015, Decided 2026-07-08).** George kept "deposit amount calculation" in MVP. **Remove deposits from MVP entirely.** The engine *may retain* deposit **config support** for later, but **MVP config never sets a deposit**, `deposit_due_minor` is always `0`, and `balance_due_minor == total_minor`. Drop the deposit worked example (George Example 1's deposit lines, Golden Test 7) from the MVP set — keep them only as "later" references. Revisit deposits only on customer feedback.
 
@@ -108,6 +108,33 @@ Provider tips are **in the MVP**.
 
 ---
 
+## 5B. Boarding Extra — `partial_unit_overage` config (D-063, Danny 2026-07-30)
+
+An **optional** provider fee when a boarding stay runs past a provider-set covered window (a late-pickup / beyond-window charge). Implemented with the existing **`partial_unit_overage`** model — **no new primitive, no schema fork.**
+
+> ⚠️ **Name guard:** "**Boarding Extra**" (an *added* charge) is NOT the **`extended`** rate tier (a *reduced* long-stay rate, resolved at §4 step 2). Opposite directions — they must never share a label in code, schema, or UI.
+
+**Config (provider, per boarding service — set in `provider-onboarding-configuration.md` §5.1a):**
+- `boarding_extra_enabled: boolean` — the onboarding yes/no. Default **off**.
+- `covered_hours: int` — hours the base nightly rate covers, **measured from the booked/scheduled drop-off timestamp** (e.g. 24–28). Provider-set.
+- `boarding_extra_minor: int` — the flat fee (the "Boarding Extra" rate-card line). **Single flat fee for MVP.**
+
+**Semantics:**
+- **Deterministic at booking.** Computed from the **booked** drop-off and pickup timestamps, never actual physical check-in/out — so it's known at checkout, included in the all-in price (LG-2), and stable in the persisted snapshot. *(Actual late pickup vs. the booking is a billing/policy matter, not engine input.)*
+- **Trigger:** if `booked_pickup > booked_dropoff + covered_hours` → emit **one** flat `boarding_extra` line (`category: "surcharge"`, model context `partial_unit_overage`). Applied **once per stay** for MVP (not per 24h rollover).
+- **Waive:** a **per-booking waive** flag (surfaced only when `boarding_extra_enabled`) suppresses the line for a specific client; the waive is recorded (reason), never silently dropped.
+- **Tiering deferred:** the Rover-style band ("4–8h extra = X, beyond = a full daycare charge") is **post-MVP** — it adds complexity and pulls capacity in (a converted dog would consume a daycare slot). MVP is single-flat only.
+- **Same-day rule:** boarding covers the calendar day → **no same-day daycare + boarding** double-book; a boarded pet still counts against the shared **location pool** while present (`capacity-model.md`), but never generates a separate daycare booking.
+
+**Golden tests (extend the §8 "late-pickup overage" case):**
+- pickup **exactly** at `dropoff + covered_hours` → **no** extra line (boundary).
+- pickup one unit past the window → **one** flat `boarding_extra` line at `boarding_extra_minor`.
+- `boarding_extra_enabled = false` → never emitted, regardless of pickup time.
+- per-booking waive set → line suppressed; total excludes it.
+- multi-day stay crossing the window once → still exactly **one** flat line (MVP single-charge).
+
+---
+
 ## 6. MVP scope (reconciled)
 
 **MVP required** — for **boarding, daycare, AND dog walking** (D-022):
@@ -118,6 +145,8 @@ Provider tips are **in the MVP**.
 - **No deposits** (D-015)
 - **Golden tests** locking all of the above
 - **Provider tips** — client-chosen, 100% to provider, not taxed/discounted (§5A)
+- **Boarding Extra** — optional flat late-pickup overage via `partial_unit_overage` (§5B, D-063)
+- **Meet & Greet is a $0 / non-priced service (D-064)** — no rate config, never gated behind a fee
 - Output feeds the **Stripe Connect** charge (D-007); Connect charge = service total + tip
 
 **Later:** `per_hour`, `per_head`, advanced `tiered`, peak pricing, packages/memberships/prepaid credits, staff/provider rate tiers, multi-location rate books, travel-radius fees, insurance billing, refund/cancellation-fee workflows, gift cards, coupons w/ redemption limits, dynamic pricing, **deposits** (unless customers ask — D-015).

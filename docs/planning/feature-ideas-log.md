@@ -39,7 +39,7 @@
 | F-023 | Shareable provider marketing card + QR (social acquisition) | Provider + prospective client | F-021 rate card, F-011 QR, F-006, D-026/D-029, D-030 | exploring | 2026-07-11 |
 | F-024 | Provider profile "story" / bio | Provider + client | Provider profile, F-021, F-008, D-047 | exploring | 2026-07-11 |
 | F-025 | Retail/sponsor partnerships for acquisition | Provider (GTM) | GTM/marketing, competitive-analysis §5 | exploring | 2026-07-11 |
-| F-026 | In-app "coming soon" roadmap preview | Provider + client | D-048 (GPS v1.1), competitive-analysis §5 | exploring | 2026-07-11 |
+| F-026 | In-app "coming soon" roadmap preview | Provider + client | Superseded by D-054 launch GPS | dropped | 2026-07-11 |
 | F-027 | Walk (timed-service) variants + duration pills | Provider + client | D-039, timed-service model, D-046/D-047, F-014, DS service-pill | exploring | 2026-07-11 |
 | F-028 | Client self-service booking edit/cancel (provider-gated window) | Provider + client | Provider settings (D-041), F-004, F-018, D-039, D-052, F-022 | exploring | 2026-07-11 |
 
@@ -422,10 +422,10 @@
 - **Logged:** 2026-07-11 (Danny)
 
 ### F-026 — In-app "coming soon" roadmap preview
-- **What:** A **minimal** in-app preview of near-term roadmap (e.g. "Coming soon: GPS walking") to set expectations and build anticipation — softens the launch parity gap where GPS is v1.1, not day-one.
+- **What (superseded):** A minimal in-app preview of near-term roadmap, originally proposed when GPS was expected after launch.
 - **Why / problem it solves:** Signals momentum + manages expectations for features competitors already have (competitive §5); can gauge interest.
 - **Who it serves:** Provider + client.
-- **Ties to:** competitive-analysis §5 (GPS gap), D-048 (GPS v1.1), settings/profile.
+- **Ties to:** D-054, which superseded and eliminated this need.
 - **Notes / open questions:** ~~keep tasteful/minimal — verify App Store rules on advertising unreleased features~~ — **moot.**
 - **Status:** **dropped (Danny, 2026-07-14)** — we're not doing "coming soon" at all: GPS ships **at launch** (D-054), so there's no unreleased feature to preview, and nothing for Apple guideline **2.3 (accurate metadata)** to catch.
 - **Logged:** 2026-07-11 (Danny)

@@ -98,6 +98,9 @@ export default function PetApproLayout({ children }: { children: React.ReactNode
           <div className="site-footer__brand">
             <Wordmark inverse />
             <p className="type-caption">The booking app for dog-care providers. Your clients, your prices, your money.</p>
+            <p className="site-footer__social type-caption">
+              Follow: <a href="https://instagram.com/petappro" target="_blank" rel="noopener noreferrer">Instagram</a> · <a href="https://facebook.com/petappro" target="_blank" rel="noopener noreferrer">Facebook</a>
+            </p>
             <Image
               className="site-footer__base509"
               src="/brands/base509/base509-logo-reverse.svg"

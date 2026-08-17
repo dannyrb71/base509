@@ -2,9 +2,11 @@
 
 > **Role of this file:** the canonical roadmap is `docs/roadmap/mvp_roadmap.md` (phases, gates, exit criteria). This annex supplies the **dated delivery schedule (sprints/milestones), the paste-ready backlog database, and the tenant-aware schema starter** referenced from there. If the two ever disagree on scope, `mvp_roadmap.md` wins; this file owns the calendar and the schema tables.
 
-Companion to **PetAppro-Strategy-and-Business-Plan.md**. Everything here is structured to paste straight into Notion — the tables become Notion databases, the checklists become to-do items. Timeline is back-planned from a **hard app-store submission date of ~Sept 10**.
+Companion to **PetAppro-Strategy-and-Business-Plan.md**. Everything here is structured to paste straight into Notion — the tables become Notion databases, the checklists become to-do items. The current recovery baseline is governed by `mvp_roadmap.md`; older Target-1 dates below are retained as historical planning context where they have not yet been re-cut.
 
 > **Launch targets (updated 2026-07-08, D-023):** **Target 1 = Oct 1** (aggressive), **Target 2 = Oct 21** (realistic, to ship *with* in-app payments — Stripe Connect, D-007 Option A). The dated calendar below is Target-1-based; add ~3 weeks for the Target-2 payments-included path. **Stripe Connect is now IN the MVP** (reversed from the earlier "deferred" language throughout).
+
+> **Web timeline override — 2026-08-15:** Base509/policies and PetAppro marketing are ready locally; the design system is published as a library; the provider portal is in progress with optional/offline booking payments. `apps/web` has never been pushed to GitHub. **Danny go → Claude Code first push is the current launch bottleneck**, gating Vercel (`Root Directory = apps/web`) → preview/domains → Supabase/Resend waitlist. This override supersedes older Aug 13 and “website not started” references below.
 
 ---
 
@@ -43,6 +45,9 @@ Companion to **PetAppro-Strategy-and-Business-Plan.md**. Everything here is stru
 
 | Milestone | Target date | Phase | Owner | Status |
 |---|---|---|---|---|
+| **First `apps/web` GitHub push** | **Immediate on Danny's go** | LR | Claude Code / Danny approval | **BLOCKED — CURRENT LAUNCH BOTTLENECK** |
+| Vercel preview + domains (`Root Directory = apps/web`) | Immediately after first push | LR | Claude Code / Danny | Blocked by first push |
+| Supabase + Resend waitlist live | After preview/domains | LR | Claude Code | Blocked by first push/deployment chain |
 | Monorepo + CI live | Jul 11 | P0 | Danny | Not started |
 | Pricing engine extracted + regression tests green | Jul 18 | P0 | Danny | Not started |
 | Tenant-aware schema (branch) reviewed | Jul 25 | P0 | Danny | Not started |
@@ -57,8 +62,8 @@ Companion to **PetAppro-Strategy-and-Business-Plan.md**. Everything here is stru
 | Store listing assets complete | Sep 5 | P3 | Danny | Not started |
 | **App submitted to both stores** | **Sep 10** | P4 | Danny | Not started |
 | Social handles reserved + brand kit | Aug 15 | P3 | Danny | Not started |
-| Website live w/ privacy + support URLs (needed for store submission) | Sep 5 | P3 | Danny | Not started |
-| Full marketing site + launch content | Sep 25 | P5 | Danny | Not started |
+| Website live w/ privacy + support URLs (needed for store submission) | After approved Vercel preview | P3/LR | Danny / Claude Code | Built locally; blocked by first push |
+| Full PetAppro marketing site + launch content | Preview QA after first push | P5/LR | Claude Code | Built locally from real Figma content; not deployed |
 | **Public launch** | **Oct 1** | P5 | Danny | Not started |
 
 ---
@@ -67,7 +72,7 @@ Companion to **PetAppro-Strategy-and-Business-Plan.md**. Everything here is stru
 
 ### Sprint 1 (Jul 7–18) — Foundations & the crown jewel
 - Set up monorepo (`apps/mobile`, `apps/web`, `packages/*`, `supabase/`).
-- **Extract `packages/pricing`** from the three existing copies into one; **write regression tests first** capturing *current* behavior (including the removed 15-night cap decision — fix the stale test).
+- **Extract `packages/pricing`** from the three existing copies into one; **write regression tests first** capturing *current* behavior. *(Verified 2026-07-31, Codex + Claude Code: the "15-night cap" is a **phantom** — it never existed in PetAppro's engine or tests; it was a mis-transcription of Woof WeTreats' **14-night client self-service cap**, deliberately not ported. No stale test to fix; **S1-3 is satisfied by the clean extraction**.)*
 - Extract `packages/booking` (validation + availability rules).
 - Generate Supabase DB types → `packages/data`.
 - GitHub Actions: typecheck + lint + test on every PR.

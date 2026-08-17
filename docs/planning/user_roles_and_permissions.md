@@ -465,6 +465,43 @@ Supersedes the Owner/Admin/Staff specifics above where they conflict. The PCSP i
 
 Adds **Manager** as a new tier to the prior Owner/Admin/Staff model. Seats/tiers per D-020; the invite flow shows level capabilities + an "Admin sees financials" disclaimer + a seat/tier check. Flow drawn on the FigJam board: "Provider · Staff / team management".
 
+### Invite-team-member screen — canonical role copy + layout (Danny, 2026-07-31)
+
+Caught in review: the invite screen described roles by what they **lack** (terse negatives) and referenced "ownership" without ever anchoring that **the Owner is the inviter** — so "Admin can't touch ownership" dangled. Fixes, canonical:
+
+- **Anchor the Owner first**, then describe each grantable level as **what it adds** (roles nest — Staff ⊂ Manager ⊂ Admin ⊂ Owner):
+  > **You're the Owner** — full access, including billing. Choose what to grant this person:
+  > - **Staff** — Handles the bookings and care they're assigned. Can't edit other bookings, and never sees or sets prices.
+  > - **Manager** — Runs day-to-day operations: all bookings, clients, scheduling. Still can't see money or change prices.
+  > - **Admin** — Your trusted partner. Everything a Manager does, plus financials, reports, and pricing. Can't change billing or ownership — that stays with you.
+- **Owner is NOT an assignable invite role** (creator only; ≥1 Owner always). Admin = the "co-provider" partner level (D-032). *(Transferring ownership is a separate future flow, not this screen.)*
+- **Split the crammed callout:** the *"Admins see your financials"* heads-up shows **only when Admin is selected** (contextual to the choice); the **seat counter** ("Seats: 2 of 3 on Crew") is persistent context — place it steadily (near the title or the Send button), not bundled with the financial warning.
+- Copy tweakable by Danny; structure (Owner-anchor · additive descriptions · split callouts) is locked.
+
+### The "More" page is DERIVED from the permission matrix — not hand-built per role (2026-07-28, from Danny's design review)
+
+Fable was hand-crafting each role's "More" screen, which introduced inconsistencies (staff view missing App Settings; risk of Share Booking Code appearing for staff). Rule going forward:
+
+- **App Settings = personal / device-level** (the user's own notification prefs, appearance, account, help, sign out). **Universal — present on EVERY role's More page, including Staff** (and the client app has its equivalent). It is NOT business config, so it is never gated away. ⚠️ Distinct from the owner's **SETTINGS** section ("Services, Prices, Availability" · "Branding & Business Profile") — that is *business config*, owner/admin-only, opens the web portal.
+- **Share Booking Code = a client-invite action → owner/admin only (D-002).** The booking code is the client-connect mechanism (D-026: invite code + QR); D-002 restricts client invites to owner/admin ("staff cannot invite clients"). So **Share Booking Code does NOT appear on the Staff (or Manager) More page.** *(If we ever want staff to help grow the client base by sharing the code, that is a deliberate D-002 revision — not a design tweak. D-002 stands as of 2026-07-28.)*
+- **Switch Space** (the account/context switcher, D-004/D-012/D-030) is **conditional** — render only when the account belongs to 2+ contexts (client identity + ≥1 business, or multiple businesses). Single-context users never see it. *(Terminology **LOCKED: "Space"** — Danny, 2026-08-01. "Switch Space" / "Space switcher" are the canonical labels.)*
+  - **Entry points to the Space switcher (MORE·04) — all gated on the same multi-context condition:** (1) the **Switch Space** tile on More; (2) **AUTH·06** choose-a-space at sign-in (audit §7 consolidation — same screen); and (3) ⭐ **the Brand/Header chevron (Danny, 2026-07-31)** — the `Brand/Header` component gets a **`chevron` boolean** that turns **ON only when the user has >1 provider**, making the header tappable → the Space switcher for a quick provider swap. Single-provider users: chevron OFF, header not tappable. Keep all three entry points consistent (same condition, same destination).
+- **General principle:** every More-page tile is permission-gated and derived from the matrix. Design once at the Staff base and gate up (per the DS "design once, gate-up as annotation" rule) — do not hand-author per role.
+- **⭐ Section structure = TWO buckets, adaptive (Danny, 2026-08-01 — replaces the invented "GENERAL / RUN THE BUSINESS / SETTINGS" labels):**
+  - **Personal Settings** — the person's own stuff: personal profile · My Schedule · Notifications · Switch Space (if multi-context) · Team Directory · App Settings · Sign out. **All roles.**
+  - **Business Settings** — running the business: Review Unpaid Balances · Manage Team · Mktg & Content · Share Booking Code · All Services Settings (web) · Brand & Business Profile (web). **Owner/Admin only** (every row here is owner/admin per the gates above).
+  - **Adaptive labeling:** a role with **both** buckets (Owner/Admin) sees the two labeled sections **"Personal Settings" / "Business Settings."** A role with **only** personal (Staff **and** Manager — none of the business rows are theirs) sees a **single section simply labeled "Settings"** (no Personal/Business distinction when there's only one bucket). *(Manager runs operations from the main tabs, not from More business rows — so Manager's More = personal only, same as Staff.)*
+
+**Staff "More" therefore = ** profile · My Schedule · Notifications · **Team directory** · App Settings · Switch Space (if multi-context) · Sign out. It correctly *excludes* Manage Team (management), Review Unpaid Balances (financial), Share Booking Code (D-002), and the web-portal business settings.
+
+### Personal profile is first-class on EVERY role's More page (2026-07-28, Danny — FLOW REVIEW 46)
+
+The owner/admin More frame led with the **business** card (brand + "on PetAppro") and **dropped the person's own profile**; the staff frame had a personal card ("Alex · Staff @ …"). Inconsistent — fix:
+
+- **Every role gets an editable personal-profile entry** (name, email, phone, avatar, credentials/password) → tap → **manage your own profile.** Owner sees "Danny · Owner @ …", staff sees "Alex · Staff @ …". Everyone can edit their **own** profile (matches the "Edit own client profile → Own" row for the client side).
+- **Business identity ≠ personal identity.** The business brand card (logo, name, "on PetAppro") is *context*, and editing the business brand/profile stays owner/admin (web portal). Don't let the business card stand in for the person's profile — show both.
+- ✅ **Team directory — MVP, accessed under More (Danny, 2026-07-28).** Within a business, members can see each other's **names + roles** and permission-scoped **contact details** (native call/text/email handoff). Visible to **all team members** (read-only contact list); the owner/admin **Manage Team** entry is the *management* version (add/invite/roles), the **Team directory** is the *view/contact* version everyone gets. This is the **foundation future in-app messaging builds on** (in-app messaging itself is **post-MVP, D-053**). Privacy: **contact details are visible to the team by default** (Danny, 2026-08-01) — names, roles, phone, email. An owner-controlled visibility *restriction* is a **post-MVP** option, not launch.
+
 ---
 
 ## App IA & role nesting (Danny 2026-07-07) — see D-033

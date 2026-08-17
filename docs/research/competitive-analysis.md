@@ -43,7 +43,7 @@
 | **Marketplace takes 20–40% + owns the client** (Rover, Wag providers) | Subscription-only, **no take-rate**; providers own their clients + brand | D-029, D-039 |
 | **Per-active-staff pricing gets expensive** (TTP, Scout) | **Flat per-band pricing**, no per-seat surcharge; free Starter | D-020 pricing |
 | **Buggy, clunky, crashy, many-click apps** (Rover, Wag, Precise) | **Best-in-class native mobile UX** — fast, modern, few taps (our core bet) | D-001, DS work |
-| **Inaccurate/glitchy GPS** (Rover, Precise) | GPS done right in **v1.1** — accurate check-in/out coordinates + reliable track | D-048 |
+| **Inaccurate/glitchy GPS** (Rover, Precise) | GPS done right **at launch** — accurate check-in/out coordinates + reliable track | D-054 |
 | **Email-primary → clients miss updates; SMS metered** (TTP) | **Push + email built-in free**; report cards + real-time updates; SMS opt-in only at top tier | D-046, D-049 |
 | **Clients confused how to book** (Precise, Rover) | Clean **self-service client booking** + invite onboarding + live price preview | product_brief Pillar B |
 | **Can't preview the bill / can't differentiate pets** (TTP, Scout) | **Explicit-rate engine** w/ per-pet flat surcharges + **stored breakdown** + live preview | D-039 |
@@ -68,7 +68,7 @@
 ## 5. Parity gaps / risks (be honest)
 
 - **Client acquisition:** marketplaces *bring customers*; we don't (deliberate, D-029). **Answer:** we target providers who already have clients and want off the marketplace/spreadsheets (the Woof WeTreats profile). **Acquisition-assist without becoming a marketplace:** give providers a **shareable marketing card + QR** to post on social (Nextdoor/Facebook/IG) so they grow their *own* book (**F-023**); an authentic **profile story/bio** to convert prospects (**F-024**); and explore **retail/sponsor partnerships** (Pet Food Express, PetSmart, Chewy) as a channel (**F-025**). We help them grow — we just don't broker.
-- **GPS at launch:** competitors have GPS (however buggy — Rover glitches, Precise logs "miles off"); ours is **v1.1**, not launch. Manual proof-of-walk covers MVP, and a tasteful in-app **"coming soon: GPS walking"** preview (**F-026**) signals it's on the way. When it ships, "GPS done *accurately*" is itself a wedge against their buggy versions.
+- **GPS at launch:** D-054 makes accurate live tracking a hard launch gate for Crew+. This is both a wedge and the highest reliability/store-review risk; schedule it early and move the date rather than shipping inaccurate tracking. F-026 was dropped because advertising GPS as “coming soon” would contradict launch scope.
 - **Deep billing features:** packages, prepay, invoice customization, QuickBooks/accounting integrations — mature competitors have these; we're MVP. Don't over-promise; roadmap them.
 - **Feature breadth:** TTP/Gingr have years of surface area. We compete on focus + UX + price, not feature count. Avoid "we do everything" positioning.
 - **Support expectations:** we're small; "responsive support" must be real or it becomes our own bad-review theme. Starter (free) = no support by design.

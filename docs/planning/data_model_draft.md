@@ -54,7 +54,7 @@ Stable product-agnostic account record. `id, primary_email, display_name, create
 - Do not put PetAppro-specific provider/client fields here.
 
 ### auth_identities
-Mapping from the current auth provider to the stable account. `id, base509_account_id, provider (supabase|apple|google|future_idp), provider_subject, created_at.`
+Mapping from the current auth provider to the stable account. `id, base509_account_id, issuer (the Supabase project / auth tenant, or a future external IdP), provider (login method: supabase|apple|google|future_idp), provider_subject, created_at.` **Unique by `(issuer, provider_subject)`, NOT `(provider, provider_subject)`** — per `technical_architecture.md` §137 "Required schema correction before migrations." Never merge accounts by email alone (Apple relay / changed / recycled addresses). *(Reconciled to the architecture contract 2026-07-31 — Codex flagged the draft was missing `issuer`.)*
 - For MVP, `provider_subject` maps to Supabase `auth.users.id`.
 - RLS helpers use this table to resolve `auth.uid()` to `base509_account_id`.
 
@@ -92,9 +92,12 @@ Client profile, **scoped per business** (D-004 Yes across businesses via separat
 ## 4. Business configuration tables
 
 ### business_services
-Services as rows, not enum branches (D-022). `id, business_id, service_type (boarding|daycare|walking|drop_in|house_sitting|... extensible), name, enabled, date_model (overnight|day|visit|slot), location_mode (provider_site|client_location|mobile_route|none), conflict_group_id (nullable), capacity_rules (jsonb), required_fields (jsonb), cancellation_policy (jsonb), deposit_required (bool — D-015 default false), visibility, created_at, updated_at.`
-- MVP enables boarding + daycare + walking, with drop-in as stretch (D-048). `visit` supports one or many scheduled visits per day; `overnight` remains one booking with per-night occurrences. Service semantics stay data-driven.
-- `location_mode` is a service-delivery seam, not D-010 multi-branch support. MVP may use the business's single implicit site; client-location rows are required for drop-in/house-sitting, and mobile-route locations belong to GPS execution (D-054).
+Services are generic engine instances, not enum branches (D-022; provider-onboarding spec §1/§5). `id, business_id, service_type_key (text; built-in preset key or provider-defined stable key), name, enabled, pricing_model, capacity_model, capacity_config (jsonb), capacity_group_id (nullable), duration_model, duration_config (jsonb), location_model, location_config (jsonb), buffers (jsonb: travel_minutes, setup_minutes), conflict_group_id (nullable), required_fields (jsonb), cancellation_policy (jsonb), deposit_required (bool — D-015 default false), visibility, created_at, updated_at.`
+- **Rework guardrail:** `service_type_key` is data, not a PostgreSQL enum or an application switch limited to boarding/daycare/walking. Those three are launch presets that populate the five engine axes; a provider-defined service uses the same row and axis columns. Never create boarding/daycare/walking-specific service tables, DTOs, persistence branches, or pricing paths.
+- Axis values use shared generated enums/check constraints: `pricing_model` follows `packages/pricing`'s canonical `PricingModel`; `capacity_model` = `bounded|unlimited` with the versioned composable V1 shape ratified in `docs/specs/capacity-model.md` §6C; `duration_model` = `overnight|fixed_window|slot|open_ended`; `location_model` = `at_provider|at_client|either`. Model-specific parameters live only in the adjacent config JSON, with generated/runtime validation; the model discriminator itself remains a first-class column so it can be indexed, constrained, typed, and queried.
+- `buffers` is a first-class per-service JSON column because it is one of the five engine axes; require non-negative integer minutes and default both values to zero. Business-level default buffers may seed a service but must be snapshotted onto the service/booking rather than consulted retroactively.
+- MVP enables boarding + daycare + walking. Future built-in presets and near-term provider-defined types reuse these rows. `slot` supports discrete walking/grooming appointments; `overnight` remains one booking with per-night occurrences.
+- `location_model` is a service-delivery seam, not D-010 multi-branch support. MVP may use the business's single implicit site; client-location rows are required for in-home services, and route locations belong to GPS execution (D-054).
 
 ### business_service_pricing
 Per-service rates consumed by `packages/pricing`. `id, business_id, business_service_id, pricing_structure (jsonb: base rate, per-night/per-day/per-visit/per-session, per-pet, add-ons, caps), effective_from, effective_to, created_at.`
@@ -107,6 +110,12 @@ Blocked dates / availability, server-enforced (replaces global blocked dates). `
 Provider-configurable exclusivity policy. `id, business_id, name, overlap_policy (exclusive|overlap_allowed), created_at, updated_at.` Services join by tenant-scoped `business_services.conflict_group_id`; the default overnight-exclusive group contains boarding, in-home sitting, and house sitting, while walking/drop-in may remain ungrouped or overlap-allowed.
 - Conflict is **per booking occurrence, not per pet**. Booking confirmation/reschedule takes a transaction-scoped lock for the business/conflict group and rejects an overlapping confirmed occurrence in the same exclusive group. The authoritative time/date range and business timezone are server-derived.
 - RLS restricts configuration to Owner/Admin. Direct client writes cannot confirm/reschedule around the check; all such transitions use the same typed RPC/Edge Function. Concurrent-overlap, boundary, timezone/DST, cancellation, and cross-tenant tests are required.
+
+### capacity_groups (ratified 2026-07-31)
+Tenant-scoped finite-resource pools shared by services that may legitimately overlap. `id, business_id, name, resource_unit, pool_limit, created_at, updated_at.` Membership is the tenant-composite `business_services.capacity_group_id`; never infer membership from `conflict_group_id`.
+- Capacity and conflict are orthogonal: a conflict group controls overlap permission, while a capacity group limits aggregate consumption when overlap is allowed.
+- `pool_limit` is a positive integer. Date/range changes use audited `business_availability.capacity_override` records targeted to the service or pool; do not rewrite the base pool row.
+- Owner/Admin configuration only. Booking approval/auto-book use one transaction-scoped capacity reservation path and test concurrent requests, interval boundaries, pool + service limits, human override audit, auto-book non-override, and cross-tenant isolation.
 
 ### business_terms_versions
 Tenant-aware terms (replaces static/global legal pages). `id, business_id, version, body (structured template + editable sections per D-009), published_at, published_by, is_current.`

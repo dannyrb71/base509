@@ -27,8 +27,8 @@
   service revenue → matches D-007 §5A (tips in MVP, own Connect line, 100% to provider).
 - **Payments** — charge at confirmation, off-session recurring charges, Payment Element, payout via
   Stripe Connect → matches D-007 Option A (Connect in MVP).
-- **Walking, no GPS** — "route map / GPS post-MVP" correctly marked → matches D-022 (walking in MVP,
-  GPS out).
+- **Walking GPS annotation is stale** — D-054 supersedes the older D-022 timing note. Route tracking is a
+  hard launch gate for Crew+; update any imported flow that labels it post-MVP before implementation.
 - **Invite-code preview before signup** — "enter invite code required to view → preview (read-only) →
   Not yet / Ready to join" → matches F-021 + Danny's clarification (code first, "not yet" to view).
   "No code → Contact / Website / Request access" (no browse) → matches D-026 (invite/QR only, no

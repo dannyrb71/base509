@@ -138,3 +138,79 @@ hierarchy ("our entire database needs a Base509 master level then a per-app id")
 
 **Status:** Codex ratified with modifications; proposed decision entries D-034 through D-038 are now
 in `open_decisions.md` for Danny's final lock.
+
+---
+
+## Requirements pass — Danny (2026-08-15): discounts, owner analytics, multi-country, exports, data access
+
+Expands the v0 inventory with the specifics Danny called out. Most map to **Stripe/Supabase built-ins first, custom UI later** (see G, Build-vs-buy).
+
+### A. Discounts & promo codes
+- **Types:** % off · $ (fixed) off · **free time** (1st week / 1st month / 1st N months / 1 year free) · **free-with-commitment** (e.g. 1st month free *only on the 12-month plan*).
+- **Attributes per code:** value + unit ($/%); **duration** (once · N billing periods · forever); **eligibility** — which tier(s)/plan(s), **new vs existing** customers, **min commitment** (annual/12-mo), **country** (when multi-country); **limits** — total redemptions, per-customer, **valid window**; stackable? (default no).
+- **Reporting:** redemptions, revenue impact, expiry per code.
+- **Build note:** this is **Stripe Coupons + Promotion Codes** almost 1:1 (`percent_off`/`amount_off`, `duration` once/repeating `duration_in_months`/forever, `applies_to` products, `max_redemptions`, `expires_at`, per-customer restrictions, currency). Free-time = 100%-off coupon for N months; free-with-commitment = a code restricted to the annual price. **Model it over Stripe; don't hand-build a discount engine.**
+
+### B. Owner analytics dashboard (same treatment your subscribers get)
+- **KPIs:** MRR/ARR, new subscribers, active **by tier**, churn, trial→paid conversion, ARPU.
+- **Comparisons (explicit ask):** this **week / month / year vs. prior**, and **YoY** — for revenue, subscriber counts, and by tier.
+- **Charts/graphs:** reuse the **shared data-viz components** built for provider reports — one component library, two audiences.
+- **MRR movement:** new / expansion / contraction / churn.
+- **Build note:** Stripe dashboard + **Stripe Sigma** covers much of this; custom is worth it for *your exact comparison views* + the cross-country roll-up (C).
+
+### C. Multi-country / multi-region — NEW dimension (design the seam now)
+Danny will **copy the app per country's app store** and needs everything **segmentable by country** + **tax/reporting by country**. This is a second dimension alongside the ratified app dimension.
+- **Console:** a **country filter on every metric** + a cross-country roll-up (all at a glance, drill into one).
+- **The weight is tax + legal, not the dashboard.** Per-country **VAT/GST/sales tax** collection + remittance, possibly a **local entity** and **separate Stripe account** per country, multi-currency (normalize to a base currency to compare). **Needs proper tax/accounting + legal advice per country — do not hand-roll.** Use **Stripe Tax** for collection; console surfaces collected/owed by country.
+- **Architecture decision (ties to master/per-app hierarchy):** each country a **separate operational deployment + Stripe/entity** (cleanest tax/legal isolation) vs **one platform, multi-currency + Stripe Tax** (simpler ops, heavier compliance). Same pattern as the app dimension — **design the country dimension into the master/billing/operator layer now; build the plumbing when country #2 is real.** PetAppro launches **US-only** (per the interim DPA/Privacy) → *seam now, not Oct-1 work.*
+
+### D. Accounting / exports (accountant + QuickBooks)
+- **Income export by month / quarter / year**, filterable **by country**, in an **accountant/QuickBooks-friendly** format (CSV first; QuickBooks import shape/integration later).
+- Include: gross revenue, refunds, discounts, **tax collected by jurisdiction**, net, currency.
+- **Build note:** Stripe exports + Stripe Tax reports cover most; the value-add is the **period + country shape your accountant actually wants**. Scheduled monthly/quarterly emailed export = nice-to-have.
+
+### E. Data — legal archival, retrieval, and DB access
+- **Legal retention/archival:** keep records the law requires (financial/tax — often ~7 yrs; per-country), **minimized + disconnected from live accounts** post-cancellation (ties Account-Ownership + Privacy §6–7). Archive on cancel, retrieve on demand.
+- **Data-subject requests (GDPR/CCPA):** export or delete a subscriber's/end-user's data (in the v0 inventory — reinforced).
+- **"Manage / pull from the database":** two lanes — (1) **structured views + exports in the console** for day-to-day (safe, audited); (2) **ad-hoc / admin DB ops via the Supabase dashboard + SQL** (owner-only, on the operational project). Do NOT expose raw DB access in the app. Break-glass into a tenant stays **D-024** (least-privilege, redacted, audited, second-approval).
+
+### F. Additions to the component inventory ("what else")
+- **Block / suspend / refund** a subscriber (+ reason + audit + second-approval for refunds — see Multi-level verification).
+- **Plan/catalog management** — define/edit tiers + prices (Stripe Products/Prices), grandfather existing subscribers on price changes.
+- **Alerts** — churn spikes, big refunds, failed payments, new top-tier signups (email/Slack to you).
+- **Scheduled reports** — auto-email the monthly/quarterly numbers + accountant export.
+- **Feature flags / shared-app config** — toggle features, manage themes/config across tenants.
+- **Console security** — MFA on your admin login + full audit log; it can refund/block/access data → treat as high-privilege (DPA security commitments).
+
+### G. Build-vs-buy + sequencing (the important call)
+**Do not build a full custom operator console before launch.** At launch, **Stripe Dashboard + Supabase give you ~80%** free: subscribers, MRR, refunds, coupons/promo codes, disputes, Stripe Tax, invoices, CSV exports — plus Supabase for the DB. Build **custom** only where they fall short: your **WoW/MoM/YoY comparison views**, the **cross-country roll-up**, and the **QuickBooks-shaped export**. Sequence: **launch on Stripe+Supabase → add the custom dashboard incrementally as scale/countries demand** (consistent with D-001).
+
+### Decisions to lock (→ open_decisions.md)
+1. **Multi-country architecture** — separate per-country entity/Stripe/deployment vs one multi-currency platform (Stripe Tax). Needs Codex + **professional tax/legal advice per country**. Design the seam now; US-only at launch.
+2. **Build-vs-buy scope** — confirm launch = Stripe + Supabase; custom operator dashboard is post-launch.
+3. **Discount system = over Stripe Coupons/Promotion Codes** (ratify: don't hand-build).
+
+---
+
+## Build notes — locked 2026-08-15 (see open_decisions D-066…D-074)
+
+### Attribution capture (D-074) — how UTM actually gets captured
+**Not a visible field the user fills in — it's captured invisibly.** Flow:
+1. **Ad links carry UTM params** — every Meta/TikTok/LinkedIn ad points at e.g.
+   `petappro.com/signup?utm_source=instagram&utm_medium=paid&utm_campaign=summer-launch`.
+2. **Landing page reads them off the URL** (`URLSearchParams`) and stashes them **first-party**
+   (a first-party cookie or `localStorage`) so they survive navigation between landing and signup.
+   Store **first-touch** (don't overwrite on later visits) + keep `document.referrer` as a fallback.
+3. **At signup submit they ride along as hidden fields** (hidden `<input>`s, not user-visible),
+   land on the **Supabase** signup/business record, and are written to the **Stripe customer
+   `metadata`** on subscription create.
+4. No UTMs present (typed URL / organic) → `utm_source = direct`. Referrer gives a soft fallback.
+
+So: **no new visible form field** — a hidden field + a first-party cookie. Fully first-party, no
+third-party pixel (consistent with Privacy §4/§8). **Must be wired at signup — cannot be backfilled.**
+
+### Discounts (D-067) — Billing-page field wiring
+The Billing-page discount field validates the entered code against **Stripe promotion codes** and
+applies the backing coupon (Stripe does the %/$/free-months math). Shared/seasonal = one code with
+`expires_at` + `max_redemptions`; unique = per-customer single-use codes. If subscription checkout
+uses Stripe Checkout, prefer its native `allow_promotion_codes: true` field over a custom one.

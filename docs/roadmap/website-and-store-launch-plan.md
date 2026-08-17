@@ -2,7 +2,7 @@
 
 > Annex to `mvp_roadmap.md`. Owns: web architecture, hosting, the website workstreams, and the app-store approval sequence/timing. Cross-links to the MKT track in `../../TASKS.md`.
 >
-> **Launch target:** Oct 1, 2026 · **Fallback:** late October (date-flex is now an accepted safety valve, on top of the D-023 scope-flex approach).
+> **Status 2026-08-15:** Base509 is push-ready, policies are published in the local registry, the design system is published as a library, and the PetAppro marketing site is built from real Figma content. The provider portal is in progress with optional/offline booking payments. **The first GitHub push of `apps/web` is the current launch bottleneck**; it gates Vercel (`Root Directory = apps/web`) → preview/domains → hosted Supabase/Resend waitlist. Late October remains the recovery target.
 
 ## 1. Web architecture — one deployment, many URLs
 
@@ -23,10 +23,18 @@ One Next.js app (`apps/web`) serves multiple domains/subdomains attached to the 
 
 | # | Workstream | Depends on | Owner | Notes |
 |---|---|---|---|---|
-| A | Content & structure (sitemap + copy) | — | Cowork draft → Danny | Brand-independent; start now |
-| B | Legal (Privacy/Terms/Support) | Data model / processor list | Cowork draft → attorney skim | Store-required; host on petappro.com |
-| C | Base509 brand (identity/skin) | Danny brand inputs | Danny + Cowork | Gates visual design only, not A/B |
-| D | Build `apps/web` + deploy | A, B, C | Claude Code | Scaffold late Aug; live early Sep |
+| A | Base509 site + policy registry | — | Danny / Claude Code | **DONE LOCALLY / PUSH-READY.** Policies published locally; Aug 15 production build green |
+| B | First GitHub push + Vercel connection | A + Danny go | Danny / Claude Code | **CURRENT LAUNCH BOTTLENECK.** `apps/web` has never been pushed. After Claude Code's first push, set Vercel Root Directory to `apps/web`; preview before production; verify domains, HTTPS, contact and policy routes |
+| C | PetAppro product site — real Figma→code | B for hosted QA | Claude Code · Codex review | **DONE LOCALLY / AWAITING PREVIEW.** Shared published library; responsive, accessibility, performance and visual QA remain |
+| D | Provider portal + Stripe subscriber/billing web experience | B + Stripe test catalogue + account/business mapping | Claude Code · Codex money/security review | **IN PROGRESS.** Optional/offline booking payments; authenticated web-only SaaS checkout/account remains separate, with webhook authority, entitlements, renewal/cancel/recovery, Test Clocks |
+| E | Supabase + Resend waitlist | B + preview/domains | Claude Code · Codex review | **BLOCKED by first push.** Configure hosted services/secrets and prove submission, persistence, consent, duplicate/error handling, and email delivery end to end |
+| F | Store enrollment/listing URLs | Live Base509 + PetAppro legal/support routes | Danny | Apple then Google; BIZ-10b before submission |
+
+### Critical-path acceptance gates
+
+- **Base509 live:** `base509.com` resolves over HTTPS; company/contact content and every published policy link work in production; preview/rollback remains available.
+- **PetAppro site:** approved Figma is implemented with governed tokens/components; responsive, keyboard/accessibility, performance and visual QA pass; `/privacy`, `/terms`, `/support`, and contact paths are stable.
+- **Stripe Billing:** Base509 test Products/Prices exist; the authenticated provider maps to the correct business; verified webhooks are authoritative and idempotent; subscription state projects to server-written tenant entitlements; trial, renewal, failure/recovery, cancellation and management paths pass Test Clock tests; the native app exposes no SaaS purchase/link/upgrade CTA.
 
 ## 4. App-store approval sequence (grounded in 2026 timelines)
 
@@ -39,13 +47,14 @@ Approval timing — not the website — sets the dates:
 
 Sequence:
 
-1. **Jul (now):** request D-U-N-S; reserve petappro.com / base509.com.
-2. **Aug:** Apple ($99) + Google ($25) org enrollment once D-U-N-S lands (~mid-Aug); build site; draft legal.
-3. **Late Aug–early Sep:** petappro.com live with `/privacy`, `/terms`, `/support`; base509.com page live.
-4. **~Mid-Sep:** create store listings (metadata, screenshots, privacy/support URLs); submit builds; **set release date = Oct 1 and hold** (both stores allow approve-early / gate-release).
-5. **Public store links** only exist post-approval → website "Download" buttons run as placeholders until launch week.
+1. **Current bottleneck:** Danny gives the go; Claude Code makes the first GitHub push of `apps/web`.
+2. **Immediately after push:** connect Vercel with `Root Directory = apps/web`; review preview, attach domains, verify HTTPS/routes, and promote with Danny's approval.
+3. **After preview/domains:** configure hosted Supabase + Resend and validate the waitlist end to end.
+4. **In parallel:** continue provider portal/Billing and the non-cuttable tenant/RBAC/RLS foundation.
+5. **After Base509 is live:** proceed with Apple Organization enrollment, then Google Play; complete BIZ-10b before submission.
+6. **Before submission:** make PetAppro `/privacy`, `/terms`, `/support`, and contact URLs stable; create listings and hold release for the approved date.
 
-**Deadline note:** with late-Oct as a fallback, **mid-September submission** carries enough margin for review + resubmits. (Prior ~Sep 10 target is fine; no longer a hard squeeze.)
+**Deadline note (2026-08-15):** the missed first push is consuming launch-readiness buffer and is now the single web bottleneck. Surface any further delay immediately against the October target.
 
 ## 5. Brand dependency
 
