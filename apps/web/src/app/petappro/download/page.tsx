@@ -24,8 +24,15 @@ export default function DownloadPage() {
 
       <Section className="figma-download__notify" tint>
         <div className="figma-download__notify-card">
-          <Eyebrow>Pre-launch</Eyebrow><h2 className="type-headline">Want a nudge<br className="download-mobile-break" /> the day it lands?</h2><p className="type-body">Not on the stores just yet — drop your email and we’ll tell you the moment it is.</p>
-          <WaitlistForm buttonLabel="Notify me" idPrefix="download-notify" />
+          <WaitlistForm
+            buttonLabel="Notify me"
+            idPrefix="download-notify"
+            prompt={(
+              <>
+                <Eyebrow>Pre-launch</Eyebrow><h2 className="type-headline">Want a nudge<br className="download-mobile-break" /> the day it lands?</h2><p className="type-body">Not on the stores just yet — drop your email and we&rsquo;ll tell you the moment it is.</p>
+              </>
+            )}
+          />
         </div>
       </Section>
 

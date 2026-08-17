@@ -18,3 +18,5 @@ build/
 # Logs
 *.log
 docs/user-flows/*.pdf
+.vercel
+.env*

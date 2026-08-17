@@ -304,3 +304,5 @@ a.card:hover .card__cta { text-decoration: underline; }
 }
 .waitlist input[type='email']:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 1px; }
 .waitlist__note { font-size: 14px; color: var(--text-secondary); margin-top: 12px; }
+.waitlist-success { display: grid; gap: 8px; }
+.waitlist-success p { margin: 0; }
