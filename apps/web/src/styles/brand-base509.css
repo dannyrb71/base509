@@ -496,8 +496,18 @@
 }
 @media (max-width: 900px) {
   [data-brand='base509'] #hero { padding: 64px 0; }
+  /* ---- tablet type scale (700–900) ------------------------------------
+     One deliberate step between the 1440 frame and the mobile frame. Only
+     h1/h2--build had a tablet size before; everything else held desktop
+     sizes until 700, which is why the stack read as oversized. The ≤700
+     and ≤560 blocks later in the file still win below them. */
   [data-brand='base509'] .b509-h1 { font-size: 44px; line-height: 50px; }
   [data-brand='base509'] .b509-h2--build { font-size: 36px; line-height: 42px; }
+  [data-brand='base509'] .b509-h2--sm { font-size: 28px; line-height: 34px; }
+  [data-brand='base509'] .b509-hero__body { font-size: 17px; line-height: 28px; }
+  [data-brand='base509'] .b509-product__name { font-size: 28px; line-height: 34px; }
+  [data-brand='base509'] .carousel__card h3 { font-size: 28px; line-height: 34px; }
+  [data-brand='base509'] .carousel__card p { font-size: 17px; line-height: 28px; }
   /* below tablet the hero drops the art, same as the mobile frame — a
      stacked 459px phone dominated the 700–900 range. Copy goes full width. */
   [data-brand='base509'] .b509-hero__row { display: block; }
@@ -514,6 +524,18 @@
   }
   [data-brand='base509'] .b509-build-row__media,
   [data-brand='base509'] .b509-build-row__cards { flex: 1 1 auto; max-width: none; }
+  /* carousel in the stacked range: ONE card per view, no side peeks, no
+     edge fade — the desktop clip window's peek-and-mask needs the 782px
+     frame around it to make sense. Cards shrink to their content (the
+     450px frame min-height goes) inside a centred 420px window. */
+  [data-brand='base509'] .carousel { width: 100%; max-width: 420px; }
+  [data-brand='base509'] .carousel__track {
+    padding-inline: 0; scroll-padding-inline: 0;
+    -webkit-mask-image: none; mask-image: none;
+  }
+  [data-brand='base509'] .carousel__card {
+    flex: 0 0 100%; width: 100%; max-width: 100%; min-height: 0;
+  }
 }
 @media (max-width: 560px) {
   [data-brand='base509'] .b509-h1 { font-size: 34px; line-height: 40px; }
