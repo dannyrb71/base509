@@ -52,6 +52,29 @@ export function middleware(req: NextRequest) {
   if (isDevHost(host)) return NextResponse.next();
 
   const brand = HOST_MAP[host] ?? 'base509'; // unknown production host → safe default
+
+  // Canonicalize brand-prefixed paths on branded hosts. All internal links are
+  // written path-addressed for the preview (`/petappro/features`), so on
+  // petappro.com a click would otherwise double-prefix into /petappro/petappro/…
+  // Same-brand prefix → strip it (petappro.com/petappro/features → /features).
+  // Other marketing brand's prefix → hop to that brand's own domain.
+  // `portal` is deliberately NOT here while app.petappro.com stays dark (D-061).
+  const seg = pathname.split('/')[1];
+  if (seg === 'base509' || seg === 'petappro') {
+    const url = req.nextUrl.clone();
+    url.pathname = pathname.slice(seg.length + 1) || '/';
+    if (seg !== brand) {
+      if (host.endsWith('.localhost')) {
+        url.host = `${seg}.localhost${req.nextUrl.port ? `:${req.nextUrl.port}` : ''}`;
+      } else {
+        url.protocol = 'https:';
+        url.host = `${seg}.com`;
+        url.port = '';
+      }
+    }
+    return NextResponse.redirect(url, 308);
+  }
+
   const url = req.nextUrl.clone();
   url.pathname = `/${brand}${pathname === '/' ? '' : pathname}`;
   return NextResponse.rewrite(url);
