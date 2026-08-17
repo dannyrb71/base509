@@ -442,3 +442,35 @@ Portal concepts committed at Danny's direction as `cda4b78` (apps/web + this bui
 - Dogs This Window is now a stepper per Danny: minus icon button · centered number field · plus icon button, each icon in a fully rounded 40px outlined circle with padding, wired to the per-window value with a floor of 1; the window total and zone-capacity line update live. `icon-plus.svg` came from Danny's export; `icon-minus.svg` was not present in the icon folder, so it was derived from the plus asset's exact bar geometry (same fill, caps, and 24-grid) — swap it if Danny exports an official one.
 - Danny's booking-enforcement question (individual-only windows) answered in-session and recorded here: correct — when a window accepts only Individual, booking enforcement (one household per slot, sequenced with the Travel Buffer, bounded by Max Walks Per Day / Walker) belongs to the booking engine (`packages/booking`, planned; capacity-model §6B contract), not the config UI. The portal captures the config; the app's booking flow enforces it at request/approval time. Flagged for the booking-engine spec pass: make individual-walk sequencing with travel buffers explicit.
 - FILES TOUCHED (follow-up): `apps/web/src/components/PortalWalkWindows.tsx` · `apps/web/src/styles/brand-petappro.css` · `apps/web/public/brands/petappro.com/icon-plus.svg` (Danny) · `apps/web/public/brands/petappro.com/icon-minus.svg` (derived) · `docs/BUILD-LOG-overnight.md`
+
+## Base509 responsive follow-up — 2026-08-17 (live session with Danny)
+
+What changed: the "What we build" row (`#products`) got the same tablet treatment as the hero (8b82dd4) — at ≤1384 the media | cards columns now stay side by side and both scale (`flex: 1 1 320px/380px`, `min-width: 0`, capped at the frame's 523/629), the fixed 782px frame height goes auto, and the carousel clip window shrinks with its cell (`width: 100%; max-width: 450px`). Stacking moved down to the 900px query alongside the hero's. Danny's direction: the static appshot must resize (it does, via `min-width:0` + its existing `max-width:100%`); swapping to the mobile carousel early was offered as a fallback but not needed — the desktop carousel holds to 900.
+
+What's verified (in-app Chromium, DOM measurement): no horizontal scroll at 1440/1280/1100/1000/950/890/768/390; row at 1440 is byte-identical to frame (523 | 629, h 782); side-by-side holds 901–1384; stacks at ≤900; mobile block layout untouched at 390. Visual screenshot check at 1000.
+
+FILES TOUCHED: `apps/web/src/styles/brand-base509.css` · `docs/BUILD-LOG-overnight.md`
+
+### Addendum (same session, Danny live feedback)
+
+Danny's second pass: (1) below 900 the hero now DROPS its phone art entirely, matching the mobile frame — a stacked 459px phone dominated 700–900; copy goes full width. (2) The build-row appshot now tracks the window everywhere: `min(319px, 24vw)` side-by-side (starts shrinking ~1330), `clamp(200px, 36vw, 319px)` stacked 700–900, mobile's approved 320px cap untouched at ≤700. Cascade gotcha: the appshot rules must live AFTER the "real exports" base sizes (~line 528) or the base `width: 319px` wins — first attempt inside the main responsive block silently lost. Verified by DOM measurement at 1440/1200/1000/860/780/720/390 (no h-scroll anywhere; hero art hidden ≤900; appshot 319/288/240/310/—/259/320). Pane screenshots glitched again mid-session (blank frame, header at bottom) — DOM measurement remains the reliable method.
+
+FILES TOUCHED: `apps/web/src/styles/brand-base509.css` · `docs/BUILD-LOG-overnight.md`
+
+## Per-brand favicons — 2026-08-17 (Fable, Danny-directed)
+
+Generated full favicon sets from Danny's 512px sources into `public/brands/{base509,petappro}/`: multi-size favicon.ico (16/32/48, PNG-in-ICO via sharp — no ImageMagick on this machine), favicon.svg, 16/32 transparent PNGs, apple-touch-icon 180 flattened onto the sampled dominant tile color (base509 #0d2b45, petappro #003e4d — no alpha, iOS-safe), icon-192/512, and site.webmanifest per brand. Wired via metadata.icons + metadata.manifest in each brand layout only; no global app/icon. Typecheck + build green; all 16 asset URLs 200 on dev. Dev server on 3003 killed + restarted after the build per the standing gotcha. Generation script kept in session scratchpad only (one-shot).
+
+FILES TOUCHED: `apps/web/public/brands/favicon-*.{svg,png}` (Danny's sources) · `apps/web/public/brands/{base509,petappro}/` (8 generated files each) · `apps/web/src/app/{base509,petappro}/layout.tsx` · `docs/BUILD-LOG-overnight.md`
+
+### Base509 build-section pass 3 (same day, Danny live feedback)
+
+Mobile (≤700): the build row is now flex-column with the carousel ordered above the phone + button (order:-1 on __cards; align-items:stretch guards against the ≤900 center rule). Stacked 700–899: appshot share cut to clamp(180px, 28vw, 260px) (was 36vw/319 cap — near-frame size dominated), row gap 56→32, base509 .section padding 56→48 at ≤900 (#hero keeps its own 64). Verified by DOM at 1000 (unchanged: row, 240px shot, 80px section pad), 800 (shot 224, gap 32, pad 48, phone still above carousel), 650/390 (carousel above phone, shot 320, no h-scroll).
+
+FILES TOUCHED: `apps/web/src/styles/brand-base509.css` · `docs/BUILD-LOG-overnight.md`
+
+### Base509 build-section pass 4 — tablet carousel + type scale (same day, Danny)
+
+Danny: 700–899 stack still bad; single-card carousel, shrinkable cards, and asked whether tablet font scales exist (they didn't — only h1/h2--build stepped at 900). Added to the ≤900 block: (1) a deliberate tablet type step — h2--sm 28/34, hero body 17/28, product name 28/34, card h3 28/34, card p 17/28 (desktop held until 700 before); (2) carousel shows ONE card, no side peeks, no edge mask — window capped 420px centred, card flex-basis 100%, min-height 450→0 so cards fit content (294px tall at 800). Verified by DOM at 800 (one card fills window, neighbours ±16px fully outside at snap, tablet fonts live), 1000 (desktop carousel untouched: 450/312/mask/h3 32/min-h 450), 390 (mobile untouched, carousel still above phone). Pane screenshots still glitching — DOM only.
+
+FILES TOUCHED: `apps/web/src/styles/brand-base509.css` · `docs/BUILD-LOG-overnight.md`

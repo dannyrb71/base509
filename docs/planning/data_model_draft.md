@@ -229,3 +229,17 @@ Every table above: **RLS on**, filtered by `business_id` via `current_membership
 1. Codex review alongside `technical_architecture.md`.
 2. Lock jsonb shapes (`pricing_structure`, `capacity_rules`, `line_items`) as Sprint 1 packages stabilize.
 3. Carry into Phase 4 specs — each spec cites the tables it touches and their RLS impact (no "TBD" on `business_id`).
+
+---
+
+## Capacity per service — ratified schema deltas (2026-08-17) — canonical: `docs/specs/capacity-model.md`
+
+(Replaces the earlier appended "schema shape" draft — NOT a second schema definition. The canonical model lives in `capacity-model.md`; below are the concrete deltas to fold into `business_services`, `business_availability`, and `capacity_groups` during the CFG-1 build.)
+
+- REMOVE any `default_capacity` field. Occupancy services (boarding, daycare) persist their limit as `capacity_config.service_limit` (REQUIRED, positive for bounded).
+- Archetypes are presets over `capacity_model = bounded | unlimited` + versioned `capacity_config` — NOT a persisted pet-service enum.
+- `capacity_groups` (tenant-scoped) with `resource_unit`; services reference `capacity_group_id` via tenant-composite FK `(business_id, capacity_group_id) -> capacity_groups(business_id, id)`. Required only when 2+ co-located services share a finite resource. Keep SEPARATE from scheduling `conflict_group_id`.
+- Add ratified relational tables: `service_windows` (walking uses `fixed_window`, NOT `slot`), window assignments, zones, and the per-day override tables — `business_calendar_days`, `business_service_day_overrides`, `capacity_group_day_overrides`, `service_window_day_overrides` (+ `service_window_day_override_assignments`). Add `booking_occurrences.service_window_id`.
+- Occupancy counting: `[arrival_service_date, departure_service_date)` half-open in business tz, for BOTH the service cap and the shared pool (Danny's date-based ruling; departure date not counted, arrivals count). See `capacity-model.md`.
+- All tables carry `business_id`; tenant-composite FKs throughout. Enforcement (approval/auto-book) in one transactional server op; RLS + cross-tenant/concurrency tests required. Lands with CFG-1, not the waitlist migration.
+- CORRECTION: the existing statement that walking uses `slot` is wrong — Walk Windows require `fixed_window`.

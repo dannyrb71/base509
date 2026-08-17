@@ -25,3 +25,6 @@ docs/user-flows/*.pdf
 .agent-backups/
 .pnpm-store/
 .fuse_hidden*
+
+# scratch staging area for pending deletions (not for commit)
+apps/_to_delete/

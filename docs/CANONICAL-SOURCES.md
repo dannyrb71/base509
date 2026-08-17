@@ -18,7 +18,7 @@
 | **Data model & tenancy spine** | `docs/planning/data_model_draft.md` + `docs/planning/technical_architecture.md` | Designed, **not yet built** (no tables exist). |
 | **Payments / ledger / invoicing model** | `docs/specs/transactions-payments-and-invoicing.md` | D-062 summarizes; the spec is authoritative. |
 | **Provider onboarding & service config** | `docs/specs/provider-onboarding-configuration.md` | Wizard flow, control types, per-service config. |
-| **Capacity model** (per-service cap + shared location pool) | `docs/specs/capacity-model.md` | Two-layer capacity: service cap + shared pool (`conflict_group_id`); archetypes per service; onboarding questions. Codex to ratify enum-vs-config. |
+| **Capacity model** (per-service cap + shared location pool) | `docs/specs/capacity-model.md` | Two-layer capacity: per-service evaluator/config plus a shared physical pool when multiple co-located services consume the same finite resource (`capacity_group_id`). `conflict_group_id` remains scheduling-only. Service archetypes are presets over `capacity_model = bounded\|unlimited` and versioned `capacity_config`, not persisted pet-service enums. Ratified 2026-08-17. |
 | **Provider settings surface map** | `docs/planning/provider-settings-ia.md` | What a provider configures and *where* (web vs app). |
 | **Provider Reports page** (metrics, tabs, CSV/QBO export) | `docs/specs/provider-reports.md` | Built off the Woof reports page; write-offs by period; QuickBooks-friendly export. Dashboard is separate (`provider-dashboard.md`). |
 | **Theme roster + names** | **D-040** in `docs/decisions/open_decisions.md` | 10 themes. Names have churned — check here, never assume. |
