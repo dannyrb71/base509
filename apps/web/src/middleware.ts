@@ -41,6 +41,7 @@ export function middleware(req: NextRequest) {
   // policy URLs like /policies/terms/v/0.1.)
   if (
     pathname.startsWith('/_next') ||
+    pathname.startsWith('/api/') ||
     pathname.startsWith('/brands/') ||
     pathname === '/favicon.ico' ||
     pathname === '/robots.txt' ||
