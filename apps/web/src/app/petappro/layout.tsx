@@ -9,6 +9,18 @@ export const metadata: Metadata = {
   title: { default: 'PetAppro — the booking app for dog-care providers', template: '%s · PetAppro' },
   description:
     'PetAppro is the modern, mobile-first booking app for dog-care providers who already have clients — flat, predictable tiers and no marketplace cut.',
+  // Per-brand favicons — each brand tree points only at its own set under
+  // /brands/<brand>/. No global app/icon exists (it would override these).
+  icons: {
+    icon: [
+      { url: '/brands/petappro/favicon.svg', type: 'image/svg+xml' },
+      { url: '/brands/petappro/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+      { url: '/brands/petappro/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
+    ],
+    shortcut: '/brands/petappro/favicon.ico',
+    apple: '/brands/petappro/apple-touch-icon.png',
+  },
+  manifest: '/brands/petappro/site.webmanifest',
 };
 
 function Wordmark({ inverse = false }: { inverse?: boolean }) {

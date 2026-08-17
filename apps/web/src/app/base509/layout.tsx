@@ -8,6 +8,18 @@ export const metadata: Metadata = {
   title: { default: 'Base509 — software that shows up for people', template: '%s · Base509' },
   description:
     'Base509 LLC is an app development company building software people can trust — dependable, approachable, and designed for the individual first. Our first product is PetAppro, a booking app for dog-care businesses.',
+  // Per-brand favicons — each brand tree points only at its own set under
+  // /brands/<brand>/. No global app/icon exists (it would override these).
+  icons: {
+    icon: [
+      { url: '/brands/base509/favicon.svg', type: 'image/svg+xml' },
+      { url: '/brands/base509/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+      { url: '/brands/base509/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
+    ],
+    shortcut: '/brands/base509/favicon.ico',
+    apple: '/brands/base509/apple-touch-icon.png',
+  },
+  manifest: '/brands/base509/site.webmanifest',
 };
 
 export default function Base509Layout({ children }: { children: React.ReactNode }) {
