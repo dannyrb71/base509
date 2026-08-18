@@ -4,6 +4,14 @@
 
 Canonical axis: `capacity_model` on `business_services` (`data_model_draft.md`). Enforced by the (planned) `packages/booking` availability engine. Asked during `provider-onboarding-configuration.md` §5. Displayed on the dashboard ("Dogs here 3/5").
 
+> ## ⚖️ AUTHORITATIVE CONTRACT (read this first)
+> The **build-ready** capacity contract is the section **"Capacity per service — RATIFIED"** near the end of this file, including the **"Walking capacity + service zones — RATIFIED (2026-08-18)"** rules now folded in. The 2026-07-25 proposal (§1–§7 below) is retained as **design rationale**; where it conflicts with the ratified contract, **the ratified contract wins**. The specific points superseded since the original proposal:
+> 1. **Counting is DATE-BASED**, not intraday peak-concurrent occupancy. A dog counts on its arrival date and every night, NOT its departure date — `[arrival_service_date, departure_service_date)` half-open in business tz — for BOTH the service cap and the shared pool. Daycare occupies exactly its single `service_date` bucket. The old §2A "peak concurrent occupancy on a timeline / bedtime headcount" model and its handoff-overlap-minutes machinery are SUPERSEDED (replaced by a coarser date-bucket rule with a departure-day tolerance).
+> 2. **Boarding & daycare REQUIRE an explicit positive `service_limit`.** The old "use against max capacity" / pool-only option for these is SUPERSEDED (§3, §6C).
+> 3. **Walking/drop-in capacity is SUMMED across assigned walkers** (per-walker default + per-window override), NOT `dogs-per-walker × walker count`; zones constrain coverage, they do not multiply capacity.
+> 4. **Per-day overrides use four target-specific tables** (`business_calendar_days`, `business_service_day_overrides`, `capacity_group_day_overrides`, `service_window_day_overrides`), NOT an `availability_exceptions.capacity_override` field. The old override field referenced in §6 is SUPERSEDED.
+> The passages below carry inline **[SUPERSEDED]** markers where they state the old model.
+
 ---
 
 ## 1. The insight — capacity is TWO layers, not one (Danny)
@@ -26,7 +34,7 @@ Use a separate **`capacity_group_id`** FK: services in the same capacity group s
 |---|---|---|---|
 | **Boarding** | dogs present overnight | ✅ **yes** — the home/location pool | own overnight max (≤ pool) |
 | **Daycare** | dogs present during the day | ✅ **yes** — same home pool | optional own max (≤ pool) |
-| **Walking** | dogs on **one walk** (group size) | ❌ no | per-walker cap (default 6); **scales by walkers**; optional walks/day |
+| **Walking** | dogs on **one walk** (group size) | ❌ no | per-walker "Dogs Per Walk" (default 6); window capacity = **SUM** of assigned walkers' effective caps *(ratified 2026-08-18 — supersedes the earlier "× walkers" phrasing)*; optional per-window override; optional walks/day |
 | **Pet-sitting** | **one engagement per sitter** — exclusive location; **pet count in the booking does NOT add capacity** (3 pets in one home = 1 engagement) | ❌ no (each booking is its own location) | concurrent engagements ≤ sitters |
 | **Drop-in** | **one visit at a time** (sequential through the day) | ❌ no | **max visits/day** per staff |
 
@@ -39,9 +47,11 @@ Two things the current enum doesn't cleanly express and Codex must place:
 
 ---
 
-## 2A. Capacity is TIME-AWARE — occupancy over a timeline, not a daily tally (Danny, 2026-07-25)
+## 2A. [SUPERSEDED — see the ratified DATE-BASED counting rule] Time-aware occupancy proposal (Danny, 2026-07-25)
 
-⛔ **Never block a booking on a naive per-day arrival count.** If a departure comes before a later arrival, the slot is free — no real conflict. Capacity is **peak concurrent occupancy across the booking's span**, computed on a timeline (the classic max-overlapping-intervals problem), against each service's occupancy definition:
+> **[SUPERSEDED 2026-08-17]** This section proposed intraday **peak-concurrent occupancy on a timeline** with a bedtime-headcount binding moment and handoff-overlap-minutes tolerance. The ratified rule is **coarser and date-based**: a dog counts on `[arrival_service_date, departure_service_date)` (half-open, business tz) for both the service cap and the pool; the departure date is not counted; daycare occupies its single `service_date`. The pool is a date-bucket scheduling limit with a departure-day tolerance, not an instantaneous physical ceiling. See "Occupancy counting rule" in the ratified section below. The timeline/interval discussion here is kept only as design rationale for *why* a departing dog need not block a later arrival.
+
+⛔ **Never block a booking on a naive per-day arrival count that ignores departures.** *(The proposal's original framing — peak concurrent occupancy across the booking's span, the max-overlapping-intervals problem — is superseded by the date-based rule above; retained for rationale:)*
 
 | Service | What "occupies a slot" | The binding moment |
 |---|---|---|
@@ -64,12 +74,12 @@ Even peak-concurrent can spike briefly at a handoff (one dog arrives 9:00, anoth
 The wizard asks capacity **in the shape each service needs**, and asks the shared pool **only when the mix requires it**:
 
 **Co-located concurrent services (boarding, daycare, any provider-defined home service):**
-- Each service's own cap — **but a choice** (Danny, 2026-07-25): the provider either **sets an explicit sub-cap** (boarding overnight = 5) **or** picks **"use against max capacity"** (no own limit — the service just flexes under the shared pool). Boarding typically has a hard sub-cap; daycare often just takes whatever's left under the pool → "use against max capacity."
+- Each service's own cap. **[SUPERSEDED for boarding/daycare, 2026-08-17]** the original "either set a sub-cap **or** pick *use against max capacity* (no own limit)" choice no longer applies to bounded boarding/daycare: both now REQUIRE an explicit positive `capacity_config.service_limit` (see the ratified section). A pooled service still flexes under the shared pool, but it must also carry its own numeric limit; "pool-only, no service limit" is retired for these archetypes.
 - **The shared total, asked once** — "**How many dogs can be at your place at one time, across all services?**" → the pool (8). Group those services into one capacity group.
 - **Conditional:** only surface the pool question when the provider offers **≥2 co-located concurrent services**. A **boarding-only** provider: their boarding cap *is* the pool (don't ask twice). A walker-only provider: **never** ask it.
 
 **Services with intrinsic (non-pooled) capacity:**
-- **Walking** — dogs per walk (default 6, editable, no warning — existing rule), optional walks/day per walker. Group total = per-walker × assigned walkers.
+- **Walking** — dogs per walk (default 6, editable, no warning — existing rule), optional walks/day per walker. Group total = **SUM of assigned walkers' effective caps** (per-walker default + optional per-window override) — *ratified 2026-08-18; supersedes the earlier "per-walker × assigned walkers" product.*
 - **Pet-sitting** — no headcount question; capacity = concurrent engagements ≤ sitters. (Confirm staff count; pets-per-booking is irrelevant to capacity.)
 - **Drop-in** — "**Max drop-in visits per day**?" (per staff), one at a time.
 
@@ -97,16 +107,16 @@ Updates `provider-dashboard.md` §A.1 (Dogs here `3/5`) — the `Y` is the pool 
 Capacity is a **provider default, not an absolute they can't deliberately exceed** — "we facilitate their model, we don't police it." Two mechanisms, both already anchored in existing decisions:
 
 1. **Per-booking override at approval** *(exists — transactions §2.1).* If approving would exceed the cap or the pool **at the binding moment** (e.g. bedtime of the 12th), the approve action shows a plain warning — *"This puts boarding at 6/5 the night of the 12th. Approve anyway?"* — and the provider can **"Approve anyway (over capacity)."** Logged (who/when), commits atomically, raises the ceiling for **that one approval only**. Non-blocking; the provider decides.
-2. **Pre-emptive date/period override** *(the `availability_exceptions.capacity_override` field).* Ahead of a known crunch (holidays), the provider **raises the cap for a date/range** — "capacity 7 for Dec 24–26." Stored as an availability exception; **client self-book and auto-book then respect the raised number** for that window.
+2. **Pre-emptive date/period override.** **[SUPERSEDED storage, 2026-08-17]** the mechanism stands, but it is NOT stored in an `availability_exceptions.capacity_override` field. Ahead of a known crunch (holidays), the provider **raises the cap for a date** via the target-specific override tables — `business_service_day_overrides.service_limit_override` for a service, `capacity_group_day_overrides.pool_limit_override` for a pool (see the ratified per-day override tables). **Client self-book and auto-book then respect the raised number** for that date.
 
 - An override can raise the **pool** as well as a per-service sub-cap.
 - ⚠️ **Auto-book never self-overrides.** Auto-book (default OFF, onboarding §5.4) approves only **within** the configured cap; going over capacity is always a **human** decision. This keeps the "computer never quietly overbooks you" contract.
 - Overrides are **logged and reversible** (auditable), `business_id`-scoped.
 
 ## 6B. Enforcement (booking package) — flags for Codex
-- Availability + **approve / auto-book** must validate **service cap AND every pool** the service belongs to, evaluated as **peak concurrent occupancy at the binding moment(s)** (§2A) — boarding at each overnight, daycare across the day window, a walk in its slot — **not** a per-day arrival tally.
-- Honor the provider's **handoff-overlap tolerance** (§2A) so legitimate same-day churn isn't falsely blocked.
-- Capacity overrides (§6) must be able to raise **the pool** as well as a service cap.
+- Availability + **approve / auto-book** must validate **service cap AND every pool** the service belongs to, evaluated as **date-bucket occupancy** over `[arrival_service_date, departure_service_date)` in business tz (daycare = its single `service_date`) — **not** intraday peak-concurrent occupancy (**[SUPERSEDED]** the old "peak concurrent at the binding moment / bedtime headcount" evaluation) and **not** a raw per-day arrival tally that ignores departures.
+- **[SUPERSEDED]** The old per-minute **handoff-overlap tolerance** is replaced by the coarser accepted date tolerance: a departing dog is uncounted for its whole departure date, an arriving dog counts its whole arrival date. No intraday grace-window machinery is built.
+- Capacity overrides (§6) must be able to raise **the pool** (`capacity_group_day_overrides`) as well as a service cap (`business_service_day_overrides`).
 - RLS/tenancy unchanged — all capacity is `business_id`-scoped.
 
 ## 6C. Capacity as composable config — flexibility without new code (Danny, 2026-07-25)
@@ -121,7 +131,7 @@ Rather than a fixed enum of capacity *types*, model capacity as a **small set of
 | **Counting basis** | concurrent (at a time) · daily throughput (per day) | how we count |
 | **Scales with** | **fixed resource (pool)** · **team (per-staff × assigned staff)** | ← the "team model" as a parameter |
 | **Pool membership** | standalone · shares pool [group] (+ pool size) | shared ceiling |
-| **Binding window** | overnight/bedtime · day-window · slot | when it's checked (from `duration_model` + §2A) |
+| **Binding window** | **date bucket** — boarding `[arrival, departure)` · daycare single `service_date` · walk window on its date | which dates the booking occupies (**[SUPERSEDED]** the old "overnight/bedtime vs day-window vs slot" intraday moment — counting is now date-based, from `duration_model` + the ratified counting rule) |
 | **Per-service cap** | explicit number · **"use against max capacity"** (pool-limited) | the sub-cap (Danny §3/#1) |
 | **Overlap tolerance** | none · allowance N · grace window | handoff churn (§2A) |
 
@@ -137,7 +147,7 @@ Naming them explicitly avoids treating all capacity the same. ⚠️ **Distinct 
 **Ratified persistence contract (CFG-1):**
 - `business_services.capacity_model`: `bounded | unlimited`.
 - `business_services.capacity_group_id`: nullable tenant-scoped FK to `capacity_groups`; never stored only inside JSON.
-- `business_services.capacity_config`: versioned JSON validated at the database boundary and in generated runtime types. V1 fields: `version`, `slot_unit`, `counting_basis`, `scales_with`, `service_limit` (nullable only when pool-limited), `binding_window`, and `overlap_tolerance`.
+- `business_services.capacity_config`: versioned JSON validated at the database boundary and in generated runtime types. V1 fields: `version`, `slot_unit`, `counting_basis`, `scales_with`, `service_limit` (**REQUIRED & positive for bounded boarding/daycare** — the earlier "nullable only when pool-limited" is superseded; null remains valid only for staff/window-derived services that have no single scalar total), `binding_window` (date-bucket), and `overlap_tolerance` (date-level departure-day tolerance, not intraday minutes).
 - `capacity_groups`: `id, business_id, name, resource_unit, pool_limit, created_at, updated_at`, with tenant-composite FK integrity and RLS. Pool/date overrides remain separate audited availability exceptions.
 - `one_to_one`, `fixed_n`, and similar labels are wizard presets mapped into this contract, not persisted evaluator types. `shared_exception` belongs to conflict/override policy, not capacity math.
 - `packages/booking` owns the pure interval/timeline evaluator. Approval and auto-book call the same transactional reservation operation; auto-book never invokes the human over-capacity override.
@@ -147,8 +157,8 @@ Naming them explicitly avoids treating all capacity the same. ⚠️ **Distinct 
 ## 7. Open
 1. ✅ **Codex ratified 2026-07-31:** `bounded|unlimited` discriminator + versioned composable config + separate first-class `capacity_group`; timeline/interval occupancy belongs in `packages/booking`. CFG-1 must implement the persistence contract and tenant/RLS tests before the wizard.
 2. ✅ **Pool-question trigger** = "≥2 co-located concurrent services offered" (§3) — confirmed (Danny).
-3. ✅ **Per-service cap vs pool-limited** — resolved (Danny): each pooled service chooses **explicit cap** or **"use against max capacity"** (§3, §6C). Daycare will commonly be pool-limited.
-4. ✅ **Time-aware capacity + override** — resolved (§2A, §6): bind at the overnight/bedtime (boarding) or day-window (daycare) peak, not arrival tallies; provider sets handoff-overlap tolerance; override = approve-anyway (per-booking) + pre-emptive date override; auto-book never self-overrides.
+3. ✅ **Per-service cap** — resolved (Danny) **and revised 2026-08-17:** bounded boarding/daycare now REQUIRE an explicit positive `service_limit` (the earlier "use against max capacity" / pool-only option is retired for these). Daycare still flexes under the pool but carries its own numeric limit too.
+4. ✅ **Counting basis + override** — resolved and **revised to date-based (2026-08-17):** occupancy is `[arrival_service_date, departure_service_date)` half-open in business tz (daycare = single `service_date`), for the service cap AND the pool; departure date not counted. Supersedes the old overnight/bedtime peak-concurrent binding and per-minute handoff tolerance (now a coarser departure-day date tolerance). Override = approve-anyway (per-booking) + pre-emptive per-day override via the target-specific tables; auto-book never self-overrides.
 5. Sibling to **DR-7** (pricing-model study) — a short **capacity-model study across verticals** may be worth it to validate these archetypes beyond pet care (salon chairs, cleaning crews) before the booking engine hardens.
 
 ---
@@ -161,7 +171,7 @@ D-075/D-076 direction ratified by Codex; this is the corrected, build-ready cont
 The two families are UI/settings presets that populate a validated `capacity_config`. Do NOT persist an `occupancy_numeric | staff_window` enum. The stable evaluator discriminator remains `capacity_model = bounded | unlimited` (see ~line 112).
 - **Occupancy-numeric** (boarding, daycare): expose a numeric service limit, persisted as the existing `capacity_config.service_limit` — do NOT add a separate `default_capacity` field. `service_limit` is REQUIRED and positive for bounded boarding/daycare (this supersedes any older "entirely pool-limited" option for boarding/daycare).
 - **Staff/window-derived** (walking, drop-in, in-home sitting): effective capacity derives from config + assigned staff + time windows; no single scalar total-capacity field.
-  - Walking capacity = dogs-per-walker × distinct available walkers for that window. Zones CONSTRAIN where an assignment applies; they do NOT multiply capacity. A staff member on overlapping windows/zones is counted ONCE.
+  - Walking capacity = SUMMED across assigned walkers: a window's capacity = Σ each assigned walker's effective cap for that window (per-walker default "Dogs Per Walk" + optional per-window override), NOT `dogs-per-walker × walker count` (ratified 2026-08-18, detailed below). Zones CONSTRAIN where an assignment applies; they do NOT multiply capacity. A staff member on overlapping windows/zones is counted ONCE.
   - In-home sitting = staff-bound exclusive-engagement concurrency (1 sitter = 1 home), not window arithmetic.
   - Walk Windows use `fixed_window` (not `slot`).
 
@@ -191,3 +201,15 @@ Rules: `holiday_pricing` only selects which rate set applies (date-level pricing
 
 ### CFG-1 fit
 These tables land with the CFG-1 operational schema (tenant + RLS), NOT the waitlist-only migration. Every capacity/calendar/window/assignment/override table carries `business_id`; all cross-table relationships use tenant-composite FKs. Clients never write these tables nor read staff assignments/other clients' demand — client availability comes from a tenant-safe effective-availability RPC. Overrides mutated only via typed server ops by Owner/Admin/authorized scheduling roles. Capacity approval/auto-book enforcement lives in ONE transactional server op (RLS cannot enforce an aggregate concurrency invariant). Generate DB types (don't hand-write). Add cross-tenant RLS tests + concurrent-approval tests before the booking engine depends on these tables.
+
+
+### Walking capacity + service zones — RATIFIED (Codex, 2026-08-18)
+Supersedes the "dogs-per-walker × walkers" walking line in the 2026-07-25 proposal. Codex accepted this deviation (no engine blocker); concrete `capacity_config` + zone keying land at CFG-1 build.
+
+**Walking / drop-in capacity is SUMMED, not uniform.** A window's group capacity = the SUM of each assigned walker's effective cap for that window, where each walker has a default "Dogs Per Walk" plus an optional per-window override (e.g. Midday = Morgan 6 + Casey 4 = 10). It is NOT `dogs-per-walker × walker count`. **Zone capacity within a window = the SUM of the caps of the walkers whose coverage includes that zone** (e.g. Noe Valley = 4 when only Casey covers it). Solo providers use a single business-scoped Dogs-Per-Walk. A staff member on overlapping windows/zones is counted once.
+
+**A walk window is a first-class named sub-service** ("Morning Walks"): Solo = business-scoped (no staff dimension); Duo+ = scoped to day/time/staff.
+
+**Service zones attach at TWO levels:** (a) the whole service (In-home sitting, drop-in, walking), and (b) the named sub-service/window (and, on teams, per-walker coverage within a window). **Named zones are a REUSABLE per-tenant pool** (the shared Zone Manager source list); the service, the window, and the walker each SELECT from that pool — not a private disjoint set per service. Business Profile's "Service Area" is a display aggregation, not the authoritative single source.
+
+**`capacity_config` (walking) must encode:** per-walker default caps, per-window walker assignments + per-window cap overrides, and per-window/per-walker zone selections referencing the reusable zone pool. The concrete shape (zone keying across service / window / staff, tenant-composite FKs, RLS) is finalized at CFG-1 build — Codex-accepted, no engine blocker.

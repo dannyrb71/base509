@@ -96,15 +96,15 @@ Services are generic engine instances, not enum branches (D-022; provider-onboar
 - **Rework guardrail:** `service_type_key` is data, not a PostgreSQL enum or an application switch limited to boarding/daycare/walking. Those three are launch presets that populate the five engine axes; a provider-defined service uses the same row and axis columns. Never create boarding/daycare/walking-specific service tables, DTOs, persistence branches, or pricing paths.
 - Axis values use shared generated enums/check constraints: `pricing_model` follows `packages/pricing`'s canonical `PricingModel`; `capacity_model` = `bounded|unlimited` with the versioned composable V1 shape ratified in `docs/specs/capacity-model.md` §6C; `duration_model` = `overnight|fixed_window|slot|open_ended`; `location_model` = `at_provider|at_client|either`. Model-specific parameters live only in the adjacent config JSON, with generated/runtime validation; the model discriminator itself remains a first-class column so it can be indexed, constrained, typed, and queried.
 - `buffers` is a first-class per-service JSON column because it is one of the five engine axes; require non-negative integer minutes and default both values to zero. Business-level default buffers may seed a service but must be snapshotted onto the service/booking rather than consulted retroactively.
-- MVP enables boarding + daycare + walking. Future built-in presets and near-term provider-defined types reuse these rows. `slot` supports discrete walking/grooming appointments; `overnight` remains one booking with per-night occurrences.
+- MVP enables boarding + daycare + walking. Future built-in presets and near-term provider-defined types reuse these rows. Named walk windows use `duration_model = fixed_window` (NOT `slot` — superseded by the ratified capacity model, §"Capacity per service" below); `overnight` remains one booking with per-night occurrences.
 - `location_model` is a service-delivery seam, not D-010 multi-branch support. MVP may use the business's single implicit site; client-location rows are required for in-home services, and route locations belong to GPS execution (D-054).
 
 ### business_service_pricing
 Per-service rates consumed by `packages/pricing`. `id, business_id, business_service_id, pricing_structure (jsonb: base rate, per-night/per-day/per-visit/per-session, per-pet, add-ons, caps), effective_from, effective_to, created_at.`
 - No global `pricing_rates.id = 1` (retired). Pricing is per business, per service.
 
-### business_availability
-Blocked dates / availability, server-enforced (replaces global blocked dates). `id, business_id, business_service_id (nullable = whole business), date, kind (blocked|limited), capacity_override, note, created_by, created_at.`
+### business_availability — SUPERSEDED (do not build as one overloaded table)
+> **Ratified (2026-08-17, D-076):** this single overloaded blocked-dates+`capacity_override` row is REJECTED. Per-day availability and capacity overrides are split into the four TARGET-SPECIFIC tables defined in the "Capacity per service — ratified schema deltas" section below: `business_calendar_days` (day-level Block All / holiday pricing), `business_service_day_overrides` (per-service `is_available` + `service_limit_override`), `capacity_group_day_overrides` (per-pool `pool_limit_override`), and `service_window_day_overrides` (+ assignments). Do not create a `business_availability` table with a `capacity_override` column. This heading is retained only to mark the replacement.
 
 ### availability_conflict_groups (D-045)
 Provider-configurable exclusivity policy. `id, business_id, name, overlap_policy (exclusive|overlap_allowed), created_at, updated_at.` Services join by tenant-scoped `business_services.conflict_group_id`; the default overnight-exclusive group contains boarding, in-home sitting, and house sitting, while walking/drop-in may remain ungrouped or overlap-allowed.
@@ -114,7 +114,7 @@ Provider-configurable exclusivity policy. `id, business_id, name, overlap_policy
 ### capacity_groups (ratified 2026-07-31)
 Tenant-scoped finite-resource pools shared by services that may legitimately overlap. `id, business_id, name, resource_unit, pool_limit, created_at, updated_at.` Membership is the tenant-composite `business_services.capacity_group_id`; never infer membership from `conflict_group_id`.
 - Capacity and conflict are orthogonal: a conflict group controls overlap permission, while a capacity group limits aggregate consumption when overlap is allowed.
-- `pool_limit` is a positive integer. Date/range changes use audited `business_availability.capacity_override` records targeted to the service or pool; do not rewrite the base pool row.
+- `pool_limit` is a positive integer. Date/range changes use audited `capacity_group_day_overrides.pool_limit_override` records (per the ratified per-day override tables below) — NOT the retired `business_availability.capacity_override` field; do not rewrite the base pool row.
 - Owner/Admin configuration only. Booking approval/auto-book use one transaction-scoped capacity reservation path and test concurrent requests, interval boundaries, pool + service limits, human override audit, auto-book non-override, and cross-tenant isolation.
 
 ### business_terms_versions
@@ -232,14 +232,21 @@ Every table above: **RLS on**, filtered by `business_id` via `current_membership
 
 ---
 
-## Capacity per service — ratified schema deltas (2026-08-17) — canonical: `docs/specs/capacity-model.md`
+## Capacity per service — RATIFIED schema deltas (2026-08-17, walking/zones ratified 2026-08-18) — canonical: `docs/specs/capacity-model.md`
 
-(Replaces the earlier appended "schema shape" draft — NOT a second schema definition. The canonical model lives in `capacity-model.md`; below are the concrete deltas to fold into `business_services`, `business_availability`, and `capacity_groups` during the CFG-1 build.)
+**These deltas are authoritative and REPLACE the older in-body definitions above** — specifically they retire the overloaded `business_availability` table (see its superseded heading in §4), change walk windows from `slot` to `fixed_window` on `business_services`, and move pool/date overrides off `business_availability.capacity_override` onto the target-specific tables below. They are not a second schema or a deferred appendix; where they conflict with an earlier definition in this file, these win. The canonical model lives in `capacity-model.md`.
 
 - REMOVE any `default_capacity` field. Occupancy services (boarding, daycare) persist their limit as `capacity_config.service_limit` (REQUIRED, positive for bounded).
 - Archetypes are presets over `capacity_model = bounded | unlimited` + versioned `capacity_config` — NOT a persisted pet-service enum.
 - `capacity_groups` (tenant-scoped) with `resource_unit`; services reference `capacity_group_id` via tenant-composite FK `(business_id, capacity_group_id) -> capacity_groups(business_id, id)`. Required only when 2+ co-located services share a finite resource. Keep SEPARATE from scheduling `conflict_group_id`.
 - Add ratified relational tables: `service_windows` (walking uses `fixed_window`, NOT `slot`), window assignments, zones, and the per-day override tables — `business_calendar_days`, `business_service_day_overrides`, `capacity_group_day_overrides`, `service_window_day_overrides` (+ `service_window_day_override_assignments`). Add `booking_occurrences.service_window_id`.
-- Occupancy counting: `[arrival_service_date, departure_service_date)` half-open in business tz, for BOTH the service cap and the shared pool (Danny's date-based ruling; departure date not counted, arrivals count). See `capacity-model.md`.
+- Occupancy counting: `[arrival_service_date, departure_service_date)` half-open in business tz, for BOTH the service cap and the shared pool (Danny's date-based ruling; departure date not counted, arrivals count). Boarding spans `[arrival, departure)`; **daycare occupies exactly its single `service_date`** (exclusive upper bound `service_date + 1 day`) — a same-day daycare booking occupies one date, never zero, so the generic half-open formula must special-case the daycare single-day bucket. The shared pool is a date-bucket scheduling limit with a departure-day tolerance (departing animals uncounted their whole departure date; arrivals count their whole arrival date), not a guaranteed instantaneous physical ceiling. See `capacity-model.md`.
 - All tables carry `business_id`; tenant-composite FKs throughout. Enforcement (approval/auto-book) in one transactional server op; RLS + cross-tenant/concurrency tests required. Lands with CFG-1, not the waitlist migration.
 - CORRECTION: the existing statement that walking uses `slot` is wrong — Walk Windows require `fixed_window`.
+
+
+## Walking capacity + zones — RATIFIED (Codex, 2026-08-18)
+- Walking/drop-in window capacity = Σ assigned walkers' effective caps (per-walker default + per-window override); NOT dogs-per-walker × count. Zone capacity within a window = Σ caps of the walkers whose coverage includes that zone.
+- A walk window is a named sub-service; Solo = business-scoped, Duo+ = day/time/staff-scoped (maps to `service_windows` + window assignments).
+- Zones = a REUSABLE per-tenant pool (the Zone Manager source list), referenced/selected at service, window, and staff (walker-coverage) levels — NOT a private disjoint set per service. Zone shapes stored once; each level selects a subset.
+- `capacity_config` (walking) encodes per-walker default caps + per-window assignments/overrides + per-window/per-walker zone selections. Concrete zone keying (service / window / staff) + tenant-composite FKs + RLS are finalized at CFG-1 build (Codex-accepted; no engine blocker).
