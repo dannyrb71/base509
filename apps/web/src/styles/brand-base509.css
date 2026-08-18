@@ -931,3 +931,17 @@ html:has([data-brand='base509']) { scroll-padding-top: 128px; }
   [data-brand='base509'] .prose h1 { font-size: 32px; line-height: 38px; }
   [data-brand='base509'] .prose h2 { font-size: 20px; line-height: 26px; }
 }
+
+/* ---------- 404 (Error 404 · 4 uh-oh 4) ---------- */
+[data-brand='base509'] .nf-kicker { margin-top: 10px; }
+[data-brand='base509'] .nf-figure {
+  font-family: var(--font-display); font-weight: 700;
+  font-size: clamp(88px, 17vw, 152px); color: var(--color-basalt); gap: 0.1em;
+}
+/* the warm aside between the numerals: ~4/5 size, nudged up so its optical
+   centre sits with the 4s */
+[data-brand='base509'] .nf-aside { font-size: 0.8em; color: var(--color-sunset); position: relative; top: -0.07em; }
+[data-brand='base509'] .nf-title { margin: 0; font-family: var(--font-display); font-weight: 700; font-size: 34px; line-height: 40px; text-transform: uppercase; color: var(--color-ink); }
+[data-brand='base509'] .nf-body { font-family: var(--font-body); font-size: 17px; line-height: 28px; color: var(--text-secondary); }
+[data-brand='base509'] .nf-secondary { color: var(--action-primary); }
+[data-brand='base509'] .nf-tagline { margin-top: 18px; font-size: 12px; font-weight: 600; letter-spacing: 1.8px; text-transform: uppercase; color: var(--text-secondary); }

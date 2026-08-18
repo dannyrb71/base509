@@ -2186,3 +2186,13 @@
   [data-brand='petappro'] .portal-donut,
   [data-brand='petappro'] .portal-bar-chart i { animation: none; }
 }
+
+/* ---------- 404 (this page went walkies) ---------- */
+[data-brand='petappro'] .nf-figure {
+  font-family: var(--font-display); font-weight: 700;
+  font-size: clamp(88px, 17vw, 152px); color: var(--pa-brandy-600);
+}
+[data-brand='petappro'] .nf-paw { width: 0.78em; height: 0.78em; margin: 0 0.04em; color: var(--pa-camo-600); }
+[data-brand='petappro'] .nf-title { margin: 0; font-family: var(--font-display); font-weight: 700; font-size: 32px; line-height: 40px; color: var(--text-primary); }
+[data-brand='petappro'] .nf-body { font-size: 17px; line-height: 28px; color: var(--text-secondary); }
+[data-brand='petappro'] .nf-secondary { color: var(--text-accent); }

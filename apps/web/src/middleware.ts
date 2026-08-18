@@ -55,8 +55,13 @@ export function middleware(req: NextRequest) {
     // which exposed the auth-less portal publicly (found 2026-08-17). Until
     // app.petappro.com launches behind real subscription auth (D-061), the
     // portal is localhost-only: review portal changes on the dev server.
+    // Rewriting to an unroutable path (not a bare NextResponse 404) lets
+    // Next render the branded not-found page with a 404 status instead of
+    // a blank white window.
     if (pathname.startsWith('/portal') && host.endsWith('.vercel.app')) {
-      return new NextResponse(null, { status: 404 });
+      const url = req.nextUrl.clone();
+      url.pathname = '/__portal-blocked__';
+      return NextResponse.rewrite(url);
     }
     return NextResponse.next();
   }
