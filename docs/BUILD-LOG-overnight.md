@@ -541,3 +541,11 @@ FILES TOUCHED: `apps/web/src/components/PortalAvailabilityView.tsx` · `apps/web
 ### Addendum: Shared Total Capacity day tile gated on both services (Danny note)
 
 The day card's Shared Total Capacity tile now renders only when the business pool exists AND both Boarding and Daycare are open on the selected date(s) — turning either off for the day hides it immediately (verified: tiles [Boarding, Daycare, Shared] → boarding off → [Boarding, Daycare] → restored). Mirrors the Business-page rule so a single-service day never shows a confusing shared ceiling. FILES TOUCHED: `apps/web/src/components/PortalAvailabilityView.tsx` · `docs/BUILD-LOG-overnight.md`
+
+## Portal exposure lockdown — middleware guard (2026-08-17 night, Danny-directed)
+
+Danny asked whether the portal had deployed before: YES — portal routes have shipped with every prod deploy since the 8/16 go-live push. Branded domains were never exposed (canonicalization 404s /portal on petappro.com/base509.com) and app.petappro.com is dark, but base509.vercel.app/portal served the ENTIRE auth-less mockup portal publicly (200, no X-Robots-Tag) since 8/16. Vercel Deployment Protection rejected ($150/mo) — fixed in middleware instead: on *.vercel.app hosts, /portal/* now returns a hard 404 (new NextResponse status 404) before the dev-host pass-through; localhost keeps full portal access for dev, app.petappro.com's HOST_MAP routing is untouched for the D-061 launch (which still requires real subscription auth before DNS ever points). Note: this also blocks portal review on Vercel PREVIEW URLs — portal review happens on localhost:3003.
+
+Verified via faked Host headers against dev: base509.vercel.app /portal + /portal/business → 404; localhost /portal → 200; vercel marketing / → 200; petappro.com /features → 200; app.petappro.com / and /business → 200. Typecheck + build green; dev server restarted per gotcha.
+
+FILES TOUCHED: `apps/web/src/middleware.ts` · `docs/BUILD-LOG-overnight.md`

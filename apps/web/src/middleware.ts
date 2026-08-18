@@ -50,7 +50,16 @@ export function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
-  if (isDevHost(host)) return NextResponse.next();
+  if (isDevHost(host)) {
+    // The .vercel.app URLs allow direct path access for preview navigation,
+    // which exposed the auth-less portal publicly (found 2026-08-17). Until
+    // app.petappro.com launches behind real subscription auth (D-061), the
+    // portal is localhost-only: review portal changes on the dev server.
+    if (pathname.startsWith('/portal') && host.endsWith('.vercel.app')) {
+      return new NextResponse(null, { status: 404 });
+    }
+    return NextResponse.next();
+  }
 
   const brand = HOST_MAP[host] ?? 'base509'; // unknown production host → safe default
 
