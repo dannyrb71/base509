@@ -1,4 +1,4 @@
-# CFG-1 — Multi-Tenant Foundation Build Spec (v2 — Codex-ratified, build-ready)
+# CFG-1 — Multi-Tenant Foundation Build Spec (v2.1 — Codex-ratified, build-ready)
 **Author: Cowork · v1 2026-08-18 → v2 folds Codex's 1st CHANGES-REQUIRED → v2.1 folds Codex's 2nd (7 residual) corrections (2026-08-18) · Status: RATIFIED (Option A), pending Codex final re-verify → Fable build**
 
 ## 0. What this is
