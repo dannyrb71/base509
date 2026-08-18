@@ -1,0 +1,17 @@
+{
+  "name": "@petappro/data",
+  "version": "0.1.0",
+  "description": "Generated Supabase DB types for the CFG-1 operational schema (S1-5). Do not hand-edit src/database.types.ts — run npm run gen.",
+  "private": true,
+  "type": "module",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "scripts": {
+    "gen": "node scripts/gen-types.mjs",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@supabase/postgres-meta": "0.98.0",
+    "typescript": "^5.5.0"
+  }
+}

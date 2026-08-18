@@ -3,11 +3,36 @@
 Project ref: `ecdmtldlqvkdvmyxgpzr` (URL: `https://ecdmtldlqvkdvmyxgpzr.supabase.co`)
 
 Versioned, additive migrations live in `migrations/` (Supabase CLI naming:
-`YYYYMMDDHHMMSS_description.sql`). Current scope is the pre-launch waitlist
-table only — the CFG-1 tenancy foundation is parked and must not be built here
-until it's unparked.
+`YYYYMMDDHHMMSS_description.sql`). Two layers exist:
 
-## Applying migrations
+1. **Waitlist** (`20260815*`/`20260816*`) — the pre-launch marketing-site
+   waitlist. Applied + verified on the live project 2026-08-16. This is the
+   ONLY thing on the production database today.
+2. **CFG-1 operational foundation** (`20260819*`) — the multi-tenant schema
+   (identity/tenancy, RBAC, RLS, invites, services + capacity/zones/overrides,
+   booking shells, entitlement projection, immutable audit) built per
+   `docs/specs/cfg-1-foundation-build-spec.md` (v2.1, Codex-ratified).
+   **Built and tested locally/CI only — NOT yet applied to the live project.**
+   Deploying it to prod requires Codex review + Danny's explicit approval
+   (spec §9 routing).
+
+## CFG-1 gate (§6) — how to run
+
+The go/no-go suite builds a fresh Postgres 15 from zero (Supabase-shim +
+every migration) and runs the full RLS/RBAC/entitlement/capacity/identity/
+concurrency gate:
+
+```bash
+cd supabase/tests && npm install && npm test
+```
+
+Locally it expects Postgres at `postgres://postgres@127.0.0.1:55432`
+(override with `CFG1_TEST_ADMIN_URL`). CI runs the same suite plus the
+`packages/data` generated-type drift check on every PR (`db-tests` job).
+
+Generated DB types: see `packages/data/README.md` (`npm run gen`).
+
+## Applying migrations (prod — approval-gated)
 
 Preferred (repeatable): `supabase link --project-ref ecdmtldlqvkdvmyxgpzr`
 then `supabase db push` (requires the Supabase CLI and an access token).
