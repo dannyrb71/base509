@@ -434,7 +434,9 @@ begin
     select g.resource_unit into v_unit
     from public.capacity_groups g
     where g.business_id = new.business_id and g.id = new.capacity_group_id;
-    if v_unit is distinct from (new.capacity_config ->> 'slot_unit') then
+    -- A missing pool row is a (cross-tenant) reference error — leave it to
+    -- the composite FK so the violation is reported as such.
+    if found and v_unit is distinct from (new.capacity_config ->> 'slot_unit') then
       raise exception 'POOL_UNIT_MISMATCH: capacity_config.slot_unit must match the pool resource_unit (%)', v_unit
         using errcode = '23514';
     end if;

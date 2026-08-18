@@ -60,7 +60,7 @@ declare
   v_inserted integer;
 begin
   -- Machine ops authenticate a workload identity, never a human in payload.
-  if auth.role() is distinct from 'service_role' then
+  if (app.jwt() ->> 'role') is distinct from 'service_role' then
     raise exception 'FORBIDDEN: entitlement sync requires the internal sync identity'
       using errcode = '42501';
   end if;

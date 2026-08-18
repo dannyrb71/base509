@@ -455,6 +455,20 @@ create trigger business_memberships_owner_remains
 
 -- ── Security-definer helpers (spec §4) ───────────────────────────────────────
 
+-- The verified request JWT. Reads the same GUC auth.jwt() reads (set by
+-- PostgREST after signature verification) but with no dependency on the
+-- auth schema, whose grants the migration role cannot manage on hosted
+-- Supabase and which cfg1_owner therefore could not be guaranteed to use.
+create or replace function app.jwt()
+returns jsonb
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select coalesce(nullif(current_setting('request.jwt.claims', true), '')::jsonb, '{}'::jsonb);
+$$;
+
 -- The verified JWT issuer — server-derived, never from request payload.
 create or replace function app.jwt_issuer()
 returns text
@@ -463,7 +477,7 @@ stable
 security definer
 set search_path = ''
 as $$
-  select nullif(auth.jwt() ->> 'iss', '');
+  select nullif(app.jwt() ->> 'iss', '');
 $$;
 
 create or replace function app.current_base509_account_id()
@@ -477,7 +491,7 @@ as $$
   from public.auth_identities ai
   join public.base509_accounts a on a.base509_account_id = ai.base509_account_id
   where ai.issuer = app.jwt_issuer()
-    and ai.provider_subject = auth.uid()::text
+    and ai.provider_subject = nullif(app.jwt() ->> 'sub', '')
     and a.status = 'active';
 $$;
 
@@ -524,13 +538,17 @@ as $$
   );
 $$;
 
--- Set-returning helpers so RLS SELECT policies hash once per statement.
+-- Set-returning helpers for RLS SELECT policies. The ROWS estimate matters:
+-- a caller belongs to a handful of businesses, and telling the planner so
+-- keeps tenant queries on index scans instead of hashed seq scans (§6
+-- realistic-RLS-performance gate).
 create or replace function app.member_business_ids()
 returns setof uuid
 language sql
 stable
 security definer
 set search_path = ''
+rows 5
 as $$
   select m.business_id
   from public.business_memberships m
@@ -545,6 +563,7 @@ language sql
 stable
 security definer
 set search_path = ''
+rows 5
 as $$
   select c.business_id
   from public.clients c
@@ -741,6 +760,7 @@ begin
 end;
 $$;
 
+alter function app.jwt() owner to cfg1_owner;
 alter function app.jwt_issuer() owner to cfg1_owner;
 alter function app.current_base509_account_id() owner to cfg1_owner;
 alter function app.current_membership(uuid) owner to cfg1_owner;
@@ -782,7 +802,7 @@ set search_path = ''
 as $$
 declare
   v_iss text := app.jwt_issuer();
-  v_sub text := auth.uid()::text;
+  v_sub text := nullif(app.jwt() ->> 'sub', '');
   v_provider text;
   v_account uuid;
 begin
@@ -805,10 +825,10 @@ begin
     return v_account;
   end if;
 
-  v_provider := coalesce(auth.jwt() -> 'app_metadata' ->> 'provider', 'supabase');
+  v_provider := coalesce(app.jwt() -> 'app_metadata' ->> 'provider', 'supabase');
 
   insert into public.base509_accounts (primary_email)
-  values (nullif(auth.jwt() ->> 'email', ''))
+  values (nullif(app.jwt() ->> 'email', ''))
   returning base509_account_id into v_account;
 
   insert into public.auth_identities (base509_account_id, issuer, provider, provider_subject)
