@@ -4,7 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
 import { usePortalPlan } from '@/components/PortalPlanProvider';
-import { PortalModal, PortalPageHeader, PortalPanel } from '@/components/PortalShell';
+import { CapacityField, PortalInfo, PortalModal, PortalPageHeader, PortalPanel } from '@/components/PortalShell';
 import { PortalWalkingRates } from '@/components/PortalWalkingRates';
 import { INITIAL_SERVICE_ZONES, PortalZoneManager } from '@/components/PortalZoneManager';
 import { ThemeGallery, type ThemeMode, type ThemeName } from '@/components/ThemeGallery';
@@ -52,9 +52,16 @@ export function PortalBusinessView() {
   const [surchargesOpen, setSurchargesOpen] = useState(false);
   const [dogsPerWalker, setDogsPerWalker] = useState('6');
   const [walksPerDay, setWalksPerDay] = useState('6');
+  /* D-075 occupancy capacity: required per-service limit; shared location
+     pool is an extra ceiling only when boarding + daycare share the home. */
+  const [boardingCapacity, setBoardingCapacity] = useState('6');
+  const [daycareCapacity, setDaycareCapacity] = useState('8');
+  const [locationPoolEnabled, setLocationPoolEnabled] = useState(true);
+  const [locationCapacity, setLocationCapacity] = useState('10');
+  const [capacityInfoOpen, setCapacityInfoOpen] = useState(false);
   const [services, setServices] = useState<Service[]>([
     { name: 'Boarding', enabled: true, price: '60', holidayPrice: '75', extraDog: '25', extendedDiscount: '5', unit: 'per night', note: 'Meet & Greet required' },
-    { name: 'Daycare', enabled: true, price: '40', holidayPrice: '50', extraDog: '18', unit: 'per day', note: 'Capacity: 8 dogs' },
+    { name: 'Daycare', enabled: true, price: '40', holidayPrice: '50', extraDog: '18', unit: 'per day', note: '' },
   ]);
   const [staff, setStaff] = useState<Staff[]>([
     { id: 1, name: 'Danny Baker', email: 'danny@example.com', role: 'Owner' },
@@ -70,6 +77,11 @@ export function PortalBusinessView() {
   const initials = initialsFor(businessName);
 
   const updateService = (index: number, patch: Partial<Service>) => setServices((items) => items.map((item, itemIndex) => itemIndex === index ? { ...item, ...patch } : item));
+  const boardingOn = services.find((item) => item.name === 'Boarding')?.enabled ?? false;
+  const daycareOn = services.find((item) => item.name === 'Daycare')?.enabled ?? false;
+  const boardingCap = Math.max(1, parseInt(boardingCapacity, 10) || 1);
+  const daycareCap = Math.max(1, parseInt(daycareCapacity, 10) || 1);
+  const locationCap = Math.max(1, parseInt(locationCapacity, 10) || 1);
   const addStaff = () => {
     if (staff.length >= seatLimit) { setNotice(`No seats remain on ${tier.name}. Upgrade to add another staff member.`); return; }
     if (!newStaffName || !newStaffEmail) { setNotice('Enter a staff name and email first.'); return; }
@@ -118,17 +130,35 @@ export function PortalBusinessView() {
           <button type="button" role="tab" aria-selected="false" disabled><span>Grooming</span><small>Soon</small></button>
         </div>
 
-        {serviceTab === 'boarding-daycare' && <div className="portal-service-editor-grid portal-service-editor-grid--two" role="tabpanel">
+        {serviceTab === 'boarding-daycare' && <div role="tabpanel">
+          <div className="portal-service-editor-grid portal-service-editor-grid--two">
           {services.map((service, index) => (
             <article className={service.enabled ? undefined : 'is-inactive'} key={service.name}>
               <div className="portal-service-editor__heading"><strong className="type-title">{service.name}</strong><label className="portal-switch"><span className="visually-hidden">Enable {service.name}</span><input type="checkbox" checked={service.enabled} onChange={(event) => updateService(index, { enabled: event.target.checked })} /><i /></label></div>
+              {service.name === 'Boarding'
+                ? <CapacityField label="Capacity" ariaLabel="Boarding Capacity" hint="Dogs per night — a dog counts on arrival and each overnight, not pickup day." value={boardingCapacity} onChange={setBoardingCapacity} disabled={!service.enabled} />
+                : <CapacityField label="Capacity" ariaLabel="Daycare Capacity" hint="Dogs per day." value={daycareCapacity} onChange={setDaycareCapacity} disabled={!service.enabled} />}
               <label className="type-body"><span>Base Price</span><span className="portal-price-input"><b>$</b><input inputMode="decimal" value={service.price} disabled={!service.enabled} onChange={(event) => updateService(index, { price: event.target.value })} /></span></label>
               <label className="type-body"><span>Holiday Price</span><span className="portal-price-input"><b>$</b><input inputMode="decimal" value={service.holidayPrice} disabled={!service.enabled} onChange={(event) => updateService(index, { holidayPrice: event.target.value })} /></span><small className="type-caption">Applied {service.name === 'Boarding' ? 'per holiday night' : 'per holiday day'} selected in Availability.</small></label>
               <label className="type-body"><span>Extra Dog Rate <small>(Optional)</small></span><span className="portal-price-input"><b>$</b><input inputMode="decimal" value={service.extraDog} disabled={!service.enabled} onChange={(event) => updateService(index, { extraDog: event.target.value })} /></span></label>
               {service.name === 'Boarding' && <label className="type-body"><span>Extended Rate Discount <small>(Optional)</small></span><span className="portal-price-input"><b>$</b><input inputMode="decimal" value={service.extendedDiscount} disabled={!service.enabled} onChange={(event) => updateService(index, { extendedDiscount: event.target.value })} /></span><small className="type-caption">Discount per night for stays of 8+ days.</small></label>}
-              <span className="type-caption">{service.unit} · {service.note}</span>
+              <span className="type-caption">{service.unit}{service.note && <> · {service.note}</>}</span>
             </article>
           ))}
+
+          {boardingOn && daycareOn && <article className={locationPoolEnabled ? 'portal-capacity-card' : 'portal-capacity-card is-inactive'} aria-label="Shared Total Capacity">
+            <div className="portal-service-editor__heading"><strong className="type-title">Shared Total Capacity<PortalInfo open={capacityInfoOpen} onToggle={() => setCapacityInfoOpen((current) => !current)} /></strong><label className="portal-switch"><span className="visually-hidden">Enable Shared Total Capacity</span><input type="checkbox" checked={locationPoolEnabled} onChange={(event) => setLocationPoolEnabled(event.target.checked)} /><i /></label></div>
+            {capacityInfoOpen && <div className="portal-walk-pricing-note"><strong className="type-body-bold">How this works:</strong><p className="type-body">A dog counts against capacity on its arrival day and each overnight — never on pickup day. Boarding and Daycare use the same day-by-day count, and with Shared Total Capacity on they also count against this one ceiling for your home — the lower limit always wins.</p></div>}
+            <CapacityField label="Total Dogs On Site" ariaLabel="Shared Total Capacity" hint="Boarding and Daycare together never exceed this on the same day." value={locationCapacity} onChange={setLocationCapacity} disabled={!locationPoolEnabled} />
+            <div className="portal-walk-pricing-note portal-walk-window-capacity">
+              <p className="type-caption">
+                {locationPoolEnabled
+                  ? <>Boarding up to {boardingCap} + Daycare up to {daycareCap} = {boardingCap + daycareCap} by service caps — but never more than <strong>{locationCap} dogs on site</strong> on any day.</>
+                  : <>Boarding up to <strong>{boardingCap} dogs</strong> per night · Daycare up to <strong>{daycareCap} dogs</strong> per day, counted independently.</>}
+              </p>
+            </div>
+          </article>}
+          </div>
         </div>}
 
         {serviceTab === 'walking' && <div className="portal-walking-tab" role="tabpanel"><PortalWalkingRates dogsPerWalker={dogsPerWalker} onDogsPerWalkerChange={setDogsPerWalker} walksPerDay={walksPerDay} onWalksPerDayChange={setWalksPerDay} subscriptionPlan={subscriptionPlan} zones={zones} onManageZones={() => setZoneManagerOpen(true)} /></div>}

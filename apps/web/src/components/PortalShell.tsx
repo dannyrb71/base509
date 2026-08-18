@@ -134,6 +134,29 @@ export function PortalDrawer({ open, onClose, eyebrow, title, children }: {
   );
 }
 
+/* Capacity field — styled exactly like the pricing fields (same control
+   height/padding/type via the shared label rules), just without the $
+   prefix. A div, not a label, so grid label:nth-of-type pinning in host
+   layouts stays untouched. Shared by Business (service cards, Shared Total
+   Capacity) and Availability (per-day overrides). */
+export function CapacityField({ label, ariaLabel, hint, value, placeholder, onChange, disabled }: {
+  label: string;
+  ariaLabel?: string;
+  hint?: string;
+  value: string;
+  placeholder?: string;
+  onChange: (next: string) => void;
+  disabled?: boolean;
+}) {
+  return (
+    <div className="portal-capacity-inline">
+      <span>{label}</span>
+      <input inputMode="numeric" aria-label={ariaLabel ?? label} value={value} placeholder={placeholder} disabled={disabled} onChange={(event) => onChange(event.target.value.replace(/[^0-9]/g, ''))} />
+      {hint && <small className="type-caption">{hint}</small>}
+    </div>
+  );
+}
+
 export function PortalInfo({ label = 'How this works', open, onToggle }: {
   label?: string;
   open: boolean;

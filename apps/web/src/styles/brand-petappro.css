@@ -1595,7 +1595,7 @@
 [data-brand='petappro'] .portal-field-grid { display: grid; gap: var(--pa-space-4); }
 [data-brand='petappro'] .portal-field-grid label,
 [data-brand='petappro'] .portal-service-editor-grid label { display: flex; min-width: 0; flex-direction: column; gap: var(--pa-space-2); color: var(--text-secondary); font-size: var(--type-caption-size); font-weight: var(--type-weight-semibold); }
-[data-brand='petappro'] :where(.portal-field-grid, .portal-service-editor-grid, .portal-add-staff, .portal-inline-form) :where(input, select),
+[data-brand='petappro'] :where(.portal-field-grid, .portal-service-editor-grid, .portal-add-staff, .portal-inline-form, .portal-date-editor__day-services, .portal-day-walking) :where(input:not([type='checkbox']), select),
 [data-brand='petappro'] .portal-editor textarea,
 [data-brand='petappro'] .portal-team-list select { min-height: var(--pa-control-height); min-width: 0; width: 100%; padding: var(--pa-space-3) var(--pa-space-4); border: 1px solid var(--border-default); border-radius: var(--radius-ctl); background: var(--surface-card); color: var(--text-primary); font: inherit; }
 [data-brand='petappro'] .portal-logo-upload { display: flex; flex-wrap: wrap; align-items: center; gap: var(--pa-space-4); margin-bottom: var(--pa-space-5); padding: var(--pa-space-4); border-radius: var(--pa-card-radius); background: var(--pa-brandy-50); }
@@ -1756,6 +1756,22 @@
 [data-brand='petappro'] .portal-date-editor__toggle > span:first-child { display: grid; gap: var(--pa-space-1); }
 [data-brand='petappro'] .portal-date-editor__availability,
 [data-brand='petappro'] .portal-date-editor__services { display: grid; gap: var(--pa-space-2); margin: 0; padding: 0; border: 0; }
+/* D-076 per-day service rows: availability toggle + capacity override. */
+[data-brand='petappro'] .portal-date-editor__day-services { display: grid; gap: var(--pa-space-3); }
+[data-brand='petappro'] .portal-day-service { display: grid; gap: var(--pa-space-3); padding: var(--pa-space-4); border-radius: var(--pa-card-radius); background: var(--surface-card); }
+[data-brand='petappro'] .portal-day-service__heading { display: flex; align-items: center; justify-content: space-between; gap: var(--pa-space-3); }
+[data-brand='petappro'] .portal-day-service.is-closed > :not(.portal-day-service__heading) { opacity: 0.6; }
+/* Dog Walking day-override section: full width under the calendar (fills the
+   column the taller editor left empty), same editor-card family as the aside.
+   Its window tiles are surface cards; per-date and per-walker fields inherit
+   the standard input dress via the shared :where() control rule. */
+[data-brand='petappro'] .portal-day-walking,
+[data-brand='petappro'] .portal-day-occupancy { display: grid; gap: var(--pa-space-4); padding: var(--pa-space-5); border-radius: var(--pa-card-radius); background: var(--pa-brandy-50); align-content: start; }
+[data-brand='petappro'] .portal-day-walking.is-closed > :not(.portal-day-service__heading) { opacity: 0.6; }
+/* Window cards stack full width at every screen size (Danny 2026-08-17). */
+[data-brand='petappro'] .portal-day-windows { display: grid; gap: var(--pa-space-3); }
+[data-brand='petappro'] .portal-day-window { display: grid; gap: var(--pa-space-3); padding: var(--pa-space-3) var(--pa-space-4); border: 1px solid var(--border-default); border-radius: var(--pa-card-radius); background: var(--surface-card); }
+[data-brand='petappro'] .portal-day-window.is-closed > :not(.portal-day-service__heading) { opacity: 0.6; }
 [data-brand='petappro'] .portal-date-editor__availability legend,
 [data-brand='petappro'] .portal-date-editor__services legend { margin-bottom: var(--pa-space-2); }
 [data-brand='petappro'] .portal-date-editor__availability label { position: relative; display: flex; padding: var(--pa-space-3); border: 1px solid var(--border-default); border-radius: var(--pa-card-radius); background: var(--surface-card); cursor: pointer; }
@@ -1829,6 +1845,13 @@
 [data-brand='petappro'] .portal-collapse-toggle img { transition: transform 200ms ease; }
 [data-brand='petappro'] .portal-collapse-toggle[aria-expanded='true'] img { transform: rotate(180deg); }
 [data-brand='petappro'] .portal-subcard { border: 1px solid var(--border-default); border-radius: var(--pa-card-radius); background: var(--surface-card); overflow: hidden; }
+/* Shared Total Capacity — an article INSIDE the service editor grid, so it
+   wears the exact card + field + input dress of the service cards; it just
+   spans the full row. */
+[data-brand='petappro'] .portal-capacity-card { grid-column: 1 / -1; }
+/* Capacity field: identical dress to the service-card pricing labels
+   (same control height/padding/type), minus the $ prefix box. */
+[data-brand='petappro'] .portal-capacity-inline { display: flex; min-width: 0; flex-direction: column; gap: var(--pa-space-2); color: var(--text-secondary); font-size: var(--type-caption-size); font-weight: var(--type-weight-semibold); }
 [data-brand='petappro'] .portal-subcard__head { display: flex; flex-wrap: wrap; align-items: center; gap: var(--pa-space-3); padding: var(--pa-space-4) var(--pa-space-5); background: var(--pa-brandy-50); border-bottom: 1px solid var(--border-default); }
 [data-brand='petappro'] .portal-subcard--plain .portal-subcard__head { background: var(--surface-card); border-bottom: 0; }
 [data-brand='petappro'] .portal-subcard--plain .portal-subcard__body { border-top: 1px solid var(--border-default); }
@@ -2075,13 +2098,19 @@
   [data-brand='petappro'] .portal-service-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
   [data-brand='petappro'] .portal-service-editor-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
   [data-brand='petappro'] .portal-service-editor-grid--two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  [data-brand='petappro'] .portal-service-editor-grid article { grid-template-rows: var(--pa-space-16) auto auto auto minmax(var(--pa-space-30), 1fr) auto; }
+  [data-brand='petappro'] .portal-service-editor-grid article:not(.portal-capacity-card) { grid-template-rows: var(--pa-space-16) auto auto auto auto minmax(var(--pa-space-30), 1fr) auto; }
   [data-brand='petappro'] .portal-service-editor-grid article > .portal-service-editor__heading { grid-row: 1; min-height: var(--pa-space-16); align-self: start; }
-  [data-brand='petappro'] .portal-service-editor-grid article > label:nth-of-type(1) { grid-row: 2; }
-  [data-brand='petappro'] .portal-service-editor-grid article > label:nth-of-type(2) { grid-row: 3; }
-  [data-brand='petappro'] .portal-service-editor-grid article > label:nth-of-type(3) { grid-row: 4; }
-  [data-brand='petappro'] .portal-service-editor-grid article > label:nth-of-type(4) { grid-row: 5; align-self: start; }
-  [data-brand='petappro'] .portal-service-editor-grid article > span:last-child { grid-row: 6; min-height: var(--pa-space-10); align-self: stretch; }
+  /* Capacity leads the card (a div, so the label nth-of-type pins below
+     stay valid); Boarding's extra pricing label takes the stretchy row 6,
+     which sits empty on Daycare to keep both captions level. The shared
+     capacity card auto-flows instead and its field matches a column width. */
+  [data-brand='petappro'] .portal-service-editor-grid article:not(.portal-capacity-card) > .portal-capacity-inline { grid-row: 2; align-self: start; }
+  [data-brand='petappro'] .portal-service-editor-grid article:not(.portal-capacity-card) > label:nth-of-type(1) { grid-row: 3; }
+  [data-brand='petappro'] .portal-service-editor-grid article:not(.portal-capacity-card) > label:nth-of-type(2) { grid-row: 4; }
+  [data-brand='petappro'] .portal-service-editor-grid article:not(.portal-capacity-card) > label:nth-of-type(3) { grid-row: 5; }
+  [data-brand='petappro'] .portal-service-editor-grid article:not(.portal-capacity-card) > label:nth-of-type(4) { grid-row: 6; align-self: start; }
+  [data-brand='petappro'] .portal-service-editor-grid article:not(.portal-capacity-card) > span:last-child { grid-row: 7; min-height: var(--pa-space-10); align-self: stretch; }
+  [data-brand='petappro'] .portal-capacity-card > .portal-capacity-inline { max-width: calc((100% - var(--pa-space-3)) / 2); }
   [data-brand='petappro'] .portal-walk-offering > div { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   [data-brand='petappro'] .portal-walk-settings { grid-template-columns: repeat(4, minmax(0, 1fr)); }
   [data-brand='petappro'] .portal-walk-rate-fields { grid-template-columns: repeat(3, minmax(0, 1fr)); }
@@ -2094,7 +2123,14 @@
   [data-brand='petappro'] .portal-team-list .portal-permissions { grid-column: 1 / -1; }
   [data-brand='petappro'] .portal-team-list .portal-remove-button { grid-column: 1 / -1; }
   [data-brand='petappro'] .portal-marketing-grid { grid-template-columns: minmax(0, .9fr) minmax(360px, 1.1fr); }
-  [data-brand='petappro'] .portal-availability-layout { grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); }
+  [data-brand='petappro'] .portal-availability-layout { grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); align-items: stretch; }
+  /* Row 1: calendar | compact date-editor card (stretches to the calendar's
+     height). Row 2: Dog Walking under the calendar | Boarding & Daycare +
+     Shared Capacity beside it. Cards in a row share the row's height. */
+  [data-brand='petappro'] .portal-availability-layout > .portal-availability-calendar { grid-column: 1; grid-row: 1; }
+  [data-brand='petappro'] .portal-availability-layout > .portal-date-editor { grid-column: 2; grid-row: 1; }
+  [data-brand='petappro'] .portal-availability-layout > .portal-day-walking { grid-column: 1; grid-row: 2; }
+  [data-brand='petappro'] .portal-availability-layout > .portal-day-occupancy { grid-column: 2; grid-row: 2; }
   [data-brand='petappro'] .portal-client-record-grid,
   [data-brand='petappro'] .portal-map-layout,
   [data-brand='petappro'] .portal-mfa-setup,
