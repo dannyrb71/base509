@@ -2197,3 +2197,65 @@
 [data-brand='petappro'] .nf-title { margin: 0; font-family: var(--font-display); font-weight: 700; font-size: 32px; line-height: 40px; color: var(--text-primary); }
 [data-brand='petappro'] .nf-body { font-size: 17px; line-height: 28px; color: var(--text-secondary); }
 [data-brand='petappro'] .nf-secondary { color: var(--text-accent); }
+
+/* ── Resources section (build spec 2026-08-19) ─────────────────────────────
+   Appended at end-of-file on purpose: base sizes + media overrides both live
+   below every earlier rule so the cascade can't silently drop them (the
+   brand-base509.css line-528 lesson). */
+[data-brand='petappro'] .res-breadcrumb { margin-bottom: var(--pa-space-4); color: var(--text-secondary); }
+[data-brand='petappro'] .res-breadcrumb a { color: var(--text-accent); text-decoration: none; }
+[data-brand='petappro'] .res-breadcrumb a:hover { text-decoration: underline; }
+[data-brand='petappro'] .res-index__intro { max-width: 640px; margin-top: var(--pa-space-3); }
+
+[data-brand='petappro'] .res-pills { display: flex; flex-wrap: wrap; gap: var(--pa-space-2); margin-bottom: var(--pa-space-3); }
+[data-brand='petappro'] .res-pill {
+  display: inline-block; padding: 4px 12px; border-radius: 999px;
+  font-size: 13px; font-weight: 700; line-height: 20px;
+  background: var(--pa-brandy-100); color: var(--pa-brandy-700);
+}
+[data-brand='petappro'] .res-pill--audience { background: var(--pa-brandy-50); color: var(--pa-brandy-600); border: 1px solid var(--pa-brandy-200); }
+
+[data-brand='petappro'] .res-grid { align-items: stretch; }
+[data-brand='petappro'] .res-card { display: flex; flex-direction: column; gap: var(--pa-space-2); }
+[data-brand='petappro'] .res-card .card__cta { margin-top: auto; }
+[data-brand='petappro'] .res-card__icon { font-size: 28px; line-height: 1; }
+[data-brand='petappro'] .res-card__cover { margin: calc(-1 * var(--pa-space-2)) 0 var(--pa-space-2); border-radius: 12px; overflow: hidden; }
+[data-brand='petappro'] .res-card__cover img { display: block; width: 100%; height: auto; }
+[data-brand='petappro'] .res-meta { color: var(--text-secondary); }
+
+[data-brand='petappro'] .res-article { max-width: 760px; }
+[data-brand='petappro'] .res-article h1 { margin: var(--pa-space-2) 0 var(--pa-space-3); }
+[data-brand='petappro'] .res-cover { margin: var(--pa-space-6) 0; border-radius: 16px; overflow: hidden; }
+[data-brand='petappro'] .res-cover img { display: block; width: 100%; height: auto; }
+[data-brand='petappro'] .res-body { margin-top: var(--pa-space-6); }
+
+[data-brand='petappro'] .res-figure { margin: var(--pa-space-6) 0; }
+[data-brand='petappro'] .res-figure img { display: block; width: 100%; height: auto; border-radius: 12px; }
+[data-brand='petappro'] .res-figure figcaption { margin-top: var(--pa-space-2); color: var(--text-secondary); }
+
+[data-brand='petappro'] .res-imagerow { display: grid; grid-template-columns: 1fr 1fr; gap: var(--pa-space-4); margin: var(--pa-space-6) 0; }
+[data-brand='petappro'] .res-imagerow .res-figure { margin: 0; }
+
+[data-brand='petappro'] .res-callout {
+  margin: var(--pa-space-6) 0; padding: var(--pa-space-4) var(--pa-space-5);
+  background: var(--pa-brandy-50); border-left: 4px solid var(--pa-camo-600);
+  border-radius: 0 12px 12px 0;
+}
+[data-brand='petappro'] .res-callout__title { margin: 0 0 var(--pa-space-1); }
+[data-brand='petappro'] .res-callout__body p { margin: 0; }
+[data-brand='petappro'] .res-callout__body p + p { margin-top: var(--pa-space-2); }
+
+[data-brand='petappro'] .res-cta { margin-top: var(--pa-space-10); text-align: center; padding: var(--pa-space-8) var(--pa-space-6); }
+[data-brand='petappro'] .res-cta .btn { margin-top: var(--pa-space-4); }
+[data-brand='petappro'] .res-related { margin-top: var(--pa-space-10); }
+[data-brand='petappro'] .res-related > .type-title { margin-bottom: var(--pa-space-5); }
+[data-brand='petappro'] .res-back { margin-top: var(--pa-space-8); }
+[data-brand='petappro'] .res-back a { color: var(--text-accent); text-decoration: none; }
+[data-brand='petappro'] .res-back a:hover { text-decoration: underline; }
+[data-brand='petappro'] .res-toolbox-group { margin-bottom: var(--pa-space-8); }
+[data-brand='petappro'] .res-toolbox-group > .type-title { margin-bottom: var(--pa-space-4); }
+
+@media (max-width: 760px) {
+  /* ImageRow stacks on mobile (build spec). */
+  [data-brand='petappro'] .res-imagerow { grid-template-columns: 1fr; }
+}

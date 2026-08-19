@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { PetApproScrollTop } from '@/components/PetApproScrollTop';
 import { MobileNav } from '@/components/MobileNav';
 import { AccountMenu } from '@/components/AccountMenu';
+import { resourcesNavVisible } from '@/lib/resources';
 
 export const metadata: Metadata = {
   title: { default: 'PetAppro — the booking app for dog-care providers', template: '%s · PetAppro' },
@@ -39,6 +40,10 @@ function Wordmark({ inverse = false }: { inverse?: boolean }) {
 }
 
 export default function PetApproLayout({ children }: { children: React.ReactNode }) {
+  // "Resources" appears in nav/footer only once ≥1 section is visible AND has
+  // published content (Resources build spec) — hidden until the first section
+  // goes live, no half-empty destination ever linked.
+  const showResources = resourcesNavVisible();
   return (
     <div data-brand="petappro" className="brand-root">
       <link
@@ -55,6 +60,7 @@ export default function PetApproLayout({ children }: { children: React.ReactNode
             <Link href="/petappro/features">Features</Link>
             <Link href="/petappro/pricing">Pricing</Link>
             <Link href="/petappro/themes">Themes</Link>
+            {showResources && <Link href="/petappro/resources">Resources</Link>}
             <Link href="/petappro/download">Download</Link>
             <Link href="/petappro/support">Support</Link>
           </nav>
@@ -71,6 +77,7 @@ export default function PetApproLayout({ children }: { children: React.ReactNode
               { href: '/petappro/features', label: 'Features' },
               { href: '/petappro/pricing', label: 'Pricing' },
               { href: '/petappro/themes', label: 'Themes' },
+              ...(showResources ? [{ href: '/petappro/resources', label: 'Resources' }] : []),
               { href: '/petappro/download', label: 'Download' },
               { href: '/petappro/support', label: 'Support' },
               { href: 'https://base509.com/policies/privacy', label: 'Privacy Policy' },
@@ -90,6 +97,7 @@ export default function PetApproLayout({ children }: { children: React.ReactNode
               <Link className="type-body" href="/petappro/features">Features</Link>
               <Link className="type-body" href="/petappro/pricing">Pricing</Link>
               <Link className="type-body" href="/petappro/themes">Themes</Link>
+              {showResources && <Link className="type-body" href="/petappro/resources">Resources</Link>}
             </div>
           </div>
           <div className="site-footer__links">

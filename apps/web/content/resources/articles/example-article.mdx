@@ -1,0 +1,68 @@
+---
+title: "Example article — every layout block in one place"
+slug: example-article
+excerpt: "A draft that exercises the full article template: cover, figures, image rows, and callouts. Never published — it exists to prove the rendering pipeline."
+section: articles
+category: Running the business
+audience: provider
+date: "2026-08-19"
+author: PetAppro
+coverImage: /resources/example-article/cover.svg
+seo:
+  title: "Example article (draft)"
+  description: "Internal rendering test article — not published."
+# ⚠️ THE GATE. This stays false forever: the file exists to prove the MDX
+# pipeline renders (flip to true LOCALLY to preview, never commit that).
+# published: false (or missing) → excluded from every index, the sitemap,
+# generateStaticParams, and related lists; the slug 404s.
+published: false
+---
+
+This draft exercises every layout block an author can use, so George can copy
+its patterns when writing real content. It never ships: `published: false`
+keeps it out of the index, the sitemap, and static params — visiting its URL
+returns a 404.
+
+## Plain markdown works everywhere
+
+Regular paragraphs, **bold**, _italic_, [links](https://petappro.com), and
+lists render through the standard `.prose` styles:
+
+- Boarding, daycare, and walking each get their own capacity rules.
+- Holiday weekends cover Friday through Monday automatically.
+- Your clients see your prices — PetAppro never takes a percentage.
+
+## A single figure
+
+<Figure
+  src="/resources/example-article/kennel-layout.svg"
+  alt="Placeholder diagram of a kennel layout"
+  caption="Figures take a required alt, an optional caption, and render through next/image."
+/>
+
+## Two images side by side
+
+<ImageRow>
+  <Figure
+    src="/resources/example-article/morning-run.svg"
+    alt="Placeholder photo of a morning group walk"
+    width={600}
+    height={400}
+  />
+  <Figure
+    src="/resources/example-article/evening-walk.svg"
+    alt="Placeholder photo of an evening solo walk"
+    width={600}
+    height={400}
+  />
+</ImageRow>
+
+## A callout
+
+<Callout title="Why this matters">
+  Callouts use the brandy-50 background with the camo left border — reach for
+  one when a paragraph is the thing readers must not skim past.
+</Callout>
+
+That's the whole authoring surface: markdown plus `<Figure>`, `<ImageRow>`,
+and `<Callout>`. Anything fancier belongs in a component first.
