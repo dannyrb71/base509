@@ -484,6 +484,58 @@ describe('entitlements (D-050)', () => {
     })
   })
 
+  it('the complete Crew/Team city-theme projection syncs and stays effective (Codex #3 round)', async () => {
+    const CREW_THEMES = [
+      'brandy_blue',
+      'husky', 'irish_setter', 'bichon_frise', 'blue_heeler', 'chessie',
+      'bark_avenue_ny', 'south_bark_miami', 'hollywoowoowood', 'san_fursisco',
+    ]
+    const biz = await newBusiness()
+    // Sync side: the full locked roster is a VALID allowlist, not a rejection.
+    const applied = await setEntitlements(biz.businessId, {
+      tier_key: 'crew',
+      theme_allowlist: CREW_THEMES,
+      capabilities: { gps: true },
+      client_limit: null,
+      seat_limit: 10,
+    })
+    expect(applied.status).toBe('applied')
+    // Read side: it stays effective — no Starter downgrade for city themes.
+    const admin = await connect()
+    const eff = await admin.query(`select app.effective_entitlements($1) as e`, [
+      biz.businessId,
+    ])
+    expect(eff.rows[0].e.tier_key).toBe('crew')
+    expect(eff.rows[0].e.theme_allowlist).toEqual(CREW_THEMES)
+    const gps = await admin.query(`select app.has_capability($1, 'gps') as ok`, [biz.businessId])
+    expect(gps.rows[0].ok).toBe(true)
+    await admin.end()
+  })
+
+  it('Duo’s projection carries all breeds and excludes the city keys', async () => {
+    const DUO_THEMES = [
+      'brandy_blue', 'husky', 'irish_setter', 'bichon_frise', 'blue_heeler', 'chessie',
+    ]
+    const biz = await newBusiness()
+    const applied = await setEntitlements(biz.businessId, {
+      tier_key: 'duo',
+      theme_allowlist: DUO_THEMES,
+      seat_limit: 2,
+      client_limit: null,
+    })
+    expect(applied.status).toBe('applied')
+    const admin = await connect()
+    const eff = await admin.query(`select app.effective_entitlements($1) as e`, [
+      biz.businessId,
+    ])
+    expect(eff.rows[0].e.tier_key).toBe('duo')
+    expect(eff.rows[0].e.theme_allowlist).toEqual(DUO_THEMES)
+    for (const cityKey of ['bark_avenue_ny', 'south_bark_miami', 'hollywoowoowood', 'san_fursisco']) {
+      expect(eff.rows[0].e.theme_allowlist).not.toContain(cityKey)
+    }
+    await admin.end()
+  })
+
   it('sync rejects malformed envelope fields outright (Codex #7)', async () => {
     const biz = await newBusiness()
     const base = {

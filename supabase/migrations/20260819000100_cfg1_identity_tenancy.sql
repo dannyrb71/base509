@@ -589,19 +589,29 @@ $$;
 -- ── Entitlement helpers (D-050; fail closed, spec §4) ────────────────────────
 
 -- The ratified stable theme keys this projection version understands — the
--- read-side mirror of the Base509 catalogue's CURRENT key set (locked pricing
--- matrix: Starter → Brandy Blue; Solo adds Husky, Irish Setter; Duo adds
--- Bichon Frise, Blue Heeler, Chessie; city/seasonal keys ship with a future
--- catalogue version and land here by migration). This is key VALIDATION only
--- — tier-to-theme policy stays in the Base509 catalogue (D-020/D-040); no
--- tier conditional lives here.
+-- read-side mirror of the Base509 catalogue's CURRENT key set. Canonical
+-- roster: apps/web/copy/theme-tiers.md (locked) — default Brandy Blue;
+-- breeds Husky, Irish Setter, Bichon Frise, Blue Heeler, Chessie; cities
+-- Bark Avenue NY, South Bark Miami, Hollywoowoowood, San Fursisco (Crew/
+-- Team). Stable keys are derived from the locked roster names by one
+-- deterministic rule — lowercase, non-alphanumeric runs → '_' — the same
+-- rule that produced the breed/default keys; the portal's theme identifiers
+-- must use these keys when it binds to this schema (single source of
+-- truth). Seasonal drops remain future/unnamed and land here by migration
+-- with their catalogue version. Key VALIDATION only — tier-to-theme policy
+-- stays in the Base509 catalogue (D-020/D-040); no tier conditional lives
+-- here.
 create or replace function app.known_theme_keys()
 returns text[]
 language sql
 immutable
 set search_path = ''
 as $$
-  select array['brandy_blue', 'husky', 'irish_setter', 'bichon_frise', 'blue_heeler', 'chessie'];
+  select array[
+    'brandy_blue',
+    'husky', 'irish_setter', 'bichon_frise', 'blue_heeler', 'chessie',
+    'bark_avenue_ny', 'south_bark_miami', 'hollywoowoowood', 'san_fursisco'
+  ];
 $$;
 
 -- A theme allowlist is valid only if it is a JSON array whose EVERY element
