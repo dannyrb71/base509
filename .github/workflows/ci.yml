@@ -77,7 +77,37 @@ jobs:
         working-directory: packages/pricing
         run: npm test -- --reporter=verbose
 
-  # ─── 3. CFG-1 DB gate (§6 go/no-go) + generated-type drift ──────────────────
+  # ─── 3. Web app build + typecheck (apps/web — Phase A: portal is real now) ──
+  web-build:
+    name: Web build + typecheck (apps/web)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: apps/web/package-lock.json
+
+      - name: Install web deps
+        working-directory: apps/web
+        run: npm ci
+
+      - name: TypeScript (apps/web)
+        working-directory: apps/web
+        run: npx tsc --noEmit
+
+      - name: Production build (apps/web)
+        working-directory: apps/web
+        env:
+          # Placeholders: the build never contacts Supabase (portal pages are
+          # dynamic); these only satisfy env presence for build parity.
+          NEXT_PUBLIC_PORTAL_SUPABASE_URL: https://placeholder.supabase.co
+          NEXT_PUBLIC_PORTAL_SUPABASE_ANON_KEY: ci-placeholder
+        run: npm run build
+
+  # ─── 4. CFG-1 DB gate (§6 go/no-go) + generated-type drift ──────────────────
   # The spec's definition of done: the full RLS/RBAC/entitlement/capacity/
   # identity/concurrency suite passes against a fresh Postgres 15 (matching
   # prod), and packages/data types regenerate without drift.
@@ -141,7 +171,7 @@ jobs:
         working-directory: packages/data
         run: npx tsc --noEmit
 
-  # ─── 4. E2E tests (Maestro) — gated on app existing ─────────────────────────
+  # ─── 5. E2E tests (Maestro) — gated on app existing ─────────────────────────
   # Uncomment and complete once apps/mobile is scaffolded and a physical/emulator
   # runner is available. The flow YAML files in e2e/flows/ are already committed.
   #
