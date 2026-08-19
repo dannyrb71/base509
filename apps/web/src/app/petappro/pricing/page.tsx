@@ -25,14 +25,36 @@ export default function PricingPage() {
         <div className="subpage-heading">
           <Eyebrow>Pricing</Eyebrow>
           <h1 className="type-display">Start free.<br />Grow predictably.</h1>
-          <p className="type-body-lg">Every plan’s a flat monthly price — go annual and about two months are on us. No commissions on your bookings.</p>
+          <p className="type-body-lg">Every plan’s a flat monthly price — go annual and a month’s on us. No commissions on your bookings.</p>
         </div>
         <div className="figma-pricing__tiers">
           {TIERS.map((tier) => (
             <article className={tier.featured ? 'is-featured' : ''} key={tier.key}>
+              {/* Variant A hierarchy (Danny, 2026-08-19): name on its own
+                  line, monthly amount is the hero, annual is a bold legible
+                  subline + "1 month free" pill. Colour discipline: camo green
+                  appears ONLY on the pill, the featured Duo border, and
+                  "Payments unlock here" — names and prices are navy. */}
               <p className="type-label">{tier.seats}</p>
-              <h2 className="type-title-lg">{tier.name} — {tier.monthly === null ? 'Contact us' : tier.monthly === 0 ? 'Free' : `$${tier.monthly}/mo`}</h2>
-              {tier.annual !== null && <p className="figma-pricing__annual type-caption">or ${tier.annual}/yr{tier.key === 'solo' ? ' · 2 months free' : ''}</p>}
+              <h2 className="figma-pricing__name">{tier.name}</h2>
+              <p className="figma-pricing__price">
+                {tier.monthly === null ? (
+                  <span className="figma-pricing__amount figma-pricing__amount--text">Contact us</span>
+                ) : tier.monthly === 0 ? (
+                  <span className="figma-pricing__amount figma-pricing__amount--text">Free</span>
+                ) : (
+                  <>
+                    <span className="figma-pricing__amount">${tier.monthly}</span>
+                    <span className="figma-pricing__per">/mo</span>
+                  </>
+                )}
+              </p>
+              {tier.annual !== null && (
+                <p className="figma-pricing__annual">
+                  <strong>or ${tier.annual.toLocaleString('en-US')}/yr</strong>
+                  <span className="figma-pricing__pill">1 month free</span>
+                </p>
+              )}
               <p className="type-body">{tier.blurb}</p>
               {tier.key === 'duo' && <span className="figma-pricing__badge type-label">Payments unlock here</span>}
               {tier.key === 'enterprise' && <Btn href="/petappro/contact" variant="secondary" size="sm">Talk to us</Btn>}

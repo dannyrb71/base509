@@ -1103,10 +1103,35 @@
   box-shadow: var(--pa-card-shadow);
 }
 [data-brand='petappro'] .figma-pricing__tiers article.is-featured { border: 2px solid var(--pa-brand-accent); }
-[data-brand='petappro'] .figma-pricing__tiers article > p:first-child { color: var(--pa-camo-700); text-transform: uppercase; }
-[data-brand='petappro'] .figma-pricing__tiers h2 { margin-top: var(--pa-space-2); color: var(--pa-brand-accent); }
+/* Variant A colour discipline (Danny 2026-08-19): camo green ONLY on the
+   "1 month free" pill, the featured Duo border, and "Payments unlock here".
+   Everything else is navy/grey; hierarchy comes from size + weight. */
+[data-brand='petappro'] .figma-pricing__tiers article > p:first-child { color: var(--text-secondary); text-transform: uppercase; }
+[data-brand='petappro'] .figma-pricing__name {
+  margin-top: var(--pa-space-2);
+  font-family: var(--font-display); font-size: 26px; line-height: 1.2; font-weight: 700;
+  color: var(--pa-brandy-900);
+}
+[data-brand='petappro'] .figma-pricing__price { margin-top: var(--pa-space-1); display: flex; align-items: baseline; gap: 4px; }
+[data-brand='petappro'] .figma-pricing__amount {
+  font-family: var(--font-display); font-size: 45px; line-height: 1.05; font-weight: 800;
+  letter-spacing: -0.02em; color: var(--pa-brandy-900);
+}
+[data-brand='petappro'] .figma-pricing__amount--text { font-size: 34px; line-height: 1.2; }
+[data-brand='petappro'] .figma-pricing__per { font-size: 18px; font-weight: 500; color: var(--text-secondary); }
+[data-brand='petappro'] .figma-pricing__annual {
+  margin-top: var(--pa-space-2); display: flex; flex-wrap: wrap; align-items: center;
+  gap: var(--pa-space-2); font-size: 15.5px; line-height: 22px;
+}
+[data-brand='petappro'] .figma-pricing__annual strong { font-weight: 700; color: var(--pa-brandy-900); }
+/* Pill colours per the approved mockup (raw values from Variant A; the
+   brand's --pa-camo-700 #508522 is deliberately NOT used here). */
+[data-brand='petappro'] .figma-pricing__pill {
+  display: inline-block; padding: 2px 10px; border-radius: 999px;
+  font-size: 12.5px; font-weight: 700; line-height: 18px;
+  color: #3f6a1c; background: #eef6e6;
+}
 [data-brand='petappro'] .figma-pricing__tiers article > .type-body { margin-top: var(--pa-space-3); color: var(--text-secondary); }
-[data-brand='petappro'] .figma-pricing__annual { margin-top: var(--pa-space-1); color: var(--text-secondary); }
 [data-brand='petappro'] .figma-pricing__badge { display: inline-flex; margin-top: var(--pa-space-4); color: var(--pa-camo-700); }
 [data-brand='petappro'] .figma-pricing__tiers .btn { margin-top: var(--pa-space-4); }
 [data-brand='petappro'] .figma-pricing__compare .pricing-table-wrap { margin-top: var(--pa-space-8); }
@@ -2259,3 +2284,11 @@
   /* ImageRow stacks on mobile (build spec). */
   [data-brand='petappro'] .res-imagerow { grid-template-columns: 1fr; }
 }
+
+/* Pricing-card Variant A colour overrides (Danny, 2026-08-19) — must sit
+   BELOW the 2026-08-14 marketing color pass, whose !important text-primary
+   rules would otherwise flatten the navy name/annual and the green badge.
+   Green stays reserved for: the pill, the Duo border, "Payments unlock here". */
+[data-brand='petappro'] .petappro-page .figma-pricing__name { color: var(--pa-brandy-900) !important; }
+[data-brand='petappro'] .petappro-page .figma-pricing__annual strong { color: var(--pa-brandy-900) !important; }
+[data-brand='petappro'] .petappro-page .figma-pricing__badge { color: var(--pa-camo-700) !important; }

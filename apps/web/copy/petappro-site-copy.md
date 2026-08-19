@@ -144,14 +144,14 @@ Distilled from the in-app copy (home empty state, Book a service, onboarding, Me
 **H1 (unchanged):** Flat pricing. No per-staff fees.
 
 **Intro →**
-> Every plan's a flat monthly price — go annual and about two months are on us. No commissions on your bookings, ever.
+> Every plan's a flat monthly price — go annual and a month's on us. No commissions on your bookings, ever.
 
-**Plan cards** (numbers unchanged; blurbs lightly warmed)
+**Plan cards** *(annual model finalized 2026-08-19: annual = 11× monthly, "1 month free" pill on each annual line)*
 - **Starter · 1 user · up to 5 clients — Free** → Free forever. Your on-ramp — up to 5 clients, with a little "Powered by PetAppro" along for the ride.
-- **Solo · 1 user — $19/mo** *(or $190/yr · 2 months free)* → For one-person outfits. Unlimited clients, your own branding.
-- **Duo · up to 2 users — $39/mo** *(or $390/yr)* → Where in-app payments unlock — Stripe and tips included. *(badge: "Payments unlock here")*
-- **Crew · up to 5 users — $79/mo** *(or $790/yr)* → For small teams. Expanded themes, and GPS walk tracking when it ships.
-- **Team · up to 20 users — $149/mo** *(or $1490/yr)* → The full theme library, seasonal packs, and opt-in SMS alerts.
+- **Solo · 1 user — $19/mo** *(or $209/yr · 1 month free)* → For one-person outfits. Unlimited clients, your own branding.
+- **Duo · up to 2 users — $39/mo** *(or $429/yr · 1 month free)* → Where in-app payments unlock — Stripe and tips included. *(badge: "Payments unlock here")*
+- **Crew · up to 5 users — $79/mo** *(or $869/yr · 1 month free)* → For small teams. Expanded themes, and GPS walk tracking when it ships.
+- **Team · up to 20 users — $149/mo** *(or $1,639/yr · 1 month free)* → The full theme library, seasonal packs, and opt-in SMS alerts.
 - **Enterprise · 20+ users — Contact us** → White-label and tenant isolation. Let's talk. · Talk to us
 
 **Feature matrix:** unchanged (functional table). Footnote unchanged: *GPS walk tracking arrives in v1.1; in-app messaging and white-label are post-MVP. Draft pricing — final pricing is confirmed at launch.*

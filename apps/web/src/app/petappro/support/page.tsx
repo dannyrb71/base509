@@ -51,7 +51,7 @@ const TOPICS: Topic[] = [
   {
     title: 'Billing & your subscription',
     questions: [
-      { question: 'What does PetAppro cost?', answer: <>Plans are a flat monthly price based on team size, from Starter through Team. Go annual and about two months are on us — see <a href="/petappro/pricing">Pricing</a>.</> },
+      { question: 'What does PetAppro cost?', answer: <>Plans are a flat monthly price based on team size, from Starter through Team. Go annual and a month’s on us — see <a href="/petappro/pricing">Pricing</a>.</> },
       { question: 'Do you charge per staff member?', answer: <>Plans use flat team-size tiers rather than metered per-seat charges. You know the price before you move into the next tier.</> },
       { question: 'Is there a free trial on paid plans?', answer: <>Yes. The trial length will be confirmed before launch.</> },
       { question: 'How do I cancel?', answer: <>In your account settings on the web — one click, self-serve. No phone call or email required. You keep access through the end of the term you’ve paid for.</> },

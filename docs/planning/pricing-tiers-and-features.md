@@ -86,14 +86,15 @@ Legend: ✅ included at launch · — not included · **[post-MVP]** later · **
 **No client caps on paid tiers (DECIDED).** Only **Starter** is capped (5 clients — the free limiter). All paid tiers are **unlimited clients**. We monetize on **seats + features + being best-in-class (features & UX)** — not metered usage. Rationale: reads "flat and fair" vs per-staff models (Time To Pet, Scout) and meets the flat-unlimited expectation set by PetPocketbook/Paw Partner, while we win on product.
 
 **Draft pricing — PLACEHOLDER, validate at the D-021 beta (not final):**
+*(Annual model finalized 2026-08-19, Danny: annual = 11× monthly — "1 month free". Term-based, non-refundable; monthly stays the hero price on the site.)*
 
-| Tier | Monthly | Annual (~2 mo free) |
+| Tier | Monthly | Annual (~1 mo free) |
 |---|---|---|
 | Starter | Free | — |
-| Solo | $19 | $190 |
-| Duo | $39 | $390 |
-| Crew | $79 | $790 |
-| Team | $149 | $1,490 |
+| Solo | $19 | $209 |
+| Duo | $39 | $429 |
+| Crew | $79 | $869 |
+| Team | $149 | $1,639 |
 | Enterprise | Custom | Custom |
 
 **Market context (2026), two camps:** *per-staff* — Time To Pet ($25–50 base + $16/active staff; ~$120 for 5), Scout (~$33 + $15/staff); *flat-unlimited* — PetPocketbook ($25), Paw Partner ($99.99, facility). Facility/boarding all-in-ones (Gingr/PetExec/ProPet) run ~$100–300.

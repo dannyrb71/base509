@@ -1,6 +1,7 @@
 /**
  * SOURCE OF TRUTH: docs/planning/pricing-tiers-and-features.md (2026-07-11;
- * theme rows amended 2026-07-18 per apps/web/copy/theme-tiers.md — locked roster).
+ * theme rows amended 2026-07-18 per apps/web/copy/theme-tiers.md — locked roster;
+ * annual model finalized 2026-08-19: annual = 11× monthly, "1 month free").
  * Transcribed once, verbatim — do NOT edit numbers here without updating the doc
  * (and vice versa). Draft pricing is a PLACEHOLDER to validate at the D-021 beta.
  */
@@ -13,10 +14,10 @@ export type Tier = {
 
 export const TIERS: Tier[] = [
   { key: 'starter', name: 'Starter', seats: '1 user · up to 5 clients', monthly: 0, annual: null, blurb: 'Your free on-ramp — up to 5 clients, your own logo and brand, with a little “Powered by PetAppro” along for the ride.' },
-  { key: 'solo', name: 'Solo', seats: '1 user', monthly: 19, annual: 190, blurb: 'For one-person outfits. Unlimited clients, plus Husky and Irish Setter themes.' },
-  { key: 'duo', name: 'Duo', seats: 'up to 2 users', monthly: 39, annual: 390, blurb: 'Where in-app payments unlock — Stripe and tips included.', featured: true },
-  { key: 'crew', name: 'Crew', seats: 'up to 5 users', monthly: 79, annual: 790, blurb: 'For small teams. The full theme library, GPS walk tracking, and no “Powered by PetAppro” mark.' },
-  { key: 'team', name: 'Team', seats: 'up to 20 users', monthly: 149, annual: 1490, blurb: 'Your biggest team — up to 20 seats with permission-based roles.' },
+  { key: 'solo', name: 'Solo', seats: '1 user', monthly: 19, annual: 209, blurb: 'For one-person outfits. Unlimited clients, plus Husky and Irish Setter themes.' },
+  { key: 'duo', name: 'Duo', seats: 'up to 2 users', monthly: 39, annual: 429, blurb: 'Where in-app payments unlock — Stripe and tips included.', featured: true },
+  { key: 'crew', name: 'Crew', seats: 'up to 5 users', monthly: 79, annual: 869, blurb: 'For small teams. The full theme library, GPS walk tracking, and no “Powered by PetAppro” mark.' },
+  { key: 'team', name: 'Team', seats: 'up to 20 users', monthly: 149, annual: 1639, blurb: 'Your biggest team — up to 20 seats with permission-based roles.' },
   { key: 'enterprise', name: 'Enterprise', seats: '20+ users', monthly: null, annual: null, blurb: 'White-label and tenant isolation. Let’s talk.' },
 ];
 

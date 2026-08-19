@@ -87,7 +87,7 @@ Yes — tipping is built into in-app payments, and tips go to you. If you take p
 ## 4. Billing & your subscription
 
 **What does PetAppro cost?**
-Plans are a flat monthly price based on team size, from Starter (free, up to 5 clients) through Team. Go annual and about two months are on us — see [Pricing](/pricing).
+Plans are a flat monthly price based on team size, from Starter (free, up to 5 clients) through Team. Go annual and a month's on us — see [Pricing](/pricing).
 
 **Do you charge per staff member?**
 No per-seat metering. One flat price per tier, and you know the price before you grow into the next one.
