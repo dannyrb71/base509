@@ -86,7 +86,9 @@ jobs:
     runs-on: ubuntu-latest
     services:
       postgres:
-        image: postgres:15
+        # postgres:15 + PostGIS preinstalled — PG15 matches prod; PostGIS
+        # backs the zone-geometry validation trigger.
+        image: postgis/postgis:15-3.4
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres

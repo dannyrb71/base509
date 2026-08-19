@@ -201,14 +201,14 @@ describe('service_zones GeoJSON boundary (Codex #6b)', () => {
   })
 
   it('rejects self-intersecting (bowtie) rings and zero-area rings', async () => {
-    // Unequal-lobe bowtie: the crossing segments intersect properly, and the
-    // shoelace area is non-zero, so the intersection check must catch it.
+    // Unequal-lobe bowtie: crossing segments, non-zero shoelace area — the
+    // PostGIS validity check must catch it.
     await expectError(
       insertZone({
         type: 'Polygon',
         coordinates: [[[0, 0], [2, 2], [2, 0], [0, 1], [0, 0]]],
       }),
-      /ZONE_BOUNDARY_INVALID.*self-intersects/,
+      /ZONE_BOUNDARY_INVALID.*[Ss]elf.?intersect/,
     )
     await expectError(
       insertZone({
@@ -216,6 +216,52 @@ describe('service_zones GeoJSON boundary (Codex #6b)', () => {
         coordinates: [[[0, 0], [1, 1], [2, 2], [0, 0]]],
       }),
       /ZONE_BOUNDARY_INVALID.*zero area/,
+    )
+  })
+
+  it('rejects a hole lying outside the exterior ring (Codex re-review #2)', async () => {
+    await expectError(
+      insertZone({
+        type: 'Polygon',
+        coordinates: [
+          [[0, 0], [1, 0], [1, 1], [0, 1], [0, 0]], // exterior unit square
+          [[3, 3], [3.2, 3], [3.2, 3.2], [3, 3.2], [3, 3]], // hole far outside
+        ],
+      }),
+      /ZONE_BOUNDARY_INVALID.*invalid geometry/,
+    )
+    // A hole INSIDE the shell is legitimate geometry.
+    await insertZone({
+      type: 'Polygon',
+      coordinates: [
+        [[0, 0], [1, 0], [1, 1], [0, 1], [0, 0]],
+        [[0.4, 0.4], [0.6, 0.4], [0.6, 0.6], [0.4, 0.6], [0.4, 0.4]],
+      ],
+    })
+  })
+
+  it('rejects overlapping MultiPolygon members (Codex re-review #2)', async () => {
+    await expectError(
+      insertZone({
+        type: 'MultiPolygon',
+        coordinates: [
+          [[[0, 0], [2, 0], [2, 2], [0, 2], [0, 0]]],
+          [[[1, 1], [3, 1], [3, 3], [1, 3], [1, 1]]], // overlaps the first
+        ],
+      }),
+      /ZONE_BOUNDARY_INVALID.*invalid geometry/,
+    )
+  })
+
+  it('rejects touching/collinear ring self-intersection (Codex re-review #2)', async () => {
+    // Figure-eight passing twice through the same interior vertex (2,2):
+    // no proper segment crossing, so only true validity checking catches it.
+    await expectError(
+      insertZone({
+        type: 'Polygon',
+        coordinates: [[[0, 0], [2, 2], [0, 4], [4, 4], [2, 2], [4, 0], [0, 0]]],
+      }),
+      /ZONE_BOUNDARY_INVALID.*invalid geometry/,
     )
   })
 

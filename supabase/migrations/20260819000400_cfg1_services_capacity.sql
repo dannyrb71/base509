@@ -22,6 +22,11 @@
 --     the internal primitive checks+locks only (spec §3.3/§5).
 -- ============================================================================
 
+-- PostGIS backs server-side zone-geometry VALIDATION only (Codex re-review
+-- #2); the stored canonical value remains the JSONB GeoJSON per the
+-- service-area-maps.md guardrail.
+create extension if not exists postgis with schema extensions;
+
 -- ── Conflict + capacity groups (orthogonal; spec §8) ────────────────────────
 create table public.availability_conflict_groups (
   id uuid primary key default gen_random_uuid(),
@@ -120,10 +125,7 @@ declare
   v_max_lat numeric;
   v_area numeric;
   i integer;
-  j integer;
-  x1 numeric; y1 numeric; x2 numeric; y2 numeric;
-  x3 numeric; y3 numeric; x4 numeric; y4 numeric;
-  d1 numeric; d2 numeric; d3 numeric; d4 numeric;
+  v_geom extensions.geometry;
 begin
   -- A missing boundary is the NOT NULL constraint's report, not this one's.
   if new.boundary is null then
@@ -205,32 +207,29 @@ begin
         raise exception 'ZONE_BOUNDARY_INVALID: ring has zero area' using errcode = '23514';
       end if;
 
-      -- Validity: no self-intersection between non-adjacent ring segments
-      -- (proper crossing test via orientation signs).
-      for i in 0 .. v_n - 3 loop
-        x1 := (v_ring -> i ->> 0)::numeric;       y1 := (v_ring -> i ->> 1)::numeric;
-        x2 := (v_ring -> (i + 1) ->> 0)::numeric; y2 := (v_ring -> (i + 1) ->> 1)::numeric;
-        for j in i + 2 .. v_n - 2 loop
-          -- Segment (0,1) and the closing segment (n-2, n-1=0) are adjacent.
-          continue when i = 0 and j = v_n - 2;
-          x3 := (v_ring -> j ->> 0)::numeric;       y3 := (v_ring -> j ->> 1)::numeric;
-          x4 := (v_ring -> (j + 1) ->> 0)::numeric; y4 := (v_ring -> (j + 1) ->> 1)::numeric;
-          d1 := (x2 - x1) * (y3 - y1) - (y2 - y1) * (x3 - x1);
-          d2 := (x2 - x1) * (y4 - y1) - (y2 - y1) * (x4 - x1);
-          d3 := (x4 - x3) * (y1 - y3) - (y4 - y3) * (x1 - x3);
-          d4 := (x4 - x3) * (y2 - y3) - (y4 - y3) * (x2 - x3);
-          if ((d1 > 0 and d2 < 0) or (d1 < 0 and d2 > 0))
-             and ((d3 > 0 and d4 < 0) or (d3 < 0 and d4 > 0)) then
-            raise exception 'ZONE_BOUNDARY_INVALID: ring self-intersects' using errcode = '23514';
-          end if;
-        end loop;
-      end loop;
     end loop;
   end loop;
 
   -- Max service-area extent.
   if (v_max_lon - v_min_lon) > 5.0 or (v_max_lat - v_min_lat) > 5.0 then
     raise exception 'ZONE_BOUNDARY_INVALID: service area exceeds the maximum extent (5.0 degrees)'
+      using errcode = '23514';
+  end if;
+
+  -- Full geometric validity via PostGIS (Codex re-review #2): catches ring
+  -- self-intersection including touching/collinear cases, holes outside the
+  -- exterior ring, and invalid MultiPolygon member relationships — cases a
+  -- pairwise proper-crossing check cannot. Validation only: the JSONB
+  -- GeoJSON above remains the stored canonical value.
+  begin
+    v_geom := extensions.st_geomfromgeojson(new.boundary::text);
+  exception when others then
+    raise exception 'ZONE_BOUNDARY_INVALID: not a parseable GeoJSON geometry (%)', sqlerrm
+      using errcode = '23514';
+  end;
+  if not extensions.st_isvalid(v_geom) then
+    raise exception 'ZONE_BOUNDARY_INVALID: invalid geometry — %',
+      extensions.st_isvalidreason(v_geom)
       using errcode = '23514';
   end if;
 

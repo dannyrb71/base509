@@ -497,7 +497,25 @@ describe('entitlements (D-050)', () => {
         c.query(`select * from public.sync_entitlements($1)`, [
           JSON.stringify({ ...base, event_id: uuid(), source_version: 500, ...extra }),
         ])
+      // theme_allowlist: non-array, array-with-object, empty-string element,
+      // and unknown stable key are all refused (Codex re-review #1).
       await expectError(attempt({ theme_allowlist: 'pink' }), /VALIDATION_FAILED.*theme_allowlist/)
+      await expectError(
+        attempt({ theme_allowlist: ['brandy_blue', { sneaky: true }] }),
+        /VALIDATION_FAILED.*theme_allowlist/,
+      )
+      await expectError(
+        attempt({ theme_allowlist: ['brandy_blue', ''] }),
+        /VALIDATION_FAILED.*theme_allowlist/,
+      )
+      await expectError(
+        attempt({ theme_allowlist: ['neon_zebra'] }),
+        /VALIDATION_FAILED.*theme_allowlist/,
+      )
+      await expectError(
+        attempt({ theme_allowlist: ['brandy_blue', 42] }),
+        /VALIDATION_FAILED.*theme_allowlist/,
+      )
       await expectError(
         attempt({ projection_version: 99 }),
         /VALIDATION_FAILED.*projection_version/,
@@ -537,16 +555,30 @@ describe('entitlements (D-050)', () => {
 
     expect((await effective()).tier_key).toBe('crew')
 
-    // Corrupt the projection out-of-band: theme_allowlist as a bare string.
-    await admin.query(
-      `update public.business_entitlements set theme_allowlist = '"solo_pink"'::jsonb
-       where business_id = $1`,
-      [biz.businessId],
-    )
-    let e = await effective()
-    expect(e.tier_key).toBe('starter')
-    expect(e.client_limit).toBe(5)
-    expect(e.theme_allowlist).toEqual(['brandy_blue'])
+    // Corrupt the projection out-of-band: every malformed allowlist shape
+    // must resolve to the safe Starter envelope, never paid entitlements.
+    for (const corrupt of [
+      `'"solo_pink"'`, // bare string, not an array
+      `'["brandy_blue", {"k": 1}]'`, // array with an object element
+      `'["brandy_blue", ""]'`, // empty-string element
+      `'["neon_zebra"]'`, // unknown stable key
+      `'[42]'`, // numeric element
+    ]) {
+      await admin.query(
+        `update public.business_entitlements set theme_allowlist = ${corrupt}::jsonb
+         where business_id = $1`,
+        [biz.businessId],
+      )
+      const e = await effective()
+      expect(e.tier_key, `allowlist ${corrupt} must fail closed`).toBe('starter')
+      expect(e.client_limit).toBe(5)
+      expect(e.theme_allowlist).toEqual(['brandy_blue'])
+      const cap = await admin.query(`select app.has_capability($1, 'gps') as ok`, [
+        biz.businessId,
+      ])
+      expect(cap.rows[0].ok, `allowlist ${corrupt} must not leak paid capabilities`).toBe(false)
+    }
+    let e: any
 
     // Restore, then corrupt the projection version instead.
     await setEntitlements(biz.businessId, { capabilities: { gps: true }, client_limit: null })

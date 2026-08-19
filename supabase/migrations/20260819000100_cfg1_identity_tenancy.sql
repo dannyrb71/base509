@@ -588,6 +588,41 @@ $$;
 
 -- ── Entitlement helpers (D-050; fail closed, spec §4) ────────────────────────
 
+-- The ratified stable theme keys this projection version understands — the
+-- read-side mirror of the Base509 catalogue's CURRENT key set (locked pricing
+-- matrix: Starter → Brandy Blue; Solo adds Husky, Irish Setter; Duo adds
+-- Bichon Frise, Blue Heeler, Chessie; city/seasonal keys ship with a future
+-- catalogue version and land here by migration). This is key VALIDATION only
+-- — tier-to-theme policy stays in the Base509 catalogue (D-020/D-040); no
+-- tier conditional lives here.
+create or replace function app.known_theme_keys()
+returns text[]
+language sql
+immutable
+set search_path = ''
+as $$
+  select array['brandy_blue', 'husky', 'irish_setter', 'bichon_frise', 'blue_heeler', 'chessie'];
+$$;
+
+-- A theme allowlist is valid only if it is a JSON array whose EVERY element
+-- is a nonempty, known stable theme-key string (Codex re-review #1) —
+-- anything else fails closed.
+create or replace function app.valid_theme_allowlist(p_allowlist jsonb)
+returns boolean
+language sql
+immutable
+set search_path = ''
+as $$
+  select p_allowlist is not null
+    and jsonb_typeof(p_allowlist) = 'array'
+    and not exists (
+      select 1
+      from jsonb_array_elements(p_allowlist) e
+      where jsonb_typeof(e.value) <> 'string'
+         or not ((e.value #>> '{}') = any (app.known_theme_keys()))
+    );
+$$;
+
 -- The lowest safe capability set: Starter, Brandy Blue only, no paid actions.
 create or replace function app.starter_entitlements()
 returns jsonb
@@ -626,11 +661,11 @@ begin
      or (v_row.expires_at is not null and v_row.expires_at <= now())
      or v_row.capabilities is null
      or jsonb_typeof(v_row.capabilities) <> 'object'
-     -- Fail closed on any malformed or unrecognized projection shape:
-     -- a theme allowlist that is not an array, or a projection_version this
-     -- code does not understand, resolves to the safe Starter envelope.
-     or v_row.theme_allowlist is null
-     or jsonb_typeof(v_row.theme_allowlist) <> 'array'
+     -- Fail closed on any malformed or unrecognized projection shape: a
+     -- theme allowlist that is not an array of known stable theme-key
+     -- strings, or a projection_version this code does not understand,
+     -- resolves to the safe Starter envelope.
+     or not app.valid_theme_allowlist(v_row.theme_allowlist)
      or v_row.projection_version not in (1, 2) then
     return app.starter_entitlements();
   end if;
@@ -775,6 +810,8 @@ alter function app.has_role(uuid, public.membership_role) owner to cfg1_owner;
 alter function app.member_business_ids() owner to cfg1_owner;
 alter function app.client_business_ids() owner to cfg1_owner;
 alter function app.current_client_id(uuid) owner to cfg1_owner;
+alter function app.known_theme_keys() owner to cfg1_owner;
+alter function app.valid_theme_allowlist(jsonb) owner to cfg1_owner;
 alter function app.starter_entitlements() owner to cfg1_owner;
 alter function app.effective_entitlements(uuid) owner to cfg1_owner;
 alter function app.has_capability(uuid, text) owner to cfg1_owner;

@@ -89,6 +89,8 @@ describe('security-definer execution boundaries', () => {
     // app schema — internal-only (no API role may execute)
     'app.jwt': { auth: false, svc: false },
     'app.jwt_issuer': { auth: false, svc: false },
+    'app.known_theme_keys': { auth: false, svc: false },
+    'app.valid_theme_allowlist': { auth: false, svc: false },
     'app.starter_entitlements': { auth: false, svc: false },
     'app.effective_entitlements': { auth: false, svc: false },
     'app.require_entitlement': { auth: false, svc: false },

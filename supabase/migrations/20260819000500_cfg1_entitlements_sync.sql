@@ -85,8 +85,9 @@ begin
   -- Malformed envelope fields are rejected outright (Codex correction #7):
   -- a bad projection must never be persisted for the read side to trip over.
   if p_envelope ? 'theme_allowlist'
-     and jsonb_typeof(p_envelope -> 'theme_allowlist') <> 'array' then
-    raise exception 'VALIDATION_FAILED: theme_allowlist must be an array' using errcode = '22023';
+     and not app.valid_theme_allowlist(p_envelope -> 'theme_allowlist') then
+    raise exception 'VALIDATION_FAILED: theme_allowlist must be an array of known stable theme-key strings'
+      using errcode = '22023';
   end if;
   if p_envelope ? 'projection_version'
      and (jsonb_typeof(p_envelope -> 'projection_version') <> 'number'

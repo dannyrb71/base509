@@ -26,9 +26,13 @@ concurrency gate:
 cd supabase/tests && npm install && npm test
 ```
 
-Locally it expects Postgres at `postgres://postgres@127.0.0.1:55432`
-(override with `CFG1_TEST_ADMIN_URL`). CI runs the same suite plus the
-`packages/data` generated-type drift check on every PR (`db-tests` job).
+Locally it expects Postgres **with PostGIS available** at
+`postgres://postgres@127.0.0.1:55432` (override with `CFG1_TEST_ADMIN_URL`).
+PostGIS backs the zone-geometry validation trigger; Homebrew's `postgis`
+formula only ships extensions for `postgresql@17`+, so local runs use PG17
+while CI runs `postgis/postgis:15-3.4` (PG15 = prod parity — CI is the gate
+of record). CI runs the same suite plus the `packages/data` generated-type
+drift check on every PR (`db-tests` job).
 
 Generated DB types: see `packages/data/README.md` (`npm run gen`).
 

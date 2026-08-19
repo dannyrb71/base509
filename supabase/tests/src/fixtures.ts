@@ -46,7 +46,7 @@ export async function setEntitlements(
     capabilities: {},
     client_limit: null,
     seat_limit: 10,
-    theme_allowlist: ['brandy_blue', 'forest'],
+    theme_allowlist: ['brandy_blue', 'husky'],
     projection_version: 2,
     ...overrides,
   }
