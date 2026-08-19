@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useRef, useState } from 'react';
 import { createPortalBrowserClient } from '@/lib/portal/supabase-browser';
+import { PortalAuthProviders } from '@/components/PortalAuthProviders';
 
 /**
  * Provider sign-up (A1 step 2). Email/password with REQUIRED email
@@ -159,6 +160,8 @@ export function PortalSignUpForm() {
           {state === 'busy' ? 'Creating your account…' : 'Create account'}
         </button>
       </form>
+      {/* A2 wires Google + Apple (+ passcode) here — launch requirement. */}
+      <PortalAuthProviders />
       <p className="type-caption portal-auth__alt">
         Already have an account? <Link href="/portal/sign-in">Sign in</Link>
       </p>

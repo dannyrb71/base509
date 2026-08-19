@@ -2328,3 +2328,30 @@
 [data-brand='petappro'] .portal-auth__alt { margin-top: var(--pa-space-5); text-align: center; color: var(--text-secondary); }
 [data-brand='petappro'] .portal-business-switcher__email { display: block; margin-top: 2px; color: var(--text-secondary); overflow: hidden; text-overflow: ellipsis; }
 [data-brand='petappro'] .portal-topbar__actions { display: flex; align-items: center; gap: var(--pa-space-3); }
+
+/* ── Portal auth: social-provider staging (A1 layout; A2 wires) ─────────────── */
+[data-brand='petappro'] .portal-auth__providers-block { margin-top: var(--pa-space-5); }
+[data-brand='petappro'] .portal-auth__divider {
+  display: flex; align-items: center; gap: var(--pa-space-3); color: var(--text-secondary);
+}
+[data-brand='petappro'] .portal-auth__divider::before,
+[data-brand='petappro'] .portal-auth__divider::after {
+  content: ''; flex: 1; height: 1px; background: var(--border-default);
+}
+[data-brand='petappro'] .portal-auth__providers {
+  display: grid; grid-template-columns: 1fr 1fr; gap: var(--pa-space-3);
+  margin-top: var(--pa-space-4);
+}
+[data-brand='petappro'] .portal-auth__provider {
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--pa-space-2);
+  padding: 11px 16px; font: inherit; font-weight: 700;
+  border: 1px solid var(--border-default); border-radius: 12px;
+  background: var(--surface-card); color: var(--text-primary); cursor: pointer;
+}
+[data-brand='petappro'] .portal-auth__provider:disabled {
+  cursor: default; opacity: 0.55;
+}
+[data-brand='petappro'] .portal-auth__provider:not(:disabled):hover { border-color: var(--pa-brandy-500); }
+[data-brand='petappro'] .portal-auth__providers-note {
+  margin-top: var(--pa-space-2); text-align: center; color: var(--text-secondary);
+}
