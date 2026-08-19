@@ -625,7 +625,13 @@ begin
      or v_row.effective_at > now()
      or (v_row.expires_at is not null and v_row.expires_at <= now())
      or v_row.capabilities is null
-     or jsonb_typeof(v_row.capabilities) <> 'object' then
+     or jsonb_typeof(v_row.capabilities) <> 'object'
+     -- Fail closed on any malformed or unrecognized projection shape:
+     -- a theme allowlist that is not an array, or a projection_version this
+     -- code does not understand, resolves to the safe Starter envelope.
+     or v_row.theme_allowlist is null
+     or jsonb_typeof(v_row.theme_allowlist) <> 'array'
+     or v_row.projection_version not in (1, 2) then
     return app.starter_entitlements();
   end if;
 
@@ -844,7 +850,9 @@ end;
 $$;
 
 alter function public.bootstrap_account() owner to cfg1_owner;
-revoke all on function public.bootstrap_account() from public, anon;
+-- Account minting is a human first-login act: machine identities are revoked
+-- too (Supabase default privileges would otherwise grant service_role).
+revoke all on function public.bootstrap_account() from public, anon, service_role;
 grant execute on function public.bootstrap_account() to authenticated;
 
 -- ── RLS + grants ─────────────────────────────────────────────────────────────

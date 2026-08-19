@@ -171,23 +171,48 @@ export async function createWindow(
   biz: BusinessFixture,
   serviceId: string,
   name = 'Midday',
+  startTime = '11:00',
+  endTime = '13:00',
 ): Promise<string> {
   return asUser(biz.owner.sub, async (c) => {
     const r = await c.query(
       `insert into public.service_windows
          (business_id, business_service_id, name, start_time, end_time)
-       values ($1, $2, $3, '11:00', '13:00') returning id`,
-      [biz.businessId, serviceId, name],
+       values ($1, $2, $3, $4, $5) returning id`,
+      [biz.businessId, serviceId, name, startTime, endTime],
     )
     return r.rows[0].id as string
   })
 }
 
-export async function createZone(biz: BusinessFixture, name: string): Promise<string> {
+/** A small valid GeoJSON polygon (SF-ish square) satisfying the zone guardrail. */
+export function validBoundary(offset = 0): Record<string, unknown> {
+  const lon = -122.45 + offset * 0.02
+  return {
+    type: 'Polygon',
+    coordinates: [
+      [
+        [lon, 37.75],
+        [lon + 0.01, 37.75],
+        [lon + 0.01, 37.76],
+        [lon, 37.76],
+        [lon, 37.75],
+      ],
+    ],
+  }
+}
+
+let zoneOffset = 0
+export async function createZone(
+  biz: BusinessFixture,
+  name: string,
+  boundary?: Record<string, unknown>,
+): Promise<string> {
   return asUser(biz.owner.sub, async (c) => {
     const r = await c.query(
-      `insert into public.service_zones (business_id, name) values ($1, $2) returning id`,
-      [biz.businessId, name],
+      `insert into public.service_zones (business_id, name, boundary)
+       values ($1, $2, $3) returning id`,
+      [biz.businessId, name, JSON.stringify(boundary ?? validBoundary(++zoneOffset % 100))],
     )
     return r.rows[0].id as string
   })
@@ -247,14 +272,11 @@ export interface ReserveArgs {
   windowId?: string | null
   zoneId?: string | null
   status?: string
-  allowOver?: boolean
-  actor?: string | null
-  reason?: string | null
 }
 
 export function reserveSql(c: pg.Client, a: ReserveArgs): Promise<pg.QueryResult> {
   return c.query(
-    `select test_harness.reserve_fixture($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) as booking_id`,
+    `select test_harness.reserve_fixture($1,$2,$3,$4,$5,$6,$7,$8,$9) as booking_id`,
     [
       a.businessId,
       a.serviceId,
@@ -265,17 +287,41 @@ export function reserveSql(c: pg.Client, a: ReserveArgs): Promise<pg.QueryResult
       a.windowId ?? null,
       a.zoneId ?? null,
       a.status ?? 'confirmed',
-      a.allowOver ?? false,
-      a.actor ?? null,
-      a.reason ?? null,
     ],
   )
 }
 
-/** Reserve through the privileged wrapper (service_role). */
+/** Reserve through the privileged wrapper (service_role, ordinary path). */
 export async function reserve(a: ReserveArgs): Promise<string> {
   return asService(async (c) => {
     const r = await reserveSql(c, a)
+    return r.rows[0].booking_id as string
+  })
+}
+
+/**
+ * Human over-capacity reservation: runs as the given AUTHENTICATED subject —
+ * the override op derives the actor and verifies the role from the session.
+ */
+export async function reserveOverCapacity(
+  actorSub: string,
+  a: ReserveArgs & { reason?: string | null },
+): Promise<string> {
+  return asUser(actorSub, async (c) => {
+    const r = await c.query(
+      `select test_harness.reserve_fixture_over_capacity($1,$2,$3,$4,$5,$6,$7,$8,$9) as booking_id`,
+      [
+        a.businessId,
+        a.serviceId,
+        a.clientId,
+        a.start,
+        a.end ?? null,
+        a.petCount ?? 1,
+        a.windowId ?? null,
+        a.zoneId ?? null,
+        a.reason ?? null,
+      ],
+    )
     return r.rows[0].booking_id as string
   })
 }

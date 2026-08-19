@@ -78,15 +78,170 @@ create index business_services_conflict_group_idx
   on public.business_services (business_id, conflict_group_id);
 
 -- ── Zones: reusable per-tenant pool (Zone Manager source list) ───────────────
+-- Geometry contract per docs/specs/service-area-maps.md ("Guardrail — store
+-- GeoJSON only", Codex 2026-08-15): each zone row persists ONE validated
+-- GeoJSON Polygon/MultiPolygon (Terra Draw output; never a FeatureCollection,
+-- never a provider-proprietary shape). Server-side validation below covers
+-- coordinate ranges, ring closure, polygon validity/self-intersection,
+-- geometry size, and max service-area extent.
 create table public.service_zones (
   id uuid primary key default gen_random_uuid(),
   business_id uuid not null references public.businesses (id),
   name text not null,
+  boundary jsonb not null,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   unique (business_id, id),
   unique (business_id, name)
 );
+
+-- Server-authoritative GeoJSON validation (service-area-maps.md guardrail).
+-- Limits: ≤ 1000 vertices per zone (geometry size), bounding box ≤ 5.0° in
+-- either axis (max service-area extent — generous for a local service area).
+create or replace function app.validate_zone_boundary()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_type text;
+  v_polys jsonb;
+  v_poly jsonb;
+  v_ring jsonb;
+  v_pt jsonb;
+  v_n integer;
+  v_total_vertices integer := 0;
+  v_lon numeric;
+  v_lat numeric;
+  v_min_lon numeric;
+  v_max_lon numeric;
+  v_min_lat numeric;
+  v_max_lat numeric;
+  v_area numeric;
+  i integer;
+  j integer;
+  x1 numeric; y1 numeric; x2 numeric; y2 numeric;
+  x3 numeric; y3 numeric; x4 numeric; y4 numeric;
+  d1 numeric; d2 numeric; d3 numeric; d4 numeric;
+begin
+  -- A missing boundary is the NOT NULL constraint's report, not this one's.
+  if new.boundary is null then
+    return new;
+  end if;
+  if jsonb_typeof(new.boundary) <> 'object' then
+    raise exception 'ZONE_BOUNDARY_INVALID: boundary must be a GeoJSON geometry object'
+      using errcode = '23514';
+  end if;
+  v_type := new.boundary ->> 'type';
+  if v_type = 'Polygon' then
+    v_polys := jsonb_build_array(new.boundary -> 'coordinates');
+  elsif v_type = 'MultiPolygon' then
+    v_polys := new.boundary -> 'coordinates';
+  else
+    raise exception 'ZONE_BOUNDARY_INVALID: boundary must be a Polygon or MultiPolygon (got %)',
+      coalesce(v_type, 'nothing') using errcode = '23514';
+  end if;
+  if v_polys is null or jsonb_typeof(v_polys) <> 'array' or jsonb_array_length(v_polys) = 0 then
+    raise exception 'ZONE_BOUNDARY_INVALID: coordinates missing' using errcode = '23514';
+  end if;
+
+  for v_poly in select * from jsonb_array_elements(v_polys) loop
+    if jsonb_typeof(v_poly) <> 'array' or jsonb_array_length(v_poly) = 0 then
+      raise exception 'ZONE_BOUNDARY_INVALID: polygon must contain at least one ring'
+        using errcode = '23514';
+    end if;
+    for v_ring in select * from jsonb_array_elements(v_poly) loop
+      if jsonb_typeof(v_ring) <> 'array' then
+        raise exception 'ZONE_BOUNDARY_INVALID: ring must be an array' using errcode = '23514';
+      end if;
+      v_n := jsonb_array_length(v_ring);
+      -- Ring closure needs first = last, and a closed triangle needs 4 points.
+      if v_n < 4 then
+        raise exception 'ZONE_BOUNDARY_INVALID: ring needs at least 4 positions'
+          using errcode = '23514';
+      end if;
+      v_total_vertices := v_total_vertices + v_n;
+      if v_total_vertices > 1000 then
+        raise exception 'ZONE_BOUNDARY_INVALID: geometry too large (max 1000 vertices)'
+          using errcode = '23514';
+      end if;
+
+      -- Coordinate-range + shape checks.
+      for i in 0 .. v_n - 1 loop
+        v_pt := v_ring -> i;
+        if jsonb_typeof(v_pt) <> 'array' or jsonb_array_length(v_pt) < 2
+           or jsonb_typeof(v_pt -> 0) <> 'number' or jsonb_typeof(v_pt -> 1) <> 'number' then
+          raise exception 'ZONE_BOUNDARY_INVALID: positions must be [lon, lat] number pairs'
+            using errcode = '23514';
+        end if;
+        v_lon := (v_pt ->> 0)::numeric;
+        v_lat := (v_pt ->> 1)::numeric;
+        if v_lon < -180 or v_lon > 180 or v_lat < -90 or v_lat > 90 then
+          raise exception 'ZONE_BOUNDARY_INVALID: coordinates out of range ([%, %])', v_lon, v_lat
+            using errcode = '23514';
+        end if;
+        v_min_lon := least(coalesce(v_min_lon, v_lon), v_lon);
+        v_max_lon := greatest(coalesce(v_max_lon, v_lon), v_lon);
+        v_min_lat := least(coalesce(v_min_lat, v_lat), v_lat);
+        v_max_lat := greatest(coalesce(v_max_lat, v_lat), v_lat);
+      end loop;
+
+      -- Ring closure.
+      if (v_ring -> 0 ->> 0)::numeric is distinct from (v_ring -> (v_n - 1) ->> 0)::numeric
+         or (v_ring -> 0 ->> 1)::numeric is distinct from (v_ring -> (v_n - 1) ->> 1)::numeric then
+        raise exception 'ZONE_BOUNDARY_INVALID: ring is not closed (first != last position)'
+          using errcode = '23514';
+      end if;
+
+      -- Non-degenerate: shoelace area must be non-zero.
+      v_area := 0;
+      for i in 0 .. v_n - 2 loop
+        v_area := v_area
+          + (v_ring -> i ->> 0)::numeric * (v_ring -> (i + 1) ->> 1)::numeric
+          - (v_ring -> (i + 1) ->> 0)::numeric * (v_ring -> i ->> 1)::numeric;
+      end loop;
+      if v_area = 0 then
+        raise exception 'ZONE_BOUNDARY_INVALID: ring has zero area' using errcode = '23514';
+      end if;
+
+      -- Validity: no self-intersection between non-adjacent ring segments
+      -- (proper crossing test via orientation signs).
+      for i in 0 .. v_n - 3 loop
+        x1 := (v_ring -> i ->> 0)::numeric;       y1 := (v_ring -> i ->> 1)::numeric;
+        x2 := (v_ring -> (i + 1) ->> 0)::numeric; y2 := (v_ring -> (i + 1) ->> 1)::numeric;
+        for j in i + 2 .. v_n - 2 loop
+          -- Segment (0,1) and the closing segment (n-2, n-1=0) are adjacent.
+          continue when i = 0 and j = v_n - 2;
+          x3 := (v_ring -> j ->> 0)::numeric;       y3 := (v_ring -> j ->> 1)::numeric;
+          x4 := (v_ring -> (j + 1) ->> 0)::numeric; y4 := (v_ring -> (j + 1) ->> 1)::numeric;
+          d1 := (x2 - x1) * (y3 - y1) - (y2 - y1) * (x3 - x1);
+          d2 := (x2 - x1) * (y4 - y1) - (y2 - y1) * (x4 - x1);
+          d3 := (x4 - x3) * (y1 - y3) - (y4 - y3) * (x1 - x3);
+          d4 := (x4 - x3) * (y2 - y3) - (y4 - y3) * (x2 - x3);
+          if ((d1 > 0 and d2 < 0) or (d1 < 0 and d2 > 0))
+             and ((d3 > 0 and d4 < 0) or (d3 < 0 and d4 > 0)) then
+            raise exception 'ZONE_BOUNDARY_INVALID: ring self-intersects' using errcode = '23514';
+          end if;
+        end loop;
+      end loop;
+    end loop;
+  end loop;
+
+  -- Max service-area extent.
+  if (v_max_lon - v_min_lon) > 5.0 or (v_max_lat - v_min_lat) > 5.0 then
+    raise exception 'ZONE_BOUNDARY_INVALID: service area exceeds the maximum extent (5.0 degrees)'
+      using errcode = '23514';
+  end if;
+
+  return new;
+end;
+$$;
+alter function app.validate_zone_boundary() owner to cfg1_owner;
+
+create trigger service_zones_validate_boundary
+  before insert or update of boundary on public.service_zones
+  for each row execute function app.validate_zone_boundary();
 
 -- Zone attachment level (a): the whole service.
 create table public.business_service_zones (
@@ -416,17 +571,67 @@ as $$
 declare
   v_unit text;
 begin
+  -- Full V1 contract (capacity-model.md §6C ratified persistence contract;
+  -- Codex correction #6a): supported version, every scalar field validated,
+  -- positive fallback capacity.
   if new.capacity_model = 'bounded' then
-    if jsonb_typeof(new.capacity_config) <> 'object' or not (new.capacity_config ? 'version') then
-      raise exception 'VALIDATION_FAILED: bounded capacity_config must be a versioned object'
+    if jsonb_typeof(new.capacity_config) <> 'object' then
+      raise exception 'VALIDATION_FAILED: bounded capacity_config must be an object'
         using errcode = '23514';
     end if;
-    -- service_limit REQUIRED & positive unless staff/window-derived (team).
-    if coalesce(new.capacity_config ->> 'scales_with', 'fixed_resource') <> 'team' then
-      if coalesce((new.capacity_config ->> 'service_limit')::integer, 0) <= 0 then
-        raise exception 'VALIDATION_FAILED: bounded occupancy services require a positive capacity_config.service_limit'
+    if not (new.capacity_config ? 'version')
+       or jsonb_typeof(new.capacity_config -> 'version') <> 'number'
+       or (new.capacity_config ->> 'version')::numeric <> 1 then
+      raise exception 'VALIDATION_FAILED: capacity_config.version must be the supported version (1)'
+        using errcode = '23514';
+    end if;
+    if coalesce(new.capacity_config ->> 'slot_unit', '') = '' then
+      raise exception 'VALIDATION_FAILED: capacity_config.slot_unit is required'
+        using errcode = '23514';
+    end if;
+    if new.capacity_config ? 'scales_with'
+       and new.capacity_config ->> 'scales_with' not in ('fixed_resource', 'team') then
+      raise exception 'VALIDATION_FAILED: capacity_config.scales_with must be fixed_resource or team'
+        using errcode = '23514';
+    end if;
+    if new.capacity_config ? 'counting_basis'
+       and new.capacity_config ->> 'counting_basis' not in ('concurrent', 'daily_throughput') then
+      raise exception 'VALIDATION_FAILED: capacity_config.counting_basis must be concurrent or daily_throughput'
+        using errcode = '23514';
+    end if;
+    if new.capacity_config ? 'binding_window'
+       and new.capacity_config ->> 'binding_window' <> 'date_bucket' then
+      raise exception 'VALIDATION_FAILED: capacity_config.binding_window must be date_bucket (V1)'
+        using errcode = '23514';
+    end if;
+    if new.capacity_config ? 'overlap_tolerance'
+       and new.capacity_config ->> 'overlap_tolerance' <> 'departure_day' then
+      raise exception 'VALIDATION_FAILED: capacity_config.overlap_tolerance must be departure_day (V1)'
+        using errcode = '23514';
+    end if;
+    if new.capacity_config ? 'service_limit' then
+      if jsonb_typeof(new.capacity_config -> 'service_limit') <> 'number'
+         or (new.capacity_config ->> 'service_limit')::numeric <> floor((new.capacity_config ->> 'service_limit')::numeric)
+         or (new.capacity_config ->> 'service_limit')::numeric <= 0 then
+        raise exception 'VALIDATION_FAILED: capacity_config.service_limit must be a positive integer'
           using errcode = '23514';
       end if;
+    end if;
+    -- The per-walker fallback capacity ("service fallback" in the §5A
+    -- precedence chain) must be a positive integer when present.
+    if new.capacity_config ? 'member_cap_default' then
+      if jsonb_typeof(new.capacity_config -> 'member_cap_default') <> 'number'
+         or (new.capacity_config ->> 'member_cap_default')::numeric <> floor((new.capacity_config ->> 'member_cap_default')::numeric)
+         or (new.capacity_config ->> 'member_cap_default')::numeric <= 0 then
+        raise exception 'VALIDATION_FAILED: capacity_config.member_cap_default must be a positive integer'
+          using errcode = '23514';
+      end if;
+    end if;
+    -- service_limit REQUIRED & positive unless staff/window-derived (team).
+    if coalesce(new.capacity_config ->> 'scales_with', 'fixed_resource') <> 'team'
+       and not (new.capacity_config ? 'service_limit') then
+      raise exception 'VALIDATION_FAILED: bounded occupancy services require a positive capacity_config.service_limit'
+        using errcode = '23514';
     end if;
   end if;
 
@@ -536,7 +741,12 @@ begin
     'service_window_assignments', 'service_window_assignment_zones'
   ] loop
     execute format('grant select, insert, update, delete on public.%I to authenticated', t);
-    execute format('grant select, insert, update, delete on public.%I to service_role', t);
+    -- Service-role/internal tooling gets NO direct DML on capacity config
+    -- (Codex correction #7): it must go through the same audited,
+    -- invariant-enforcing operations (the admin RLS path with its validation
+    -- + audit triggers, and the typed override RPCs). RLS-bypass is not
+    -- permission to bypass validation.
+    execute format('grant select on public.%I to service_role', t);
     execute format(
       'create policy %I on public.%I for select to authenticated using (app.has_role(business_id, ''staff''))',
       t || '_select_staff', t
@@ -723,25 +933,114 @@ begin
 end;
 $$;
 
--- ── The internal capacity primitive (spec §5 — the ONLY capacity code) ───────
+-- ── Effective assignment resolution for one (window, date) ──────────────────
+-- The §5A precedence chain, per walker: day-assignment override → window/
+-- member (recurring) override → service/member default → service fallback
+-- (capacity_config.member_cap_default). A present window-day override row
+-- REPLACES the date's assignment set. Removed/inactive members contribute
+-- zero (they are filtered out entirely). Used by the capacity core for the
+-- per-window, per-zone, and overlapping-window sums.
+create or replace function app.window_effective_assignments(
+  p_business_id uuid,
+  p_business_service_id uuid,
+  p_service_window_id uuid,
+  p_date date
+)
+returns table (
+  business_membership_id uuid,
+  assignment_id uuid,
+  from_day_override boolean,
+  cap integer
+)
+language sql
+stable
+security definer
+set search_path = ''
+rows 10
+as $$
+  with override_row as (
+    select o.id
+    from public.service_window_day_overrides o
+    where o.business_id = p_business_id
+      and o.service_window_id = p_service_window_id
+      and o.service_date = p_date
+  ),
+  svc as (
+    select s.capacity_config
+    from public.business_services s
+    where s.business_id = p_business_id and s.id = p_business_service_id
+  ),
+  raw as (
+    -- Recurring assignments apply only when no day override replaces them.
+    select a.business_membership_id,
+           a.id as assignment_id,
+           false as from_day_override,
+           a.member_capacity_override as override_cap
+    from public.service_window_assignments a
+    where a.business_id = p_business_id
+      and a.service_window_id = p_service_window_id
+      and not exists (select 1 from override_row)
+    union all
+    -- Day-override assignments: an absent per-day cap falls back to the
+    -- walker's RECURRING window override first (full precedence), never
+    -- straight to the service default.
+    select da.business_membership_id,
+           da.id,
+           true,
+           coalesce(da.member_capacity_override, ra.member_capacity_override)
+    from public.service_window_day_override_assignments da
+    join override_row o on da.service_window_day_override_id = o.id
+    left join public.service_window_assignments ra
+      on ra.business_id = p_business_id
+     and ra.service_window_id = p_service_window_id
+     and ra.business_membership_id = da.business_membership_id
+    where da.business_id = p_business_id
+  )
+  select r.business_membership_id,
+         r.assignment_id,
+         r.from_day_override,
+         coalesce(
+           r.override_cap,
+           d.capacity,
+           (s.capacity_config ->> 'member_cap_default')::integer
+         ) as cap
+  from raw r
+  cross join svc s
+  join public.business_memberships m
+    on m.business_id = p_business_id
+   and m.id = r.business_membership_id
+   and m.status = 'active'
+  left join public.service_member_capacity_defaults d
+    on d.business_id = p_business_id
+   and d.business_service_id = p_business_service_id
+   and d.business_membership_id = r.business_membership_id
+$$;
+alter function app.window_effective_assignments(uuid, uuid, uuid, date) owner to cfg1_owner;
+revoke all on function app.window_effective_assignments(uuid, uuid, uuid, date) from public;
+
+-- ── The internal capacity primitive core (spec §5 — the ONLY capacity code) ──
 -- Computes effective capacity for the requested date buckets and either
 -- returns or raises a stable conflict. With p_lock, takes invariant locks in
 -- deterministic order (service → conflict group → pool) so concurrent
 -- reservations serialize; the same core runs lock-free for read-only
 -- availability. It does NOT approve, cancel, reschedule, or invoice.
-create or replace function app.capacity_check(
+--
+-- p_skip_capacity_limits is reachable ONLY through the authenticated human
+-- override operation below (Codex correction #3): the core takes no actor
+-- input of any kind, so the ordinary/auto path cannot bypass capacity at
+-- all. Availability blocks (Block All, day/window closures, exclusive
+-- conflict groups) are enforced in EVERY mode.
+create or replace function app.capacity_check_core(
   p_business_id uuid,
   p_business_service_id uuid,
   p_start_date date,
   p_end_date date,
   p_pet_count integer,
-  p_service_window_id uuid default null,
-  p_service_zone_id uuid default null,
-  p_exclude_booking_id uuid default null,
-  p_lock boolean default true,
-  p_allow_over_capacity boolean default false,
-  p_over_capacity_actor uuid default null,
-  p_over_capacity_reason text default null
+  p_service_window_id uuid,
+  p_service_zone_id uuid,
+  p_exclude_booking_id uuid,
+  p_lock boolean,
+  p_skip_capacity_limits boolean
 )
 returns void
 language plpgsql
@@ -761,6 +1060,8 @@ declare
   v_window_override public.service_window_day_overrides%rowtype;
   v_window_cap integer;
   v_zone_cap integer;
+  v_cluster_cap integer;
+  v_cluster_used integer;
   v_scales_team boolean;
 begin
   if p_pet_count is null or p_pet_count <= 0 then
@@ -813,10 +1114,54 @@ begin
       using errcode = '22023';
   end if;
 
-  if p_allow_over_capacity
-     and (p_over_capacity_actor is null or p_over_capacity_reason is null) then
-    raise exception 'VALIDATION_FAILED: over-capacity approval requires an explicit actor and reason'
-      using errcode = '22023';
+  -- Zone selections bind at ALL three levels (Codex correction #2): the
+  -- requested zone must exist, and where the service or the window carries
+  -- an explicit zone selection, the zone must be in it (no rows at a level
+  -- means that level is unrestricted). Assignment-level coverage is applied
+  -- in the sums below.
+  if p_service_zone_id is not null then
+    if not exists (
+      select 1 from public.service_zones z
+      where z.business_id = p_business_id and z.id = p_service_zone_id
+    ) then
+      raise exception 'NOT_FOUND: zone does not exist in this business' using errcode = 'P0002';
+    end if;
+    if exists (
+      select 1 from public.business_service_zones z
+      where z.business_id = p_business_id and z.business_service_id = p_business_service_id
+    ) and not exists (
+      select 1 from public.business_service_zones z
+      where z.business_id = p_business_id
+        and z.business_service_id = p_business_service_id
+        and z.service_zone_id = p_service_zone_id
+    ) then
+      raise exception 'CAPACITY_CONFLICT: zone is not served by this service' using errcode = 'P0004';
+    end if;
+    if p_service_window_id is not null and exists (
+      select 1 from public.service_window_zones z
+      where z.business_id = p_business_id and z.service_window_id = p_service_window_id
+    ) and not exists (
+      select 1 from public.service_window_zones z
+      where z.business_id = p_business_id
+        and z.service_window_id = p_service_window_id
+        and z.service_zone_id = p_service_zone_id
+    ) then
+      raise exception 'CAPACITY_CONFLICT: zone is not served by this window' using errcode = 'P0004';
+    end if;
+  end if;
+
+  -- Conditional pool (capacity-model.md line 178; Codex correction #5): a
+  -- capacity group exists ONLY when 2+ co-located services consume the same
+  -- finite resource. A lone service attached to a pool is a configuration
+  -- error, rejected here in the evaluator.
+  if v_svc.capacity_group_id is not null then
+    if (select count(*)
+        from public.business_services s2
+        where s2.business_id = p_business_id
+          and s2.capacity_group_id = v_svc.capacity_group_id) < 2 then
+      raise exception 'POOL_MISCONFIGURED: a capacity pool requires 2+ participating services'
+        using errcode = '23514';
+    end if;
   end if;
 
   -- Deterministic lock order: service → conflict group → capacity pool.
@@ -900,7 +1245,7 @@ begin
       end if;
     end if;
 
-    if not p_allow_over_capacity then
+    if not p_skip_capacity_limits then
       -- 5. Service limit (date-bucket occupancy). Fixed-resource: scalar
       --    limit with day override; team: summed distinct walkers.
       if v_svc.capacity_model = 'bounded' then
@@ -928,75 +1273,43 @@ begin
 
         if v_scales_team and p_service_window_id is not null then
           -- Effective walking capacity = Σ distinct assigned walkers'
-          -- effective caps. Precedence per walker: day assignment override →
-          -- window/member override → service/member default → service fallback.
-          with active_assignments as (
-            select a.business_membership_id,
-                   a.member_capacity_override,
-                   a.id as assignment_id,
-                   false as from_day_override
-            from public.service_window_assignments a
-            where a.business_id = p_business_id
-              and a.service_window_id = p_service_window_id
-              and v_window_override.id is null
-            union all
-            select da.business_membership_id,
-                   da.member_capacity_override,
-                   da.id as assignment_id,
-                   true as from_day_override
-            from public.service_window_day_override_assignments da
-            where da.business_id = p_business_id
-              and da.service_window_day_override_id = v_window_override.id
-          ),
-          effective as (
-            select distinct on (aa.business_membership_id)
-              aa.business_membership_id,
-              coalesce(
-                aa.member_capacity_override,
-                d.capacity,
-                (v_svc.capacity_config ->> 'member_cap_default')::integer
-              ) as cap,
-              -- Coverage: no zone rows on the assignment = covers every zone.
-              (
-                p_service_zone_id is null
-                or case when aa.from_day_override then
-                  not exists (
-                    select 1 from public.service_window_day_override_assignment_zones z
-                    where z.business_id = p_business_id
-                      and z.service_window_day_override_assignment_id = aa.assignment_id
-                  )
-                  or exists (
-                    select 1 from public.service_window_day_override_assignment_zones z
-                    where z.business_id = p_business_id
-                      and z.service_window_day_override_assignment_id = aa.assignment_id
-                      and z.service_zone_id = p_service_zone_id
-                  )
-                else
-                  not exists (
-                    select 1 from public.service_window_assignment_zones z
-                    where z.business_id = p_business_id
-                      and z.service_window_assignment_id = aa.assignment_id
-                  )
-                  or exists (
-                    select 1 from public.service_window_assignment_zones z
-                    where z.business_id = p_business_id
-                      and z.service_window_assignment_id = aa.assignment_id
-                      and z.service_zone_id = p_service_zone_id
-                  )
-                end
-              ) as covers_zone
-            from active_assignments aa
-            left join public.service_member_capacity_defaults d
-              on d.business_id = p_business_id
-             and d.business_service_id = p_business_service_id
-             and d.business_membership_id = aa.business_membership_id
-          )
+          -- effective caps, resolved via app.window_effective_assignments
+          -- (full §5A precedence; inactive members contribute zero).
           select
-            coalesce(sum(e.cap), 0),
-            coalesce(sum(e.cap) filter (where e.covers_zone), 0)
+            coalesce(sum(ea.cap), 0),
+            coalesce(sum(ea.cap) filter (where
+              p_service_zone_id is null
+              or case when ea.from_day_override then
+                not exists (
+                  select 1 from public.service_window_day_override_assignment_zones z
+                  where z.business_id = p_business_id
+                    and z.service_window_day_override_assignment_id = ea.assignment_id
+                )
+                or exists (
+                  select 1 from public.service_window_day_override_assignment_zones z
+                  where z.business_id = p_business_id
+                    and z.service_window_day_override_assignment_id = ea.assignment_id
+                    and z.service_zone_id = p_service_zone_id
+                )
+              else
+                not exists (
+                  select 1 from public.service_window_assignment_zones z
+                  where z.business_id = p_business_id
+                    and z.service_window_assignment_id = ea.assignment_id
+                )
+                or exists (
+                  select 1 from public.service_window_assignment_zones z
+                  where z.business_id = p_business_id
+                    and z.service_window_assignment_id = ea.assignment_id
+                    and z.service_zone_id = p_service_zone_id
+                )
+              end
+            ), 0)
           into v_window_cap, v_zone_cap
-          from effective e
-          where e.cap is not null;
+          from app.window_effective_assignments(
+            p_business_id, p_business_service_id, p_service_window_id, v_d
+          ) ea
+          where ea.cap is not null;
 
           -- Window total demand vs summed capacity.
           select coalesce(sum(o.pet_count), 0) into v_used
@@ -1029,6 +1342,55 @@ begin
               raise exception 'CAPACITY_CONFLICT: zone capacity %/% on %', v_used, v_zone_cap, v_d
                 using errcode = 'P0004';
             end if;
+          end if;
+
+          -- Overlapping-window constraint (ratified: "a staff member on
+          -- overlapping windows/zones is counted ONCE"): across every window
+          -- of this service that overlaps this one in time on this date,
+          -- each distinct walker contributes at most one effective cap (the
+          -- largest of their per-window caps), and total demand across the
+          -- overlap cluster must fit under that de-duplicated sum.
+          select coalesce(sum(x.walker_cap), 0) into v_cluster_cap
+          from (
+            select ea.business_membership_id, max(ea.cap) as walker_cap
+            from public.service_windows w2
+            cross join lateral app.window_effective_assignments(
+              p_business_id, p_business_service_id, w2.id, v_d
+            ) ea
+            where w2.business_id = p_business_id
+              and w2.business_service_id = p_business_service_id
+              and w2.enabled
+              and extract(dow from v_d)::smallint = any (w2.weekdays)
+              and w2.start_time < v_window.end_time
+              and w2.end_time > v_window.start_time
+              and not exists (
+                select 1 from public.service_window_day_overrides o
+                where o.business_id = p_business_id
+                  and o.service_window_id = w2.id
+                  and o.service_date = v_d
+                  and o.is_available = false
+              )
+              and ea.cap is not null
+            group by ea.business_membership_id
+          ) x;
+
+          select coalesce(sum(o.pet_count), 0) into v_cluster_used
+          from public.booking_occurrences o
+          join public.bookings b on b.business_id = o.business_id and b.id = o.booking_id
+          join public.service_windows w2
+            on w2.business_id = o.business_id and w2.id = o.service_window_id
+          where o.business_id = p_business_id
+            and o.business_service_id = p_business_service_id
+            and o.service_date = v_d
+            and o.status <> 'cancelled'
+            and b.status in ('approved', 'confirmed')
+            and w2.start_time < v_window.end_time
+            and w2.end_time > v_window.start_time
+            and (p_exclude_booking_id is null or b.id <> p_exclude_booking_id);
+          if v_cluster_used + p_pet_count > v_cluster_cap then
+            raise exception 'CAPACITY_CONFLICT: overlapping windows share walkers (%/% on %)',
+              v_cluster_used, v_cluster_cap, v_d
+              using errcode = 'P0004';
           end if;
         end if;
       end if;
@@ -1066,22 +1428,96 @@ begin
     end if;
   end loop;
 
-  -- Explicit human over-capacity: immutable audit is mandatory (spec §5/§6).
-  if p_allow_over_capacity then
-    perform app.append_audit(
-      p_business_id, p_over_capacity_actor, 'user', 'capacity.over_capacity_override',
-      'business_service', p_business_service_id::text, p_over_capacity_reason,
-      null,
-      jsonb_build_object(
-        'start_date', p_start_date, 'end_date', p_end_date,
-        'pet_count', p_pet_count, 'service_window_id', p_service_window_id
-      )
-    );
-  end if;
 end;
 $$;
-alter function app.capacity_check(uuid, uuid, date, date, integer, uuid, uuid, uuid, boolean, boolean, uuid, text) owner to cfg1_owner;
-revoke all on function app.capacity_check(uuid, uuid, date, date, integer, uuid, uuid, uuid, boolean, boolean, uuid, text) from public;
+alter function app.capacity_check_core(uuid, uuid, date, date, integer, uuid, uuid, uuid, boolean, boolean) owner to cfg1_owner;
+revoke all on function app.capacity_check_core(uuid, uuid, date, date, integer, uuid, uuid, uuid, boolean, boolean) from public;
+
+-- The ordinary primitive: full enforcement, no override input of any kind.
+-- Machine/auto callers cannot bypass capacity at all (Codex correction #3).
+create or replace function app.capacity_check(
+  p_business_id uuid,
+  p_business_service_id uuid,
+  p_start_date date,
+  p_end_date date,
+  p_pet_count integer,
+  p_service_window_id uuid default null,
+  p_service_zone_id uuid default null,
+  p_exclude_booking_id uuid default null,
+  p_lock boolean default true
+)
+returns void
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+  perform app.capacity_check_core(
+    p_business_id, p_business_service_id, p_start_date, p_end_date, p_pet_count,
+    p_service_window_id, p_service_zone_id, p_exclude_booking_id, p_lock, false
+  );
+end;
+$$;
+alter function app.capacity_check(uuid, uuid, date, date, integer, uuid, uuid, uuid, boolean) owner to cfg1_owner;
+revoke all on function app.capacity_check(uuid, uuid, date, date, integer, uuid, uuid, uuid, boolean) from public;
+
+-- ── Human over-capacity approval (distinct authenticated op; spec §5) ────────
+-- The ONLY path that may relax capacity limits. The actor is DERIVED FROM THE
+-- AUTHENTICATED SESSION — never accepted as input — and must hold an
+-- authorized scheduling role (Manager+ per the roles doc: managers run
+-- day-to-day booking approval; over-capacity is the "Approve anyway" human
+-- decision, capacity-model.md §6). Requires an explicit reason; appends the
+-- mandatory immutable audit event atomically with the check, while the
+-- invariant locks are held. Availability blocks (Block All, closures,
+-- exclusive conflict groups) still bind — only numeric capacity is relaxed.
+-- Machine identities (service_role and other workload sessions) resolve no
+-- account and are refused before any check runs.
+create or replace function app.capacity_check_human_override(
+  p_business_id uuid,
+  p_business_service_id uuid,
+  p_start_date date,
+  p_end_date date,
+  p_pet_count integer,
+  p_service_window_id uuid default null,
+  p_service_zone_id uuid default null,
+  p_exclude_booking_id uuid default null,
+  p_reason text default null
+)
+returns void
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_actor uuid;
+begin
+  v_actor := app.require_account();
+  perform app.require_role(p_business_id, 'manager');
+
+  if p_reason is null or length(btrim(p_reason)) = 0 then
+    raise exception 'VALIDATION_FAILED: over-capacity approval requires an explicit reason'
+      using errcode = '22023';
+  end if;
+
+  perform app.capacity_check_core(
+    p_business_id, p_business_service_id, p_start_date, p_end_date, p_pet_count,
+    p_service_window_id, p_service_zone_id, p_exclude_booking_id, true, true
+  );
+
+  perform app.append_audit(
+    p_business_id, v_actor, 'user', 'capacity.over_capacity_override',
+    'business_service', p_business_service_id::text, p_reason,
+    null,
+    jsonb_build_object(
+      'start_date', p_start_date, 'end_date', p_end_date,
+      'pet_count', p_pet_count, 'service_window_id', p_service_window_id
+    )
+  );
+end;
+$$;
+alter function app.capacity_check_human_override(uuid, uuid, date, date, integer, uuid, uuid, uuid, text) owner to cfg1_owner;
+revoke all on function app.capacity_check_human_override(uuid, uuid, date, date, integer, uuid, uuid, uuid, text) from public;
+grant execute on function app.capacity_check_human_override(uuid, uuid, date, date, integer, uuid, uuid, uuid, text) to authenticated;
 
 -- ── Tenant-safe effective availability for clients (spec §4) ─────────────────
 -- Returns only per-date availability — no capacity configuration, staff

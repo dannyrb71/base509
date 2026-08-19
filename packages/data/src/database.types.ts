@@ -1421,6 +1421,7 @@ export type Database = {
       }
       service_zones: {
         Row: {
+          boundary: Json
           business_id: string
           created_at: string
           id: string
@@ -1428,6 +1429,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          boundary: Json
           business_id: string
           created_at?: string
           id?: string
@@ -1435,6 +1437,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          boundary?: Json
           business_id?: string
           created_at?: string
           id?: string

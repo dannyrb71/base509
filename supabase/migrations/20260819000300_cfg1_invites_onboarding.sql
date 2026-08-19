@@ -25,10 +25,16 @@ create table public.business_invite_codes (
   created_at timestamptz not null default now(),
   unique (business_id, id),
   -- staff invites carry a role; client invites never do
-  check ((type = 'staff') = (target_role is not null))
+  check ((type = 'staff') = (target_role is not null)),
+  -- Team invites are single-use, full stop (spec §8; Codex correction #4) —
+  -- enforced at the table so no code path can mint a multi-use staff code.
+  check (type <> 'staff' or max_uses = 1)
 );
 
 create index business_invite_codes_business_idx on public.business_invite_codes (business_id);
+
+create trigger business_invite_codes_no_rekey before update on public.business_invite_codes
+  for each row execute function app.prevent_tenant_rekey();
 
 alter table public.business_invite_codes owner to cfg1_owner;
 alter table public.business_invite_codes enable row level security;
@@ -150,8 +156,13 @@ begin
       raise exception 'GRANT_CEILING: cannot invite at or above your own role'
         using errcode = '42501';
     end if;
-    -- Ratified defaults: single-use, 7-day expiry.
-    v_max_uses := coalesce(p_max_uses, 1);
+    -- Team invites are single-use by rule, not by default (spec §8; Codex
+    -- correction #4): any other requested use count is an error.
+    if p_max_uses is not null and p_max_uses <> 1 then
+      raise exception 'VALIDATION_FAILED: staff invites are single-use (max_uses must be 1)'
+        using errcode = '22023';
+    end if;
+    v_max_uses := 1;
     v_expires := coalesce(p_expires_at, now() + interval '7 days');
   else
     if p_target_role is not null then

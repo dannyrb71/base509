@@ -144,6 +144,7 @@ Single transactional security-definer RPCs. **Actor authority by op class — no
 
 **Summed walking + reusable zones — relational, FK-bearing rows (NOT JSON blobs):**
 - `service_zones` (reusable per-tenant pool); service-to-zone links; window-to-zone links.
+- **Zone geometry (binding, per `docs/specs/service-area-maps.md` "Guardrail — store GeoJSON only", Codex 2026-08-15):** each `service_zones` row persists **one validated GeoJSON Polygon/MultiPolygon** (Terra Draw's native output) — never a FeatureCollection in a single column, never a provider-proprietary shape. The server validates coordinate ranges, ring closure, polygon validity/self-intersection, geometry size, and max service-area extent; booking containment is server-authoritative (client-side map checks are preview only).
 - Per-service / per-member **default capacity** rows.
 - `service_window_assignments` with an optional **per-window member capacity override**.
 - Assignment-to-zone **coverage** links; corresponding **day-override assignment** rows.

@@ -362,8 +362,9 @@ describe('RBAC matrix (nested levels, roles doc)', () => {
         expect(u.rowCount).toBe(0)
         await expectError(
           c.query(
-            `insert into public.service_zones (business_id, name) values ($1, 'nope-' || $2)`,
-            [biz.businessId, uuid()],
+            `insert into public.service_zones (business_id, name, boundary) values ($1, 'nope-' || $2, $3)`,
+            [biz.businessId, uuid(),
+             '{"type":"Polygon","coordinates":[[[0,0],[0.01,0],[0.01,0.01],[0,0]]]}'],
           ),
           /row-level security/,
         )

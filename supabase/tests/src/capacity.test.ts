@@ -13,6 +13,7 @@ import {
   createZone,
   newBusiness,
   reserve,
+  reserveOverCapacity,
   reserveSql,
   setEntitlements,
   setMemberDefaultCap,
@@ -385,6 +386,13 @@ describe('pools vs conflict groups', () => {
       config: { version: 1, slot_unit: 'dogs', service_limit: 5 },
       capacityGroupId: pool, conflictGroupId: conflict,
     })
+    // The pool needs a second participating service (conditional-pool rule);
+    // it stays out of the conflict group so only exclusivity binds sitting.
+    await createService(biz, {
+      type: 'daycare', durationModel: 'open_ended',
+      config: { version: 1, slot_unit: 'dogs', service_limit: 5 },
+      capacityGroupId: pool,
+    })
     const client = await addClient(biz)
     const D = '2027-12-13'
     await reserve({ businessId: biz.businessId, serviceId: sitting, clientId: client.clientId,
@@ -418,41 +426,94 @@ describe('pools vs conflict groups', () => {
   })
 })
 
-describe('human over-capacity override (explicit flag + immutable audit)', () => {
-  it('auto-book (no human actor/reason) can NEVER go over; a human with both can', async () => {
+describe('human over-capacity override (session-derived actor, Codex #3)', () => {
+  it('the ordinary/auto primitive cannot bypass capacity at all — it has no override input', async () => {
     const { biz, svc, clientId } = await boardingBiz(1)
     const D = '2028-01-10'
     await reserve({ businessId: biz.businessId, serviceId: svc, clientId,
       start: D, end: '2028-01-11' })
-
-    // The machine path cannot invoke the override (missing actor/reason).
-    await expectError(
-      reserve({ businessId: biz.businessId, serviceId: svc, clientId,
-        start: D, end: '2028-01-11', allowOver: true }),
-      /VALIDATION_FAILED.*over-capacity/,
-    )
-    // Plain over-capacity approval without the flag conflicts as usual.
+    // The machine path simply conflicts; there is nothing to forge.
     await expectError(
       reserve({ businessId: biz.businessId, serviceId: svc, clientId,
         start: D, end: '2028-01-11' }),
       /CAPACITY_CONFLICT/,
     )
+    // And no capacity function carries an actor/flag parameter anymore.
+    const admin = await connect()
+    const sig = await admin.query(
+      `select proname, coalesce(array_to_string(proargnames, ','), '') as args
+       from pg_proc
+       where pronamespace = 'app'::regnamespace and proname like 'capacity_check%'`,
+    )
+    expect(sig.rowCount).toBeGreaterThanOrEqual(3)
+    for (const row of sig.rows) {
+      expect(row.args, `${row.proname} must not accept override/actor input`)
+        .not.toMatch(/over_capacity_actor|allow_over_capacity/)
+    }
+    await admin.end()
+  })
 
-    // Explicit human override: flag + actor + reason → allowed + audited.
-    await reserve({
+  it('a machine caller is denied even when it supplies a forged reason/actor claim', async () => {
+    const { biz, svc, clientId } = await boardingBiz(1)
+    const c = await connect()
+    // service_role with a forged sub claim pointing at the real owner:
+    await c.query(`select set_config('request.jwt.claims', $1, false)`, [
+      JSON.stringify({ role: 'service_role', iss: 'https://test.local/auth/v1', sub: biz.owner.sub }),
+    ])
+    await c.query('set role service_role')
+    await expectError(
+      c.query(
+        `select app.capacity_check_human_override($1, $2, '2028-01-12', '2028-01-13', 1,
+                null, null, null, 'forged machine reason')`,
+        [biz.businessId, svc],
+      ),
+      /permission denied/,
+    )
+    await expectError(
+      c.query(
+        `select test_harness.reserve_fixture_over_capacity($1, $2, $3, '2028-01-12', '2028-01-13')`,
+        [biz.businessId, svc, clientId],
+      ),
+      /permission denied/,
+    )
+    await c.end()
+  })
+
+  it('requires Manager+, an explicit reason, and audits atomically; Staff/clients are refused', async () => {
+    const { biz, svc, clientId } = await boardingBiz(1)
+    await setEntitlements(biz.businessId)
+    const manager = await addMember(biz, 'manager')
+    const staff = await addMember(biz, 'staff')
+    const D = '2028-01-14'
+    await reserve({ businessId: biz.businessId, serviceId: svc, clientId,
+      start: D, end: '2028-01-15' })
+
+    // Staff cannot approve over capacity.
+    await expectError(
+      reserveOverCapacity(staff.sub, { businessId: biz.businessId, serviceId: svc, clientId,
+        start: D, end: '2028-01-15', reason: 'staff trying' }),
+      /FORBIDDEN/,
+    )
+    // A manager without a reason is refused.
+    await expectError(
+      reserveOverCapacity(manager.sub, { businessId: biz.businessId, serviceId: svc, clientId,
+        start: D, end: '2028-01-15' }),
+      /VALIDATION_FAILED.*reason/,
+    )
+    // Manager + reason → allowed; actor derived from the session; audited.
+    await reserveOverCapacity(manager.sub, {
       businessId: biz.businessId, serviceId: svc, clientId,
-      start: D, end: '2028-01-11',
-      allowOver: true, actor: biz.owner.accountId, reason: 'Holiday crunch, owner approved',
+      start: D, end: '2028-01-15', reason: 'Holiday crunch, manager approved',
     })
     const admin = await connect()
     const audit = await admin.query(
-      `select id, reason from public.audit_events
+      `select id, reason, actor_account_id from public.audit_events
        where business_id = $1 and action = 'capacity.over_capacity_override'`,
       [biz.businessId],
     )
     expect(audit.rowCount).toBe(1)
-    expect(audit.rows[0].reason).toContain('owner approved')
-    // The audit row is immutable.
+    expect(audit.rows[0].reason).toContain('manager approved')
+    expect(audit.rows[0].actor_account_id).toBe(manager.accountId)
     await expectError(
       admin.query(`update public.audit_events set reason = 'scrubbed' where id = $1`, [
         audit.rows[0].id,
@@ -460,6 +521,18 @@ describe('human over-capacity override (explicit flag + immutable audit)', () =>
       /IMMUTABLE_ROW/,
     )
     await admin.end()
+  })
+
+  it('the override never revives availability blocks (Block All still binds)', async () => {
+    const { biz, svc, clientId } = await boardingBiz(1)
+    await asUser(biz.owner.sub, (c) =>
+      c.query(`select public.set_calendar_day($1, '2028-01-20', true)`, [biz.businessId]),
+    )
+    await expectError(
+      reserveOverCapacity(biz.owner.sub, { businessId: biz.businessId, serviceId: svc, clientId,
+        start: '2028-01-20', end: '2028-01-21', reason: 'trying to bulldoze a blocked day' }),
+      /CAPACITY_CONFLICT.*blocked/,
+    )
   })
 })
 
@@ -518,6 +591,174 @@ describe('concurrency gates', () => {
     const { ok, errors } = await race(runners)
     expect(ok).toBe(1)
     for (const e of errors) expect(e).toMatch(/CAPACITY_CONFLICT.*conflict group/)
+  })
+})
+
+describe('summed walking corrections (Codex #2)', () => {
+  async function walkerBiz() {
+    const biz = await newBusiness()
+    await setEntitlements(biz.businessId)
+    const svc = await createService(biz, {
+      type: 'walking',
+      durationModel: 'fixed_window',
+      config: { version: 1, slot_unit: 'dogs', scales_with: 'team', member_cap_default: 2 },
+    })
+    const client = await addClient(biz)
+    return { biz, svc, clientId: client.clientId }
+  }
+
+  it('a walker on two OVERLAPPING windows is counted once across them', async () => {
+    const f = await walkerBiz()
+    const w1 = await createWindow(f.biz, f.svc, 'Late Morning', '11:00', '13:00')
+    const w2 = await createWindow(f.biz, f.svc, 'Early Afternoon', '12:00', '14:00')
+    const w3 = await createWindow(f.biz, f.svc, 'Evening', '15:00', '16:00')
+    const morgan = await addMember(f.biz, 'staff')
+    await setMemberDefaultCap(f.biz, f.svc, morgan.membershipId, 6)
+    for (const w of [w1, w2, w3]) {
+      await assignWalker(f.biz, w, morgan.membershipId)
+    }
+    const D = '2028-04-03'
+    // Morgan's 6 dogs fit in the first window…
+    await reserve({ businessId: f.biz.businessId, serviceId: f.svc, clientId: f.clientId,
+      start: D, windowId: w1, petCount: 6 })
+    // …but the overlapping second window does NOT get 6 more: same walker.
+    await expectError(
+      reserve({ businessId: f.biz.businessId, serviceId: f.svc, clientId: f.clientId,
+        start: D, windowId: w2 }),
+      /CAPACITY_CONFLICT.*overlapping windows/,
+    )
+    // A non-overlapping window is a fresh walk: 6 more are fine.
+    await reserve({ businessId: f.biz.businessId, serviceId: f.svc, clientId: f.clientId,
+      start: D, windowId: w3, petCount: 6 })
+  })
+
+  it('day-override assignment with no cap follows the FULL precedence chain', async () => {
+    const f = await walkerBiz()
+    const w = await createWindow(f.biz, f.svc)
+    const morgan = await addMember(f.biz, 'staff') // recurring override 3, default 6
+    const casey = await addMember(f.biz, 'staff') // member default 4, no recurring
+    const dana = await addMember(f.biz, 'staff') // nothing → service fallback 2
+    await setMemberDefaultCap(f.biz, f.svc, morgan.membershipId, 6)
+    await setMemberDefaultCap(f.biz, f.svc, casey.membershipId, 4)
+    await assignWalker(f.biz, w, morgan.membershipId, { capOverride: 3 })
+    const D = '2028-04-04'
+    await asUser(f.biz.owner.sub, (c) =>
+      c.query(`select public.set_window_day_override($1, $2, $3, true, $4)`, [
+        f.biz.businessId, w, D,
+        JSON.stringify([
+          { membership_id: morgan.membershipId }, // no cap → recurring override 3 (NOT default 6)
+          { membership_id: casey.membershipId }, // no cap, no recurring → member default 4
+          { membership_id: dana.membershipId }, // nothing anywhere → member_cap_default 2
+        ]),
+      ]),
+    )
+    // 3 + 4 + 2 = 9 — if the chain skipped to Morgan's member default the
+    // wrong total would be 12.
+    await reserve({ businessId: f.biz.businessId, serviceId: f.svc, clientId: f.clientId,
+      start: D, windowId: w, petCount: 9 })
+    await expectError(
+      reserve({ businessId: f.biz.businessId, serviceId: f.svc, clientId: f.clientId,
+        start: D, windowId: w }),
+      /CAPACITY_CONFLICT/,
+    )
+  })
+
+  it('removed/inactive members contribute zero capacity', async () => {
+    const f = await walkerBiz()
+    const w = await createWindow(f.biz, f.svc)
+    const morgan = await addMember(f.biz, 'staff')
+    await setMemberDefaultCap(f.biz, f.svc, morgan.membershipId, 6)
+    await assignWalker(f.biz, w, morgan.membershipId)
+    const D = '2028-04-05'
+    await reserve({ businessId: f.biz.businessId, serviceId: f.svc, clientId: f.clientId,
+      start: D, windowId: w, petCount: 1 })
+    await asUser(f.biz.owner.sub, (c) =>
+      c.query('select public.remove_member($1, $2)', [f.biz.businessId, morgan.membershipId]),
+    )
+    // With its only walker removed, the window has zero capacity left.
+    await expectError(
+      reserve({ businessId: f.biz.businessId, serviceId: f.svc, clientId: f.clientId,
+        start: '2028-04-12', windowId: w, petCount: 1 }),
+      /CAPACITY_CONFLICT.*window capacity/,
+    )
+  })
+
+  it('service-level and window-level zone selections are enforced', async () => {
+    const f = await walkerBiz()
+    const w = await createWindow(f.biz, f.svc)
+    const morgan = await addMember(f.biz, 'staff')
+    await setMemberDefaultCap(f.biz, f.svc, morgan.membershipId, 6)
+    await assignWalker(f.biz, w, morgan.membershipId) // covers all zones
+    const noe = await createZone(f.biz, 'Noe Valley')
+    const mission = await createZone(f.biz, 'Mission')
+    const castro = await createZone(f.biz, 'Castro')
+
+    // Service serves only Noe + Mission.
+    await asUser(f.biz.owner.sub, async (c) => {
+      for (const z of [noe, mission]) {
+        await c.query(
+          `insert into public.business_service_zones (business_id, business_service_id, service_zone_id)
+           values ($1, $2, $3)`,
+          [f.biz.businessId, f.svc, z],
+        )
+      }
+      // The window serves only Noe.
+      await c.query(
+        `insert into public.service_window_zones (business_id, service_window_id, service_zone_id)
+         values ($1, $2, $3)`,
+        [f.biz.businessId, w, noe],
+      )
+    })
+
+    const D = '2028-04-06'
+    // Castro is not in the SERVICE's zone selection.
+    await expectError(
+      reserve({ businessId: f.biz.businessId, serviceId: f.svc, clientId: f.clientId,
+        start: D, windowId: w, zoneId: castro }),
+      /CAPACITY_CONFLICT.*not served by this service/,
+    )
+    // Mission is served by the service but not by this WINDOW.
+    await expectError(
+      reserve({ businessId: f.biz.businessId, serviceId: f.svc, clientId: f.clientId,
+        start: D, windowId: w, zoneId: mission }),
+      /CAPACITY_CONFLICT.*not served by this window/,
+    )
+    // Noe passes every level.
+    await reserve({ businessId: f.biz.businessId, serviceId: f.svc, clientId: f.clientId,
+      start: D, windowId: w, zoneId: noe })
+    // A zone id that does not exist in the business at all is NOT_FOUND.
+    await expectError(
+      reserve({ businessId: f.biz.businessId, serviceId: f.svc, clientId: f.clientId,
+        start: D, windowId: w, zoneId: crypto.randomUUID() }),
+      /NOT_FOUND.*zone/,
+    )
+  })
+})
+
+describe('conditional pool: 2+ participating services (Codex #5)', () => {
+  it('a lone service attached to a pool is rejected by the evaluator', async () => {
+    const biz = await newBusiness()
+    await setEntitlements(biz.businessId)
+    const pool = await createCapacityGroup(biz, 8)
+    const boarding = await createService(biz, {
+      type: 'boarding', durationModel: 'overnight',
+      config: { version: 1, slot_unit: 'dogs', service_limit: 5 },
+      capacityGroupId: pool,
+    })
+    const client = await addClient(biz)
+    await expectError(
+      reserve({ businessId: biz.businessId, serviceId: boarding, clientId: client.clientId,
+        start: '2028-05-01', end: '2028-05-02' }),
+      /POOL_MISCONFIGURED/,
+    )
+    // Attaching a second co-located service makes the pool legitimate.
+    await createService(biz, {
+      type: 'daycare', durationModel: 'open_ended',
+      config: { version: 1, slot_unit: 'dogs', service_limit: 3 },
+      capacityGroupId: pool,
+    })
+    await reserve({ businessId: biz.businessId, serviceId: boarding, clientId: client.clientId,
+      start: '2028-05-01', end: '2028-05-02' })
   })
 })
 

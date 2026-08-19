@@ -185,10 +185,13 @@ describe('invite codes (§3.2, §8 defaults)', () => {
 })
 
 describe('entitlements (D-050)', () => {
-  it('CONCURRENCY: seat activation cannot exceed the seat limit', async () => {
+  it('CONCURRENCY: seat activation cannot exceed the seat limit (separate single-use invites)', async () => {
     const biz = await newBusiness()
     await setEntitlements(biz.businessId, { seat_limit: 3 }) // owner + 2 more
-    const invite = await makeInvite(biz, 'staff', { maxUses: 8 })
+    // Team invites are strictly single-use, so the race uses 8 DISTINCT
+    // invites — the seat limit, not invite exhaustion, must be the gate.
+    const invites: Array<{ id: string; token: string }> = []
+    for (let i = 0; i < 8; i++) invites.push(await makeInvite(biz, 'staff'))
     const people = await Promise.all(Array.from({ length: 8 }, () => newAccount()))
     const clients = await Promise.all(people.map(() => connect()))
     try {
@@ -199,10 +202,15 @@ describe('entitlements (D-050)', () => {
         await clients[i]!.query('set role authenticated')
       }
       const results = await Promise.allSettled(
-        clients.map((c) => c.query('select * from public.redeem_invite($1)', [invite.token])),
+        clients.map((c, i) =>
+          c.query('select * from public.redeem_invite($1)', [invites[i]!.token]),
+        ),
       )
       const ok = results.filter((r) => r.status === 'fulfilled').length
       expect(ok).toBe(2)
+      for (const r of results) {
+        if (r.status === 'rejected') expect(String(r.reason)).toMatch(/LIMIT_EXCEEDED/)
+      }
     } finally {
       for (const c of clients) await c.end().catch(() => {})
     }
@@ -212,6 +220,32 @@ describe('entitlements (D-050)', () => {
       [biz.businessId],
     )
     expect(Number(n.rows[0].n)).toBe(3)
+    await admin.end()
+  })
+
+  it('staff invites are single-use at BOTH the RPC and the table (Codex #4)', async () => {
+    const biz = await newBusiness()
+    // RPC layer: requesting a multi-use team invite is an error, not a default.
+    await asUser(biz.owner.sub, async (c) => {
+      await expectError(
+        c.query(`select * from public.create_invite($1, 'staff', 'staff', 5)`, [biz.businessId]),
+        /VALIDATION_FAILED.*single-use/,
+      )
+      // max_uses = 1 explicitly is fine.
+      await c.query(`select * from public.create_invite($1, 'staff', 'staff', 1)`, [biz.businessId])
+    })
+    // Table layer: even a privileged direct insert cannot mint one.
+    const admin = await connect()
+    await expectError(
+      admin.query(
+        `insert into public.business_invite_codes
+           (business_id, code_hash, type, target_role, max_uses, created_by_account_id)
+         values ($1, encode(extensions.digest(gen_random_uuid()::text, 'sha256'), 'hex'),
+                 'staff', 'staff', 3, $2)`,
+        [biz.businessId, biz.owner.accountId],
+      ),
+      /check constraint/,
+    )
     await admin.end()
   })
 
@@ -448,6 +482,83 @@ describe('entitlements (D-050)', () => {
         /LIMIT_EXCEEDED/,
       )
     })
+  })
+
+  it('sync rejects malformed envelope fields outright (Codex #7)', async () => {
+    const biz = await newBusiness()
+    const base = {
+      source_system: 'base509_master',
+      operational_business_id: biz.businessId,
+      tier_key: 'crew',
+      capabilities: {},
+    }
+    await asService(async (c) => {
+      const attempt = (extra: Record<string, unknown>) =>
+        c.query(`select * from public.sync_entitlements($1)`, [
+          JSON.stringify({ ...base, event_id: uuid(), source_version: 500, ...extra }),
+        ])
+      await expectError(attempt({ theme_allowlist: 'pink' }), /VALIDATION_FAILED.*theme_allowlist/)
+      await expectError(
+        attempt({ projection_version: 99 }),
+        /VALIDATION_FAILED.*projection_version/,
+      )
+      await expectError(
+        attempt({ projection_version: 'two' }),
+        /VALIDATION_FAILED.*projection_version/,
+      )
+      await expectError(attempt({ client_limit: 'abc' }), /VALIDATION_FAILED.*client_limit/)
+      await expectError(attempt({ seat_limit: [3] }), /VALIDATION_FAILED.*seat_limit/)
+      await expectError(
+        attempt({ effective_at: 'not-a-date' }),
+        /VALIDATION_FAILED.*timestamps/,
+      )
+      await expectError(
+        attempt({ expires_at: 'tomorrow-ish' }),
+        /VALIDATION_FAILED.*timestamps/,
+      )
+    })
+    // Nothing malformed was persisted; the business still holds its seed.
+    const admin = await connect()
+    const row = await admin.query(
+      `select source_system from public.business_entitlements where business_id = $1`,
+      [biz.businessId],
+    )
+    expect(row.rows[0].source_system).toBe('bootstrap_stub')
+    await admin.end()
+  })
+
+  it('read side fails closed to Starter on malformed theme_allowlist or unsupported projection_version (Codex #7)', async () => {
+    const biz = await newBusiness()
+    await setEntitlements(biz.businessId, { capabilities: { gps: true }, client_limit: null })
+    const admin = await connect()
+    const effective = async () =>
+      (await admin.query(`select app.effective_entitlements($1) as e`, [biz.businessId]))
+        .rows[0].e
+
+    expect((await effective()).tier_key).toBe('crew')
+
+    // Corrupt the projection out-of-band: theme_allowlist as a bare string.
+    await admin.query(
+      `update public.business_entitlements set theme_allowlist = '"solo_pink"'::jsonb
+       where business_id = $1`,
+      [biz.businessId],
+    )
+    let e = await effective()
+    expect(e.tier_key).toBe('starter')
+    expect(e.client_limit).toBe(5)
+    expect(e.theme_allowlist).toEqual(['brandy_blue'])
+
+    // Restore, then corrupt the projection version instead.
+    await setEntitlements(biz.businessId, { capabilities: { gps: true }, client_limit: null })
+    await admin.query(
+      `update public.business_entitlements set projection_version = 99 where business_id = $1`,
+      [biz.businessId],
+    )
+    e = await effective()
+    expect(e.tier_key).toBe('starter')
+    const cap = await admin.query(`select app.has_capability($1, 'gps') as ok`, [biz.businessId])
+    expect(cap.rows[0].ok).toBe(false)
+    await admin.end()
   })
 
   it('get_effective_entitlements proves membership and reports fail-closed state', async () => {

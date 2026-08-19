@@ -68,42 +68,118 @@ describe('audit immutability + redaction', () => {
 })
 
 describe('security-definer execution boundaries', () => {
-  it('unintended roles cannot execute privileged functions', async () => {
-    const c = await connect()
+  // Every privileged function's ACL, enumerated from the catalog and matched
+  // EXACTLY against the intended classification (Codex #1) — an unclassified
+  // function or an unexpected grant fails this test.
+  const EXPECTED: Record<string, { auth: boolean; svc: boolean }> = {
+    // app schema — helpers RLS policies and RPC guards evaluate as the caller
+    'app.current_base509_account_id': { auth: true, svc: true },
+    'app.current_membership': { auth: true, svc: true },
+    'app.role_rank': { auth: true, svc: true },
+    'app.has_role': { auth: true, svc: true },
+    'app.member_business_ids': { auth: true, svc: true },
+    'app.client_business_ids': { auth: true, svc: true },
+    'app.current_client_id': { auth: true, svc: true },
+    'app.has_capability': { auth: true, svc: true },
+    'app.require_account': { auth: true, svc: true },
+    'app.require_role': { auth: true, svc: true },
+    // app schema — the human over-capacity op: authenticated sessions only
+    // (machine identities must be unable to reach it at all)
+    'app.capacity_check_human_override': { auth: true, svc: false },
+    // app schema — internal-only (no API role may execute)
+    'app.jwt': { auth: false, svc: false },
+    'app.jwt_issuer': { auth: false, svc: false },
+    'app.starter_entitlements': { auth: false, svc: false },
+    'app.effective_entitlements': { auth: false, svc: false },
+    'app.require_entitlement': { auth: false, svc: false },
+    'app.client_limit': { auth: false, svc: false },
+    'app.seat_limit': { auth: false, svc: false },
+    'app.append_audit': { auth: false, svc: false },
+    'app.lock_business_account': { auth: false, svc: false },
+    'app.capacity_check': { auth: false, svc: false },
+    'app.capacity_check_core': { auth: false, svc: false },
+    'app.window_effective_assignments': { auth: false, svc: false },
+    'app.validate_zone_boundary': { auth: false, svc: false },
+    'app.validate_service_capacity': { auth: false, svc: false },
+    'app.audit_config_change': { auth: false, svc: false },
+    'app.touch_updated_at': { auth: false, svc: false },
+    'app.prevent_tenant_rekey': { auth: false, svc: false },
+    'app.raise_immutable': { auth: false, svc: false },
+    'app.protect_business_columns': { auth: false, svc: false },
+    'app.protect_client_columns': { auth: false, svc: false },
+    'app.enforce_no_dual_relationship_membership': { auth: false, svc: false },
+    'app.enforce_no_dual_relationship_client': { auth: false, svc: false },
+    'app.enforce_owner_remains': { auth: false, svc: false },
+    // public schema — typed RPCs
+    'public.bootstrap_account': { auth: true, svc: false },
+    'public.create_business': { auth: true, svc: true },
+    'public.create_invite': { auth: true, svc: true },
+    'public.revoke_invite': { auth: true, svc: true },
+    'public.redeem_invite': { auth: true, svc: true },
+    'public.create_client': { auth: true, svc: true },
+    'public.reactivate_client': { auth: true, svc: true },
+    'public.set_client_status': { auth: true, svc: true },
+    'public.change_membership_role': { auth: true, svc: true },
+    'public.remove_member': { auth: true, svc: true },
+    'public.reactivate_member': { auth: true, svc: true },
+    'public.team_directory': { auth: true, svc: true },
+    'public.set_occurrence_care_status': { auth: true, svc: true },
+    'public.effective_availability': { auth: true, svc: true },
+    'public.set_calendar_day': { auth: true, svc: true },
+    'public.set_service_day_override': { auth: true, svc: true },
+    'public.set_pool_day_override': { auth: true, svc: true },
+    'public.set_window_day_override': { auth: true, svc: true },
+    'public.reset_day_override': { auth: true, svc: true },
+    'public.get_effective_entitlements': { auth: true, svc: true },
+    // public schema — machine op (workload identity only)
+    'public.sync_entitlements': { auth: false, svc: true },
+    // test harness (not a migration): the ordinary reserve path is machine-
+    // only; the human over-capacity path is authenticated-only
+    'test_harness.reserve_fixture': { auth: false, svc: true },
+    'test_harness.reserve_fixture_over_capacity': { auth: true, svc: false },
+    'test_harness.cancel_booking': { auth: false, svc: true },
+  }
 
-    // anon: nothing.
+  it('enumerates EVERY cfg1_owner function ACL and matches the classification exactly', async () => {
+    const admin = await connect()
+    const rows = await admin.query(
+      `select n.nspname || '.' || p.proname as fq,
+              has_function_privilege('anon', p.oid, 'execute') as anon,
+              has_function_privilege('authenticated', p.oid, 'execute') as auth,
+              has_function_privilege('service_role', p.oid, 'execute') as svc
+       from pg_proc p
+       join pg_namespace n on n.oid = p.pronamespace
+       where p.proowner = (select oid from pg_roles where rolname = 'cfg1_owner')
+       order by fq`,
+    )
+    await admin.end()
+
+    const actualNames = rows.rows.map((r: any) => r.fq as string).sort()
+    expect(actualNames, 'function set drifted — classify new functions explicitly')
+      .toEqual(Object.keys(EXPECTED).sort())
+
+    for (const r of rows.rows) {
+      expect(r.anon, `${r.fq}: anon must never execute privileged functions`).toBe(false)
+      const want = EXPECTED[r.fq as string]!
+      expect(r.auth, `${r.fq}: authenticated EXECUTE mismatch`).toBe(want.auth)
+      expect(r.svc, `${r.fq}: service_role EXECUTE mismatch`).toBe(want.svc)
+    }
+  })
+
+  it('denied roles fail at runtime too, not just in the catalog', async () => {
+    const c = await connect()
     await become(c, 'anon')
     await expectError(c.query('select public.bootstrap_account()'), /permission denied/)
-    await expectError(
-      c.query(`select public.sync_entitlements('{}')`),
-      /permission denied/,
-    )
-    await expectError(
-      c.query(`select app.current_base509_account_id()`),
-      /permission denied/,
-    )
-    await expectError(
-      c.query(`select test_harness.reserve_fixture($1, $1, $1, '2028-01-01')`, [uuid()]),
-      /permission denied/,
-    )
+    await expectError(c.query(`select app.current_base509_account_id()`), /permission denied/)
 
-    // authenticated: no machine ops, no internal primitive, no audit appender.
     await become(c, 'authenticated', { sub: uuid() })
+    await expectError(c.query(`select public.sync_entitlements('{}')`), /permission denied/)
     await expectError(
-      c.query(`select public.sync_entitlements('{}')`),
+      c.query(`select app.capacity_check($1, $1, '2028-01-01', null, 1)`, [uuid()]),
       /permission denied/,
     )
     await expectError(
-      c.query(
-        `select app.capacity_check($1, $1, '2028-01-01', null, 1)`,
-        [uuid()],
-      ),
-      /permission denied/,
-    )
-    await expectError(
-      c.query(
-        `select app.append_audit(null, null, 'user', 'forged', 'x', null)`,
-      ),
+      c.query(`select app.append_audit(null, null, 'user', 'forged', 'x', null)`),
       /permission denied/,
     )
     await expectError(
@@ -112,6 +188,27 @@ describe('security-definer execution boundaries', () => {
     )
     // The issuer allowlist is invisible to app roles.
     await expectError(c.query(`select * from app.trusted_issuers`), /permission denied/)
+    await c.end()
+  })
+
+  it('service_role has NO direct DML on capacity-config tables (Codex #7)', async () => {
+    const c = await connect()
+    await become(c, 'service_role')
+    for (const t of [
+      'availability_conflict_groups', 'capacity_groups', 'business_services',
+      'service_zones', 'business_service_zones', 'service_windows',
+      'service_window_zones', 'service_member_capacity_defaults',
+      'service_window_assignments', 'service_window_assignment_zones',
+    ]) {
+      await expectError(
+        c.query(`insert into public.${t} default values`),
+        /permission denied/,
+      )
+      await expectError(c.query(`update public.${t} set id = id`), /permission denied/)
+      await expectError(c.query(`delete from public.${t}`), /permission denied/)
+      // Reads stay available for tooling.
+      await c.query(`select * from public.${t} limit 1`)
+    }
     await c.end()
   })
 

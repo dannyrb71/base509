@@ -82,6 +82,33 @@ begin
     raise exception 'VALIDATION_FAILED: tier_key required' using errcode = '22023';
   end if;
 
+  -- Malformed envelope fields are rejected outright (Codex correction #7):
+  -- a bad projection must never be persisted for the read side to trip over.
+  if p_envelope ? 'theme_allowlist'
+     and jsonb_typeof(p_envelope -> 'theme_allowlist') <> 'array' then
+    raise exception 'VALIDATION_FAILED: theme_allowlist must be an array' using errcode = '22023';
+  end if;
+  if p_envelope ? 'projection_version'
+     and (jsonb_typeof(p_envelope -> 'projection_version') <> 'number'
+          or (p_envelope ->> 'projection_version')::numeric not in (1, 2)) then
+    raise exception 'VALIDATION_FAILED: unsupported projection_version' using errcode = '22023';
+  end if;
+  if p_envelope ? 'client_limit'
+     and jsonb_typeof(p_envelope -> 'client_limit') not in ('number', 'null') then
+    raise exception 'VALIDATION_FAILED: client_limit must be a number or null' using errcode = '22023';
+  end if;
+  if p_envelope ? 'seat_limit'
+     and jsonb_typeof(p_envelope -> 'seat_limit') not in ('number', 'null') then
+    raise exception 'VALIDATION_FAILED: seat_limit must be a number or null' using errcode = '22023';
+  end if;
+  begin
+    perform (p_envelope ->> 'effective_at')::timestamptz,
+            (p_envelope ->> 'expires_at')::timestamptz;
+  exception when others then
+    raise exception 'VALIDATION_FAILED: effective_at/expires_at must be timestamps'
+      using errcode = '22023';
+  end;
+
   -- The stub may seed ONLY the safe Starter set (spec §2.2): Starter tier,
   -- no truthy capability, Starter limits. Anything richer must come from the
   -- master.
