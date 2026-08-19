@@ -24,7 +24,7 @@ export default function PricingPage() {
       <Section className="figma-pricing__hero" tint>
         <div className="subpage-heading">
           <Eyebrow>Pricing</Eyebrow>
-          <h1 className="type-display">Start free.<br className="pricing-mobile-break" /> Grow predictably.</h1>
+          <h1 className="type-display">Start free.<br />Grow predictably.</h1>
           <p className="type-body-lg">Every plan’s a flat monthly price — go annual and about two months are on us. No commissions on your bookings.</p>
         </div>
         <div className="figma-pricing__tiers">
