@@ -35,8 +35,20 @@ function initialsFor(name: string) {
   return names.slice(0, 2).map((item) => item.charAt(0).toUpperCase()).join('');
 }
 
-export function PortalBusinessView() {
-  const [businessName, setBusinessName] = useState('Woof Wetreats');
+export type BusinessProfile = { name: string; timezone: string; currency: string };
+
+export function PortalBusinessView({
+  initialProfile,
+  saveProfile,
+}: {
+  /** Real tenant profile (A1 step 4); absent only in legacy unwired previews. */
+  initialProfile?: BusinessProfile;
+  /** Server action persisting the profile to the tenant row (RLS admin-gated). */
+  saveProfile?: (p: { name: string; timezone: string }) => Promise<{ ok?: boolean; error?: string }>;
+}) {
+  const [businessName, setBusinessName] = useState(initialProfile?.name ?? 'Woof Wetreats');
+  const [timezone, setTimezone] = useState(initialProfile?.timezone ?? 'America/Los_Angeles');
+  const [saving, setSaving] = useState(false);
   const [logo, setLogo] = useState<string>('');
   const [theme, setTheme] = useState<ThemeName>('Husky');
   const [mode, setMode] = useState<ThemeMode>('light');
@@ -108,7 +120,7 @@ export function PortalBusinessView() {
             <label className="type-body"><span>Business Name</span><input value={businessName} onChange={(event) => setBusinessName(event.target.value)} /></label>
             <label className="type-body"><span>Support Email</span><input type="email" defaultValue="hello@woofwetreats.example" /></label>
             <label className="type-body"><span>Service Area</span><button className="portal-service-area-trigger" type="button" onClick={() => setZoneManagerOpen(true)}><span>San Francisco · {zones.length} Service Zones</span><Image src="/brands/petappro.com/icon-chevron-down.svg" alt="" width={24} height={24} /></button></label>
-            <label className="type-body"><span>Time Zone</span><select defaultValue="America/Los_Angeles"><option>America/Los_Angeles</option><option>America/Denver</option><option>America/Chicago</option><option>America/New_York</option></select></label>
+            <label className="type-body"><span>Time Zone</span><select value={timezone} onChange={(event) => setTimezone(event.target.value)}><option>America/Los_Angeles</option><option>America/Denver</option><option>America/Chicago</option><option>America/New_York</option></select></label>
           </div>
         </PortalPanel>
 
@@ -117,7 +129,15 @@ export function PortalBusinessView() {
           <p className="type-body">This uses the same live theme picker as the PetAppro Themes page.</p>
         </PortalPanel>
       </div>
-      <div className="portal-tab-save"><button className="btn btn--cta type-button" type="button" onClick={() => setNotice('Profile & Brand saved.')}>Save Profile &amp; Brand</button></div>
+      <div className="portal-tab-save"><button className="btn btn--cta type-button" type="button" disabled={saving} onClick={async () => {
+        // Real tenant write (A1): the server action updates the businesses
+        // row; RLS + the admin policy are the authority, this is just UI.
+        if (!saveProfile) { setNotice('Profile & Brand saved.'); return; }
+        setSaving(true);
+        const result = await saveProfile({ name: businessName, timezone });
+        setSaving(false);
+        setNotice(result.error ? `Couldn’t save: ${result.error}` : 'Profile & Brand saved.');
+      }}>{saving ? 'Saving…' : 'Save Profile & Brand'}</button></div>
       </div>}
 
       {businessTab === 'services' && <div className="portal-business-tab-panel" role="tabpanel">

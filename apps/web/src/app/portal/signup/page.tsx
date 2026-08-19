@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation';
 
-/** Placeholder — the real signup flow (spec §4) ships with the portal build. */
+/** Legacy path — the real page is /sign-up (A1). */
 export default function PortalSignup() {
-  redirect('/portal');
+  redirect('/portal/sign-up');
 }

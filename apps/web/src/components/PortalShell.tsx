@@ -17,7 +17,17 @@ const NAV_ITEMS = [
   ['Account', '/portal/account', '/brands/petappro/icon-location.svg'],
 ] as const;
 
-export function PortalShell({ children }: { children: ReactNode }) {
+export function PortalShell({
+  children,
+  businessName,
+  userEmail,
+}: {
+  children: ReactNode;
+  /** The authenticated tenant's real display name (A1); undefined only in
+   *  legacy unwired previews. */
+  businessName?: string;
+  userEmail?: string;
+}) {
   const pathname = usePathname();
 
   return (
@@ -29,13 +39,17 @@ export function PortalShell({ children }: { children: ReactNode }) {
         </Link>
         <div className="portal-topbar__actions">
           <AccountMenu variant="portal" />
+          <form method="post" action="/portal/auth/sign-out">
+            <button className="btn btn--secondary btn--sm type-button" type="submit">Sign out</button>
+          </form>
         </div>
       </header>
       <div className="portal-frame">
         <aside className="portal-sidebar" aria-label="Provider Portal">
           <div className="portal-business-switcher">
             <span className="type-label">Business</span>
-            <strong className="type-body-bold">Woof Wetreats</strong>
+            <strong className="type-body-bold">{businessName ?? 'Your business'}</strong>
+            {userEmail && <span className="type-caption portal-business-switcher__email">{userEmail}</span>}
           </div>
           <nav className="portal-nav">
             {NAV_ITEMS.map(([label, href, icon]) => {

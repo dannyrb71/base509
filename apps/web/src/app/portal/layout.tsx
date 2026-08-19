@@ -1,6 +1,4 @@
 import type { Metadata } from 'next';
-import { PortalPlanProvider } from '@/components/PortalPlanProvider';
-import { PortalShell } from '@/components/PortalShell';
 
 export const metadata: Metadata = {
   title: { default: 'PetAppro Portal', template: '%s · PetAppro Portal' },
@@ -8,7 +6,9 @@ export const metadata: Metadata = {
 };
 
 /**
- * Exploratory provider-admin concept only. No auth, data, or billing wiring.
+ * Portal brand root (Phase A/A1: real auth + petappro-dev data). Auth pages
+ * render in the (auth) group's minimal card; the app itself lives in (app),
+ * whose layout resolves the session, tenant, and entitlements server-side.
  */
 export default function PortalLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -18,7 +18,7 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
         href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"
       />
       <a href="#main" className="skip-link">Skip to content</a>
-      <PortalPlanProvider><PortalShell>{children}</PortalShell></PortalPlanProvider>
+      {children}
     </div>
   );
 }

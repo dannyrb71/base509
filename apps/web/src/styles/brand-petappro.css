@@ -2292,3 +2292,37 @@
 [data-brand='petappro'] .petappro-page .figma-pricing__name { color: var(--pa-brandy-900) !important; }
 [data-brand='petappro'] .petappro-page .figma-pricing__annual strong { color: var(--pa-brandy-900) !important; }
 [data-brand='petappro'] .petappro-page .figma-pricing__badge { color: var(--pa-camo-700) !important; }
+
+/* ── Portal auth (Phase A/A1: sign-up · sign-in · verification states) ──────
+   Waitlist-form control language on the portal token set. */
+[data-brand='petappro'] .portal-auth {
+  min-height: 100vh; display: flex; align-items: center; justify-content: center;
+  padding: var(--pa-space-6); background: var(--pa-brandy-50);
+}
+[data-brand='petappro'] .portal-auth__card {
+  width: 100%; max-width: 460px; background: var(--surface-card);
+  border-radius: var(--pa-card-radius); box-shadow: var(--pa-card-shadow);
+  padding: var(--pa-space-8) var(--pa-space-6);
+}
+[data-brand='petappro'] .portal-auth__logo { display: block; margin: 0 auto var(--pa-space-6); }
+[data-brand='petappro'] .portal-auth__card h1 { margin: 0 0 var(--pa-space-2); color: var(--text-primary); text-align: center; }
+[data-brand='petappro'] .portal-auth__lead { margin: 0 0 var(--pa-space-5); color: var(--text-secondary); text-align: center; }
+[data-brand='petappro'] .portal-auth__form { display: flex; flex-direction: column; gap: var(--pa-space-2); }
+[data-brand='petappro'] .portal-auth__form .type-label { margin-top: var(--pa-space-3); color: var(--text-secondary); }
+[data-brand='petappro'] .portal-auth__optional { font-weight: 400; text-transform: none; }
+[data-brand='petappro'] .portal-auth__form input {
+  padding: 12px 16px; font: inherit; font-size: 16px;
+  border: 1px solid var(--border-default); border-radius: 12px;
+  background: var(--surface-card); color: var(--text-primary);
+}
+[data-brand='petappro'] .portal-auth__form input:focus-visible {
+  outline: 2px solid var(--focus-ring); outline-offset: 1px; border-color: var(--pa-brandy-500);
+}
+[data-brand='petappro'] .portal-auth__form .btn { margin-top: var(--pa-space-5); }
+[data-brand='petappro'] .portal-auth__error { margin: var(--pa-space-2) 0 0; color: #b3261e; font-size: 14px; }
+[data-brand='petappro'] .portal-auth__success { text-align: center; }
+[data-brand='petappro'] .portal-auth__success .type-body { margin-top: var(--pa-space-3); }
+[data-brand='petappro'] .portal-auth__success .btn { margin-top: var(--pa-space-4); }
+[data-brand='petappro'] .portal-auth__alt { margin-top: var(--pa-space-5); text-align: center; color: var(--text-secondary); }
+[data-brand='petappro'] .portal-business-switcher__email { display: block; margin-top: 2px; color: var(--text-secondary); overflow: hidden; text-overflow: ellipsis; }
+[data-brand='petappro'] .portal-topbar__actions { display: flex; align-items: center; gap: var(--pa-space-3); }

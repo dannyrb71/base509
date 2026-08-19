@@ -36,16 +36,42 @@ function entitlementsFor(planKey: string): PlanEntitlements {
   };
 }
 
-const PortalPlanContext = createContext<{ planKey: string; setPlanKey: (key: string) => void; tier: Tier; entitlements: PlanEntitlements } | null>(null);
+/** The authenticated tenant this portal render is bound to (A1). */
+export type PortalBusinessContext = {
+  id: string;
+  name: string;
+  slug: string | null;
+  role: 'owner' | 'admin' | 'manager' | 'staff';
+  email: string;
+};
 
-export function PortalPlanProvider({ children }: { children: ReactNode }) {
-  const [planKey, setPlanKey] = useState('crew');
+const PortalPlanContext = createContext<{
+  planKey: string;
+  setPlanKey: (key: string) => void;
+  tier: Tier;
+  entitlements: PlanEntitlements;
+  business: PortalBusinessContext | null;
+} | null>(null);
+
+export function PortalPlanProvider({
+  children,
+  initialPlanKey = 'crew',
+  business = null,
+}: {
+  children: ReactNode;
+  /** Real tier from the server entitlement projection (A1); 'crew' remains
+   *  only the legacy demo default for unwired previews. */
+  initialPlanKey?: string;
+  business?: PortalBusinessContext | null;
+}) {
+  const [planKey, setPlanKey] = useState(initialPlanKey);
   const value = useMemo(() => ({
     planKey,
     setPlanKey,
     tier: TIERS.find((tier) => tier.key === planKey) ?? TIERS[3],
     entitlements: entitlementsFor(planKey),
-  }), [planKey]);
+    business,
+  }), [planKey, business]);
   return <PortalPlanContext.Provider value={value}>{children}</PortalPlanContext.Provider>;
 }
 

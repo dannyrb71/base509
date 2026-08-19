@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation';
 
-/** Placeholder — the real passwordless login (D-031/D-038) ships with the portal build. */
+/** Legacy path — the real page is /sign-in (A1). */
 export default function PortalLogin() {
-  redirect('/portal');
+  redirect('/portal/sign-in');
 }
