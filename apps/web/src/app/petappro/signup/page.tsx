@@ -15,8 +15,8 @@ export default function SignupPage() {
             note="Starter will be free — no card required for the free plan."
             prompt={(
               <>
-                <h1 className="type-display">Let’s set up your business.</h1>
-                <p className="type-body-lg">The portal’s not open just yet — drop your email and you’ll be first in when it is.</p>
+                <h1 className="type-display">Coming soon —<br />we’re fetching it.</h1>
+                <p className="type-body-lg">The app and business portal are not open just yet —<br /> drop your email and you’ll be first in when they are.</p>
               </>
             )}
           />
