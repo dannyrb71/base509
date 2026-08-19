@@ -184,6 +184,81 @@ describe('invite codes (§3.2, §8 defaults)', () => {
   })
 })
 
+describe('business bootstrap slug + multi-business (Phase A 0a)', () => {
+  it('two businesses may share a display name; slugs stay unique and routable', async () => {
+    const a = await newBusiness('Happy Paws');
+    const b = await newBusiness('Happy Paws');
+    const admin = await connect()
+    const rows = await admin.query(
+      `select id, name, slug from public.businesses where id = any($1::uuid[]) order by created_at`,
+      [[a.businessId, b.businessId]],
+    )
+    expect(rows.rowCount).toBe(2)
+    expect(rows.rows[0].name).toBe('Happy Paws')
+    expect(rows.rows[1].name).toBe('Happy Paws')
+    for (const r of rows.rows) {
+      expect(r.slug).toMatch(/^happy-paws-[0-9a-f]{6}$/)
+    }
+    expect(rows.rows[0].slug).not.toBe(rows.rows[1].slug)
+    await admin.end()
+  })
+
+  it('slugs sanitize messy names and never collide with authorization (routing only)', async () => {
+    const biz = await newBusiness('  Émile & Co — Dogs!!  ')
+    const admin = await connect()
+    const r = await admin.query(`select slug from public.businesses where id = $1`, [
+      biz.businessId,
+    ])
+    expect(r.rows[0].slug).toMatch(/^[a-z0-9][a-z0-9-]*-[0-9a-f]{6}$/)
+    await admin.end()
+  })
+
+  it('bootstrap is idempotent: same key returns the same business and slug', async () => {
+    const owner = await newAccount()
+    const key = uuid()
+    const first = await asUser(owner.sub, async (c) =>
+      (await c.query(`select public.create_business('Retry Kennel', $1) as id`, [key])).rows[0].id,
+    )
+    const second = await asUser(owner.sub, async (c) =>
+      (await c.query(`select public.create_business('Retry Kennel', $1) as id`, [key])).rows[0].id,
+    )
+    expect(second).toBe(first)
+    const admin = await connect()
+    const n = await admin.query(
+      `select count(*) as n from public.businesses where bootstrap_key = $1`, [key],
+    )
+    expect(Number(n.rows[0].n)).toBe(1)
+    await admin.end()
+  })
+
+  it('one account can own multiple businesses (many-to-many, no schema conflict)', async () => {
+    const owner = await newAccount()
+    const ids: string[] = []
+    for (const name of ['First Location', 'Second Location']) {
+      ids.push(
+        await asUser(owner.sub, async (c) =>
+          (await c.query(`select public.create_business($1, $2) as id`, [name, uuid()])).rows[0].id,
+        ),
+      )
+    }
+    expect(new Set(ids).size).toBe(2)
+    const admin = await connect()
+    const m = await admin.query(
+      `select count(*) as n from public.business_memberships
+       where base509_account_id = $1 and role = 'owner' and status = 'active'`,
+      [owner.accountId],
+    )
+    expect(Number(m.rows[0].n)).toBe(2)
+    // Each business got its own Starter entitlement row.
+    const e = await admin.query(
+      `select count(*) as n from public.business_entitlements where business_id = any($1::uuid[])`,
+      [ids],
+    )
+    expect(Number(e.rows[0].n)).toBe(2)
+    await admin.end()
+  })
+})
+
 describe('entitlements (D-050)', () => {
   it('CONCURRENCY: seat activation cannot exceed the seat limit (separate single-use invites)', async () => {
     const biz = await newBusiness()
