@@ -20,7 +20,7 @@ const featureCards = [
   },
   {
     title: 'Payments & tips',
-    body: 'Clients pay you directly through Stripe, tips and all. We take nothing.',
+    body: 'Clients pay you directly through Stripe, tips and all — and we take no cut of your bookings.',
     icon: '/brands/petappro/icon-card.svg',
   },
   {
@@ -55,7 +55,7 @@ export default function PetApproHome() {
               No cut.
             </h1>
             <p className="type-body-lg">
-              PetAppro runs the boarding, daycare, walking, and drop-ins for dog folks who already have a full leash of clients. Your day, your prices, your people — in an app they’ll actually like opening. You keep every dollar; we take no cut.
+              PetAppro runs the boarding, daycare, walking, and drop-ins for dog folks who already have a full leash of clients. Your day, your prices, your people — in an app they’ll actually like opening. No marketplace in the middle, and we never take a percentage of your bookings.
             </p>
             <div className="home-actions">
               <Btn href="/petappro/signup" variant="cta">Get early access</Btn>
@@ -177,7 +177,7 @@ export default function PetApproHome() {
       </Section>
 
       <Section id="home-payment-quote" tight>
-        <h2 className="type-headline">Your clients pay you directly.<br />We take nothing.</h2>
+        <h2 className="type-headline">Your clients pay you directly.<br />We take no cut.</h2>
       </Section>
 
       <Section id="home-pricing">
