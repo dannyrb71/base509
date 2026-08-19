@@ -36,6 +36,11 @@ $$;
 
 grant cfg1_owner to current_user;
 grant usage on schema extensions to cfg1_owner;
+-- Hosted Supabase: the migration role is not a superuser there, so assigning
+-- ownership requires the NEW owner to hold CREATE on the target schema
+-- (locally a superuser apply skips that check). Without this, the first
+-- `alter … owner to cfg1_owner` fails with 42501.
+grant usage, create on schema public to cfg1_owner;
 
 -- ── app schema (internal helpers; never exposed via PostgREST) ───────────────
 create schema if not exists app authorization cfg1_owner;
