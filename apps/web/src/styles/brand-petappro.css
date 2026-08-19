@@ -2285,11 +2285,13 @@
   [data-brand='petappro'] .res-imagerow { grid-template-columns: 1fr; }
 }
 
-/* Pricing-card Variant A colour overrides (Danny, 2026-08-19) — must sit
-   BELOW the 2026-08-14 marketing color pass, whose !important text-primary
-   rules would otherwise flatten the navy name/annual and the green badge.
-   Green stays reserved for: the pill, the Duo border, "Payments unlock here". */
-[data-brand='petappro'] .petappro-page .figma-pricing__name { color: var(--pa-brandy-900) !important; }
+/* Pricing-card colour overrides (Variant A, Danny 2026-08-19; two-color
+   cleanup same day: tier names go GREEN camo-700 #3f6a1c — the AA-safe deep
+   camo, ~5.9:1 on white, NOT bright #68A82F — and "/mo" goes navy so the
+   price row carries no grey). Must sit BELOW the 2026-08-14 marketing color
+   pass, whose !important text-primary rules would otherwise flatten these. */
+[data-brand='petappro'] .petappro-page .figma-pricing__name { color: #3f6a1c !important; }
+[data-brand='petappro'] .petappro-page .figma-pricing__per { color: var(--pa-brandy-900) !important; }
 [data-brand='petappro'] .petappro-page .figma-pricing__annual strong { color: var(--pa-brandy-900) !important; }
 [data-brand='petappro'] .petappro-page .figma-pricing__badge { color: var(--pa-camo-700) !important; }
 

@@ -25,7 +25,7 @@ export default function PricingPage() {
         <div className="subpage-heading">
           <Eyebrow>Pricing</Eyebrow>
           <h1 className="type-display">Start free.<br />Grow predictably.</h1>
-          <p className="type-body-lg">Every plan’s a flat monthly price — go annual and a month’s on us. No commissions on your bookings.</p>
+          <p className="type-body-lg">Every plan’s a flat monthly price — go annual and a month’s on us.<br />No commissions on your bookings.</p>
         </div>
         <div className="figma-pricing__tiers">
           {TIERS.map((tier) => (
