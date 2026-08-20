@@ -41,10 +41,10 @@ export function ResourceCard({ doc }: { doc: ResourceDoc }) {
           <Image
             src={doc.coverImage}
             alt=""
-            width={640}
-            height={360}
+            width={doc.coverImageWidth ?? 640}
+            height={doc.coverImageHeight ?? 480}
             sizes="(max-width: 760px) 100vw, 400px"
-            unoptimized={doc.coverImage.endsWith('.svg')}
+            unoptimized={doc.coverImageUnoptimized || doc.coverImage.endsWith('.svg')}
           />
         </div>
       )}
@@ -53,7 +53,6 @@ export function ResourceCard({ doc }: { doc: ResourceDoc }) {
         <span className="res-pill res-pill--audience">{AUDIENCE_LABEL[doc.audience]}</span>
       </div>
       <h3 className="type-title">{doc.title}</h3>
-      <p className="type-body">{doc.excerpt}</p>
       <p className="res-meta type-caption">
         {formatDate(doc.date)} · {doc.readMinutes} min read
       </p>

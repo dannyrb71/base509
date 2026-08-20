@@ -32,7 +32,7 @@ export const RESOURCE_SECTIONS: ResourceSection[] = [
     key: 'articles',
     title: 'Articles',
     description:
-      'Practical reads for dog-care businesses — pricing, capacity, client care, and running the operation without losing your evenings.',
+      'Practical reads for dog owners and pet-care businesses — safety, client care, and building trusted care relationships.',
     route: '/petappro/resources/articles',
     visible: true,
   },
