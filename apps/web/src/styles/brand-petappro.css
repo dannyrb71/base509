@@ -2378,8 +2378,15 @@
    node inherits the mode-correct ink so nothing (incl. the "Theme · Mode"
    caption, previously dark-on-dark) can fall below AA on the theme surface. */
 [data-brand='petappro'] .portal-brand-preview .type-title,
-[data-brand='petappro'] .portal-brand-preview .type-caption { color: inherit; }
+[data-brand='petappro'] .portal-brand-preview .type-caption {
+  color: inherit;
+  /* The type classes pin --type-family-sans on the CHILDREN, which beats the
+     card's inline theme font — inherit pulls the selected theme's typeface
+     through the whole preview module. */
+  font-family: inherit;
+}
 [data-brand='petappro'] .portal-brand-preview .type-caption { opacity: 1; }
+[data-brand='petappro'] .portal-brand-preview__mark { font-family: inherit; }
 
 /* ── Portal auth: password visibility toggle + recovery links ──────────────── */
 [data-brand='petappro'] .portal-auth__pw { position: relative; display: flex; }
