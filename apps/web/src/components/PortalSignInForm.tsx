@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import { PortalAuthProviders } from '@/components/PortalAuthProviders';
+import { PasswordInput } from '@/components/PasswordInput';
 import { createPortalBrowserClient } from '@/lib/portal/supabase-browser';
 
 /**
@@ -88,14 +89,16 @@ export function PortalSignInForm() {
           onChange={(e) => setEmail(e.target.value)}
           autoComplete="email"
         />
-        <label className="type-label" htmlFor="si-password">Password</label>
-        <input
+        <div className="portal-auth__label-row">
+          <label className="type-label" htmlFor="si-password">Password</label>
+          <Link className="type-caption portal-auth__forgot" href="/portal/forgot-password">Forgot password?</Link>
+        </div>
+        <PasswordInput
           id="si-password"
-          type="password"
-          required
           value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          onChange={setPassword}
           autoComplete="current-password"
+          required
         />
         {error && <p className="portal-auth__error" role="alert">{error}</p>}
         <button className="btn btn--cta type-button" type="submit" disabled={state === 'busy'}>

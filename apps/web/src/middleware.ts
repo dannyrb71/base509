@@ -5,7 +5,7 @@ import { createServerClient } from '@supabase/ssr';
  * Portal auth gate (Phase A/A1). Paths a signed-out visitor may reach —
  * expressed WITHOUT the /portal prefix (the app.petappro.com shape).
  */
-const PORTAL_PUBLIC_PATHS = ['/sign-in', '/sign-up', '/auth', '/login', '/signup'];
+const PORTAL_PUBLIC_PATHS = ['/sign-in', '/sign-up', '/forgot-password', '/reset-password', '/auth', '/login', '/signup'];
 
 function isPortalPublicPath(portalPath: string) {
   return PORTAL_PUBLIC_PATHS.some((p) => portalPath === p || portalPath.startsWith(`${p}/`));

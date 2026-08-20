@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useRef, useState } from 'react';
+import { PasswordInput } from '@/components/PasswordInput';
 import { createPortalBrowserClient } from '@/lib/portal/supabase-browser';
 import { PortalAuthProviders } from '@/components/PortalAuthProviders';
 
@@ -135,25 +136,23 @@ export function PortalSignUpForm() {
           autoComplete="email"
         />
         <label className="type-label" htmlFor="su-password">Password</label>
-        <input
+        <PasswordInput
           id="su-password"
-          type="password"
-          required
-          minLength={8}
-          placeholder="At least 8 characters"
           value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          onChange={setPassword}
           autoComplete="new-password"
+          placeholder="At least 8 characters"
+          minLength={8}
+          required
         />
         <label className="type-label" htmlFor="su-confirm">Confirm password</label>
-        <input
+        <PasswordInput
           id="su-confirm"
-          type="password"
-          required
-          placeholder="Same password again"
           value={confirm}
-          onChange={(e) => setConfirm(e.target.value)}
+          onChange={setConfirm}
           autoComplete="new-password"
+          placeholder="Same password again"
+          required
         />
         {error && <p className="portal-auth__error" role="alert">{error}</p>}
         <button className="btn btn--cta type-button" type="submit" disabled={state === 'busy'}>

@@ -12,12 +12,19 @@ import { ensureBootstrap, resolveActiveBusiness } from '@/lib/portal/session';
 export async function GET(req: NextRequest) {
   const code = req.nextUrl.searchParams.get('code');
   const to = (path: string) => portalRedirect(req, path);
+  // Allowlisted post-exchange destination (password recovery lands on the
+  // set-new-password page instead of the bootstrap flow).
+  const next = req.nextUrl.searchParams.get('next') === '/reset-password' ? '/reset-password' : null;
 
-  if (!code) return to('/sign-in?error=missing_code');
+  if (!code) return to(next ? '/forgot-password?error=recovery_expired' : '/sign-in?error=missing_code');
 
   const supabase = await createPortalServerClient();
   const { error } = await supabase.auth.exchangeCodeForSession(code);
-  if (error) return to('/sign-in?error=verification_failed');
+  // Expired/already-used links exchange-fail — recovery gets a friendly
+  // re-request path, verification keeps its sign-in message.
+  if (error) return to(next ? '/forgot-password?error=recovery_expired' : '/sign-in?error=verification_failed');
+
+  if (next) return to(next);
 
   const { data } = await supabase.auth.getUser();
   if (!data.user) return to('/sign-in');
