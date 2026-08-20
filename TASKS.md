@@ -1,10 +1,10 @@
 # PetAppro — TASKS.md (single shared to-do list)
 
-> **This is the shared source of truth for what's being worked on.** ChatGPT (PM), Claude Code (dev), and Codex (reviewer) all read this file. Keep it current.
+> **This is the George-owned master execution list.** George maintains coordination, timeline, task state, and syncs. Product Management (Cowork/Claude) owns specs and prioritization; Codex is read-only Governance; Fable/Code is the only coder, committer, and pusher; Danny is final approver and the only deploy go.
 >
 > **How to update:** change a task's `Status`, add new tasks at the bottom of the right section, and add a line to the Changelog with today's date. Whoever edits it should keep the format intact so the other tools can parse it.
 >
-> **Launch status (updated 2026-08-15):** October launch is **RED / tightening**. The web launch package is built locally and production-build green, but `apps/web` has never been pushed to GitHub. **Danny-authorized first push by Claude Code is the current launch bottleneck**; it gates Vercel connection (`Root Directory = apps/web`), preview/domain verification, and then hosted Supabase/Resend waitlist activation.
+> **Launch status (EOD 2026-08-20):** Phase A provider authentication + portal-on-real-dev-data is essentially built and deployed behind the dark portal domain; no customer-facing portal exposure changed. Email/password signup/sign-in, recovery, tenant isolation, and persisted tenant themes are working. Google/Apple buttons are built but unwired and are a hard pre-launch gate. Next sequence: social auth → booking engine → mobile app → payments. Oct 1 remains tracked. Google Play enrollment is paused pending D&B address propagation.
 
 ---
 
@@ -18,14 +18,38 @@
 ---
 
 ## 🔥 This week's focus (update every Monday)
-_Week of: 2026-08-10 (updated 2026-08-15)_
-1. **CURRENT BOTTLENECK — first `apps/web` GitHub push:** Base509 is push-ready, policies are published in the local registry, the PetAppro marketing site is built from real Figma content, and `npm run build` is green (verified Aug 15). Nothing can reach Vercel until Danny gives the go and Claude Code performs the first push.
-2. **Immediately after push:** connect Vercel with `Root Directory = apps/web` → review preview → attach and verify domains/HTTPS/routes → promote only with Danny's explicit approval.
-3. **Then activate waitlist:** configure hosted Supabase + Resend, validate environment separation and secrets, and prove the waitlist end to end on the deployed domain. The local API route exists; the hosted integration is blocked by the first push/deployment chain.
-4. **Provider portal — IN PROGRESS:** continue the provider portal with optional/offline booking-payment support. Keep provider SaaS Stripe Billing web-only and separate from optional provider→client payment configuration; Expo exposes no SaaS purchase or link.
-5. **Foundation gate remains non-negotiable:** tenant schema, RBAC/RLS, generated types, and isolation tests cannot be displaced by website work.
+_Week of: 2026-08-17 (George sync)_
+1. **Wire Google + Apple provider sign-in — HARD PRE-LAUNCH GATE:** branded buttons exist on sign-up/sign-in; complete provider wiring and test recovery/account-linking behavior before Oct 1.
+2. **Booking engine — NEXT BUILD:** build against the working dev database and shared pricing/service foundation; per-occurrence conflict handling remains a separately reviewed/tested slice.
+3. **Expo/React Native mobile app:** begin once booking interfaces stabilize; carry the same auth and tenant-isolation guarantees into native.
+4. **Payments:** wire Stripe Connect booking payments and web-only Stripe Billing after the booking core; keep the two money rails separate and prohibit native IAP/subscription CTAs.
+5. **Store + launch content:** Cowork/Claude prepares the store-listing and launch-content packet by **Aug 28** to protect mid-September submission and the Sep 1 content ramp.
+6. **External/store track:** Apple enrollment is DONE. Google Play Organization enrollment remains PAUSED until D&B propagates the current business address.
 
-**Pricing engine — build-ready spec DONE (2026-07-08).** Reconciled George v2 → **`docs/specs/booking_and_pricing.md`** (source of truth): canonical enum + pinned order-of-operations + rounding/currency (minor units/bps/ppm, half-up per-line) + storable immutable breakdown + engine-pure boundary. Reconciliation deltas: **walking IN MVP** (D-022; +`duration_tiered`/`per_session`), **deposits OUT** (D-015), **payments = Stripe Connect** (D-007; total feeds the charge), **actor ids = `base509_account_id`** (D-035). Open product decisions resolved for MVP (tax / discount-basis / holiday-granularity / repricing). **Next → Claude Code:** build `packages/pricing` **golden-tests-first** (§8/§10), then wire to booking + Connect. On the critical path for payments.
+## Operating lanes and handoff protocol — locked 2026-08-17
+
+| Lane | Owner | May do | Must not do |
+|---|---|---|---|
+| Project Management | George | Master list, schedule, dependencies, syncs, handoffs | Author product requirements, ratify architecture, code, commit, push, deploy |
+| Product Management | Cowork/Claude | Specs, requirements, prioritization, acceptance criteria | Code, commit, push, governance approval |
+| Governance | Codex | Read-only architecture/schema/code ratification and review | Author product specs, implement, edit build output, commit, push |
+| Coding/Dev | Fable/Code | Plan and implement approved work; sole committer/pusher | Self-approve governance/product decisions; deploy without Danny's exact go |
+| Product Owner | Danny | Final approval, push/deploy authorization, scope decisions | — |
+
+**Universal rules:** Fable is the single committer/pusher. No deploy without Danny's explicit **“ready to deploy.”** Every handoff contains one lane's bounded deliverable. **“DONE — ready to commit”** is the signal to Fable that a non-code lane's local artifact is ready for the sole-committer flow. Fable reports commit SHA, push state, and deploy state every time.
+
+## CFG-1 controlled sequence — George owns coordination
+
+| Gate | Owner | Status | Exit / handoff |
+|---|---|---|---|
+| CFG-1A — Product build packet | Cowork/Claude | DONE | Product requirements and objective acceptance criteria handed to Governance. |
+| CFG-1B — Technical ratification | Codex | DONE | Read-only technical direction ratified. |
+| CFG-1C — Local implementation | Fable/Code | DONE | Generic multi-tenant foundation, migrations, generated types, RBAC/RLS, and isolation tests built and hardened. |
+| CFG-1D — Governance review | Codex | DONE — 4 PASSES | Four read-only review passes completed; a material security hole was caught and closed before acceptance. |
+| CFG-1E — Product Owner approval | Danny | DONE — ACCEPTED | Accepted at commit `c7ee515`. Production database application was deliberately excluded. |
+| CFG-1F — Push | Fable/Code | DONE | `c7ee515` pushed to `origin/main`; CI green, 103/103 on the real PostGIS service, drift-clean. Deploy/database state: production DB untouched. |
+
+**Pricing engine — build-ready spec DONE (2026-07-08).** Reconciled George v2 → **`docs/specs/booking_and_pricing.md`** (source of truth): canonical enum + pinned order-of-operations + rounding/currency (minor units/bps/ppm, half-up per-line) + storable immutable breakdown + engine-pure boundary. Reconciliation deltas: **walking IN MVP** (D-022; +`duration_tiered`/`per_session`), **deposits OUT** (D-015), **payments = Stripe Connect** (D-007; total feeds the charge), **actor ids = `base509_account_id`** (D-035). Open product decisions resolved for MVP (tax / discount-basis / holiday-granularity / repricing). The shared `packages/pricing` engine now exists; any further build work follows **Product spec → Codex ratification → Fable implementation → Codex review → Danny approval → Fable push**.
 
 > Removed from focus (2026-07-07): "form LLC → start D-U-N-S clock" (**done** — LLC approved, D-U-N-S 11-314-3683 in hand) and "line up 5–6 PCSP beta testers" (**too early** — that's post-freeze, ~late Aug; see BIZ-7).
 
@@ -35,26 +59,48 @@ _Week of: 2026-08-10 (updated 2026-08-15)_
 
 | ID | Task | Owner | Status | Notes |
 |---|---|---|---|---|
-| S1-1 | Set up monorepo (apps/mobile, apps/web, packages/*, supabase/) | Claude Code | DOING | Workspace/packages and web scaffold exist; `apps/mobile` is only EAS config and `supabase/` is absent. |
-| S1-2 | Extract single `packages/pricing` from the 3 existing copies | Claude Code | DONE | One shared package exists; 39 tests pass, 8 planned cases skipped. |
-| S1-3 | Fix stale pricing test (15-night cap was removed) | Claude Code | DONE | Verified in current suite. D-063 creates a new, separate correction below. |
-| S1-4 | Extract `packages/booking` (validation + availability) | Claude Code | TODO | Package absent; sequence after CFG-1 contract. |
-| S1-5 | Generate Supabase DB types → `packages/data` | Claude Code | BLOCKED | `supabase/` and migrations do not exist; blocked by CFG-1. |
-| S1-6 | GitHub Actions CI: typecheck + lint + test on every PR | Claude Code | DONE | `ci.yml` and `eas-build.yml` exist. Re-verify enforcement after the authorized push. |
+| S1-1 | Set up monorepo (apps/mobile, apps/web, packages/*, supabase/) | Fable/Code | DONE | Workspace, packages, web scaffold, mobile config, and Supabase migration infrastructure now exist. |
+| S1-2 | Extract single `packages/pricing` from the 3 existing copies | Fable/Code | DONE | One shared package exists; 39 tests pass, 8 planned cases skipped. |
+| S1-3 | Fix stale pricing test (15-night cap was removed) | Fable/Code | DONE | Verified in current suite. D-063 creates a new, separate correction below. |
+| S1-4 | Extract `packages/booking` (validation + availability) | Fable/Code | TODO | Package absent; sequence after CFG-1 contract. |
+| S1-5 | Generate Supabase DB types → `packages/data` | Fable/Code | DONE | Landed and drift-checked with CFG-1 at `c7ee515`. |
+| S1-6 | GitHub Actions CI: typecheck + lint + test on every PR | Fable/Code | DONE | `ci.yml` and `eas-build.yml` exist. Re-verify enforcement after the authorized push. |
 | S1-R | Codex review of S1-2/S1-3 (money logic) | Codex | DONE | Independent review completed; pricing fixes and regression coverage landed locally. |
 
 **Sprint 1 outcome:** its pricing/CI exit criteria are materially present, but the broader foundation did not land. The missing schema/RLS half is now the recovery sprint and cannot be traded away.
 
-## Current sprint — Foundation Recovery (Jul 31–Aug 14)
+## Closed recovery window — Foundation Recovery (Jul 31–Aug 14)
+
+CFG-1 recovery completed 2026-08-18. Production application remains a later launch operation, not unfinished foundation work.
 
 | ID | Task | Owner | Status | Notes |
 |---|---|---|---|---|
-| REC-0 | Protect and synchronize the ~2-week local work batch | Claude Code · Danny approval | BLOCKED | No Git writes until Danny says “ready to deploy.” Claude Code remains sole committer/pusher. |
+| REC-0 | Protect and synchronize the ~2-week local work batch | Fable/Code · Danny approval | DONE | Authorized commits were pushed through the single-committer flow; current accepted foundation is on `origin/main`. |
 | REC-1 | Ratify generic capacity persistence contract | George/Codex | DONE | `capacity_model = bounded | unlimited`; shared resources use tenant-scoped `capacity_group_id`; conflict groups remain scheduling-only. |
-| REC-2 | Correct D-063 Boarding Extra behavior + golden tests | Claude Code · Codex money review | TODO | Current engine uses actual-vs-scheduled pickup. Required behavior is deterministic at booking from booked pickup vs booked drop-off + covered hours, one flat optional fee, per-booking waiver, and boundary tests. |
-| CFG-1 | Add Supabase migration infrastructure + generic service/tenant schema | Claude Code · Codex schema review | TODO — BUILD FIRST | Five axes, capacity groups, stable account/membership/RBAC primitives, additive migrations, generated types. |
-| REC-3 | Apply and test RLS at every tenant boundary | Claude Code · Codex security review | BLOCKED by CFG-1 | Provider/client/staff negative read **and write** tests; no cross-tenant leakage; `WITH CHECK` on mutations. |
-| REC-4 | Reconcile CI against migrations, generated types, and RLS tests | Claude Code | BLOCKED by CFG-1 | Gate merges on schema/type drift and tenant-isolation tests. |
+| REC-2 | Correct D-063 Boarding Extra behavior + golden tests | Fable/Code · Codex money review | TODO | Current engine uses actual-vs-scheduled pickup. Required behavior is deterministic at booking from booked pickup vs booked drop-off + covered hours, one flat optional fee, per-booking waiver, and boundary tests. |
+| CFG-1 | Add Supabase migration infrastructure + generic service/tenant schema | Fable/Code · Codex review | DONE — ACCEPTED | Accepted at `c7ee515`; pushed to `origin/main`. Live database intentionally untouched. |
+| REC-3 | Apply and test RLS at every tenant boundary | Fable/Code · Codex review | DONE | Negative tenant-isolation coverage hardened through four Governance review passes; security defect found during review was fixed. |
+| REC-4 | Reconcile CI against migrations, generated types, and RLS tests | Fable/Code | DONE | CI green: 103/103 against PostGIS and schema drift clean. |
+
+## App build phase — active from Aug 18
+
+> Environment rule: feature work uses a CFG-1 dev/staging database. The production database remains untouched until Danny authorizes the near-launch apply. Every feature adds its own tests to the CI gate and follows the bounded Product → Governance → Fable → Governance → Danny → Fable handoff.
+
+| ID | Task | Owner | Status | Notes |
+|---|---|---|---|---|
+| ENV-1 | Stand up CFG-1 dev/staging database | Fable/Code · Codex review | DONE | Phase A is running on real non-production data. Production remains untouched. |
+| AUTH-1 | Provider email/password signup, sign-in, and recovery | Fable/Code · Codex review | DONE — DEV DEPLOYED | Authenticated portal uses real tenant data; tenant isolation verified; password recovery live. Portal remains behind the dark domain. |
+| AUTH-2 | Wire Google and Apple provider sign-in | Fable/Code · Codex security review | TODO — HARD LAUNCH GATE | Brand-spec buttons are built on signup/sign-in but unwired. Must be complete and tested before Oct 1. |
+| BOOK-1 | Build shared booking engine against real non-production data | Fable/Code · Codex money/security review | TODO — NEXT | Use the shared pricing engine and generic service model; client preview, staff edit, and server booking must not diverge. Start after AUTH-2. |
+| BOOK-2 | Add per-occurrence conflict handling | Cowork/Claude → Codex → Fable/Code | BLOCKED by BOOK-1 SPEC | Separate Product packet, Governance ratification, implementation, review, and tests. Do not fold silently into BOOK-1. |
+| PORTAL-2 | Bind portal theme keys to tenant configuration | Fable/Code · Codex review | DONE — DEV DEPLOYED | Tenant themes render fonts, logos, and live previews and persist to real dev data. |
+| PORTAL-3 | Add tenant-safe client theme read | Fable/Code · Codex security review | DONE — VERIFIED | Portal theme state is tenant-scoped; multi-tenant isolation verified on Phase A. |
+| PAY-1 | Wire Stripe Connect booking payments | Fable/Code · Codex money/security review | BLOCKED by BOOK-1 | Client→provider physical-service payments; keep provider-scoped Stripe objects and direct-charge posture. |
+| PAY-2 | Wire Stripe Billing subscription experience | Fable/Code · Codex money/security review | DOING — TEST MODE | Provider→Base509 subscription, web-only. Stripe account and sandbox exist; keep fully separate from Connect. |
+| APP-1 | Build Expo/React Native mobile application | Fable/Code · Codex review | BLOCKED by BOOK-1 interfaces | Native booking flow and authentication; store submission tracked separately. |
+| STORE-1 | Complete app-store policy review and submission readiness | Codex → George/Danny | TODO | Apple enrollment done; Google Play remains externally blocked. Track deletion paths, privacy/location disclosures, no-IAP rule, metadata, and review buffer. |
+| CI-1 | Upgrade minor CI `actions/*` dependencies to v5 | Fable/Code | TODO — NON-BLOCKING | Batch maintenance change with the normal CI evidence; do not displace app critical-path work. |
+| PROD-DB-1 | Apply accepted foundation migrations to production | Fable/Code · Danny explicit approval | DEFERRED — NEAR LAUNCH | Target near Oct 1 only after staging evidence, backup/rollback readiness, Governance review, and Danny's explicit go. |
 
 ## Web launch + subscription critical path (Aug 12 onward)
 
@@ -62,20 +108,24 @@ _Week of: 2026-08-10 (updated 2026-08-15)_
 |---|---|---|---|---|
 | WEB-R1 | Local production preflight: multi-domain `apps/web` | Codex | DONE — PUSH-READY | Aug 15: `npm run build` passed; 53 routes generated. The prior `Section.className` type failure is resolved. Push/deploy review still checks hostname isolation, brand separation, secrets, a11y, and links. |
 | WEB-R2 | Policy registry publication/history change | Codex · legal owner | REVIEW — AWAITING PUSH/DEPLOY | Policies are published in the local registry. Verify stable URLs/content hashes and absence of draft/counsel placeholders on preview and production. |
-| WEB-1 | First `apps/web` GitHub push → Vercel preview/domains | Danny · Claude Code | **BLOCKED — CURRENT LAUNCH BOTTLENECK** | `apps/web` has never been pushed. Danny gives the go; Claude Code performs the first push. Then connect Vercel with `Root Directory = apps/web`, review preview, attach domains, verify HTTPS/routes, and promote only with Danny's explicit approval. |
-| WEB-2 | Build PetAppro marketing site from real Figma content | Claude Code · Codex review | DONE LOCALLY — AWAITING WEB-1 | Built in the shared multi-domain app. Deployment, domain, responsive/a11y/performance, and visual QA remain gated by the first push and preview. |
-| WEB-3 | Activate Supabase + Resend waitlist | Claude Code · Codex review | BLOCKED by WEB-1 | After preview/domains, configure hosted Supabase and Resend with environment-scoped secrets; validate consent, duplicate/error handling, delivery, and end-to-end submission on the deployed PetAppro domain. |
-| PORTAL-1 | Provider portal | Claude Code · Codex review | DOING | Portal UI is in progress with an optional/offline booking-payments model. Preserve server-side authorization/entitlements and keep SaaS Billing separate and web-only. |
-| BILL-1 | Implement provider subscription checkout and account flow | Claude Code · Codex money/security review | DOING — PORTAL LANE | Authenticated **web-only Stripe Billing**: plan/price lookup, trial/renewal disclosure + affirmative consent, Checkout, return/reconciliation, Customer Portal, invoices, cancellation, Test Clocks, idempotent verified webhooks. Optional/offline booking payments do not weaken SaaS subscription enforcement. |
-| BILL-2 | Project Billing subscription state into PetAppro entitlements | Claude Code · Codex security review | BLOCKED by BILL-1 + CFG-1 | Base509 Billing is commercial truth; PetAppro receives server-written tenant-scoped capabilities. Fail closed; ordinary clients cannot write tier/entitlement state. |
+| WEB-1 | First `apps/web` GitHub push → Vercel preview/domains | Fable/Code · Danny approval | DONE | Pushed and deployed; Base509/PetAppro domains and HTTPS verified live. |
+| WEB-2 | Build PetAppro marketing site from real Figma content | Fable/Code · Codex review | DONE — LIVE | Live in the shared multi-domain app. |
+| WEB-3 | Activate Supabase + Resend waitlist | Fable/Code · Codex review | DONE — LIVE | Production submission verified: persistence + branded Resend email. |
+| PORTAL-EXPOSURE | Keep provider portal dark in production | Fable/Code | DONE — RESOLVED | Guard is live; `/portal` returns 404, including preview-host exposure. Do not reopen without Danny. |
+| PORTAL-404 | Branded 404 page | Cowork/Claude → Fable/Code | DONE — LIVE | Branded 404 pages shipped and are live. |
+| PORTAL-1 | Provider portal — Phase A auth + real data | Fable/Code · Codex review | DONE — DEV DEPLOYED / DARK | Provider signup/sign-in, recovery, real tenant data, isolation, and persisted themes are live on dev. Authenticated portal remains behind the dark domain; nothing customer-facing changed. |
+| EMAIL-1 | Branded transactional-email infrastructure | Fable/Code · Codex review | DONE — LIVE | Sends as PetAppro <noreply@petappro.com>; support@ mailbox and branded transactional templates are configured. Launch requirement satisfied. |
+| BILL-1 | Implement provider subscription checkout and account flow | Fable/Code · Codex money/security review | DOING — LONG POLE | Authenticated **web-only Stripe Billing in test mode**: plan/price lookup, trial/renewal disclosure + affirmative consent, Checkout, return/reconciliation, Customer Portal, invoices, cancellation, discounts via Stripe, Test Clocks, idempotent verified webhooks. |
+| BILL-2 | Project Billing subscription state into PetAppro entitlements | Fable/Code · Codex review | BLOCKED by BILL-1 | Base509 Billing is commercial truth; PetAppro receives server-written tenant-scoped capabilities. Fail closed; ordinary clients cannot write tier/entitlement state. |
 | BILL-R | Enforce Billing-vs-Connect and no-IAP boundaries | Codex | BLOCKED — AWAITING BUILD | Billing = provider→Base509 SaaS subscription, web only. Connect = client→provider physical-service payment. Reject shared Customers/payment methods/webhooks/ledgers, native purchase links/CTAs, and client-writable entitlement state. |
 
-### Aug 15 GO/NO-GO — formal criteria
+### Aug 15 foundation GO/NO-GO — closed GREEN on Aug 18
 
 - **D-U-N-S in hand:** GREEN — Base509 LLC, 11-314-3683.
-- **Tenant schema + RBAC/RLS:** RED — not started as of 2026-07-31 (`supabase/` absent).
-- **GO requires all of:** versioned additive migration infrastructure; `business_id` on every tenant table; stable Base509 identity + membership/RBAC helpers; RLS and `WITH CHECK` on every tenant table; cross-tenant negative read/write tests for provider/client/staff; generic five-axis services plus capacity groups; regenerated DB types; CI green.
-- **Current forecast:** **NO-GO for Oct 1.** The recovery sprint tests whether Oct 21 remains credible. A red Aug 15 gate moves launch later or removes non-foundation scope; it never cuts tenancy, RBAC/RLS, the shared pricing package, or its tests.
+- **Tenant schema + RBAC/RLS:** GREEN — accepted at `c7ee515` after four Governance review passes and pushed to `origin/main`.
+- **Verification:** 103/103 CI checks passed on the real PostGIS service; generated-schema drift is clean. A material security hole found during review was closed before acceptance.
+- **Environment state:** live database untouched. Dev/staging apply is next; production apply is deliberately deferred until near launch.
+- **Timeline effect:** the foundation architecture and major external-verification unknowns are materially de-risked roughly six weeks before Oct 1. The app build, payments, mobile delivery, and store review now determine the launch path.
 
 ---
 
@@ -83,9 +133,9 @@ _Week of: 2026-08-10 (updated 2026-08-15)_
 
 | ID | Task | Owner | Status | Notes |
 |---|---|---|---|---|
-| CFG-1 | **Implement generic five-axis `business_services` migration + generated DB types** | Claude Code | TODO — BUILD FIRST | Add `pricing_model`, `capacity_model`, `duration_model`, `location_model`, and `buffers` as first-class columns; `capacity_model` is `bounded | unlimited`, with nullable tenant-scoped `capacity_group_id`. `service_type_key` is text/data, not a boarding/daycare/walking enum. Add `business_id`, RLS, `WITH CHECK`, constraints, and cross-tenant tests. This gates wizard code. |
-| CFG-2 | **Wizard shell + Steps 1–2 using one generic service DTO/API** | Claude Code | BLOCKED by CFG-1 | Boarding/daycare/walking are preset data that populate the generic axes. No service-specific persistence DTOs/endpoints or switch-based authorization. Save/resume and ≥1-service gate per onboarding spec §2/§11. |
-| CFG-3 | **Provider-defined service type configuration UI** | Claude Code · Codex review | TODO — NEAR-TERM | Danny priority, not launch scope. Expose the same generic axes and provider-defined name/key; completing this must not require a migration or rewrite of CFG-1/CFG-2. |
+| CFG-1 | **Implement generic five-axis `business_services` migration + generated DB types** | CFG-1A→F owners above | DONE — ACCEPTED | `c7ee515` on `origin/main`; CI green and production database untouched. |
+| CFG-2 | **Wizard shell + Steps 1–2 using one generic service DTO/API** | Fable/Code | TODO — AFTER BOOK-1 | Dev data is available. Sequence after the booking core unless Product reprioritizes; boarding/daycare/walking remain preset data over the generic axes. |
+| CFG-3 | **Provider-defined service type configuration UI** | Fable/Code · Codex review | TODO — NEAR-TERM | Danny priority, not launch scope. Expose the same generic axes and provider-defined name/key; completing this must not require a migration or rewrite of CFG-1/CFG-2. |
 
 ---
 
@@ -95,16 +145,16 @@ _Week of: 2026-08-10 (updated 2026-08-15)_
 
 | ID | Work package | Priority | Owner | Status | Legal requirements / build gate |
 |---|---|---|---|---|---|
-| LG-1 | **Safety continuity states + offline critical-care access** | P0 / Launch | Claude Code · Codex review | TODO | #1, #2, #12. Model active-service safety restrictions separately from account suspension/closure; cached read-only care sheet/today schedule and outage tests are launch gates. |
-| LG-2 | **All-in pricing + later-charge authorization ledger** | P0 / Engine | Claude Code · Codex money review | BLOCKED — spec/tests first | #3, #30, #31. Server price shown for a booking configuration includes every mandatory non-tax fee; damage/added-service charges require new affirmative approval; exact/objective cancellation/no-show authorization is snapshotted. Must update `packages/pricing` golden tests before checkout work. |
-| LG-3 | **Stripe direct-charge and Provider-scoped payment boundary** | P0 / Money + tenancy | Claude Code · Codex security review | TODO | #4, #32. Standard Connect direct charges only; reject `application_fee_amount`; authorization, Customer/payment method, PaymentIntent, and saved-method lookup remain scoped to the identified connected account/business. Cross-tenant money-isolation tests required. |
-| LG-4 | **Versioned consent/evidence ledger** | P0 / Schema | Claude Code · Codex review | BLOCKED — retention counsel input | #5, #19, #29. Version/hash exact text and UI, checkbox state, actor/session/device/app version, timestamps, provider legal identity, booking total/timing, and booking ID; fresh acceptance for material changes. Retention duration cannot be finalized without counsel. |
-| LG-5 | **SaaS auto-renewal + purchase snapshot controls** | P0 / Billing | Claude Code · Codex review | BLOCKED — counsel/CARL timing confirmation | #6, #7, #8. Separate unchecked renewal consent, dynamic amount/date, notices and fallback cancellation; snapshot plan/support description; business deletion cancels renewal immediately. Validate with Stripe Test Clocks. |
-| LG-6 | **Deletion, leave-provider, ownership transfer, and closure saga** | P0 / Store + safety | Claude Code · Codex security review | TODO | #9–17, #22, #27, #34. In-app + web deletion paths; affirmative successor acceptance; immediate option; future-booking cancellation amount preview; simultaneous notices; safe active-service restriction; exports/refunds/fallback; tombstones, no functional retained login, debt never blocks deletion. |
-| LG-7 | **GPS consent, worker notice, lifecycle, and auto-stop** | P0 / D-054 launch gate | Claude Code · Codex reliability/privacy review | BLOCKED — exact retention period/counsel covenant | #20, #24 (GPS), #26. Just-in-time unchecked consent before OS prompt; persistent worker notice; tracking only during active service; check-out/report-card/window/max-duration kill switches; no client coordinate replay; reliability and store-review tests scheduled early. |
-| LG-8 | **Privacy lifecycle jobs + disclosure change control** | P0 / Launch | Claude Code · Codex review | BLOCKED — counsel periods + backup-cycle confirmation | #21, #23–25. Separate marketing/transactional streams, enforceable retention/deletion jobs, SDK/subprocessor inventory, store-disclosure sync, and a review gate before advertising/tracking activation. |
-| LG-9 | **Assignment-scoped home-access security** | P0 / Security | Claude Code · Codex security review | TODO | #28, #33. Home-access data is visible only to assigned/authorized personnel during the service window; prompt code rotation when a Provider relationship ends. RLS and negative cross-role/cross-tenant tests required. |
-| LG-10 | **No-vetting product-language invariant** | Permanent guardrail / Launch | PM · Claude Code · Codex review | TODO | #18. No verified/trusted/certified/approved/screened badges, ratings, rankings, or endorsement implications in product, design, or marketing. Add copy/UI acceptance checks. |
+| LG-1 | **Safety continuity states + offline critical-care access** | P0 / Launch | Fable/Code · Codex review | TODO | #1, #2, #12. Model active-service safety restrictions separately from account suspension/closure; cached read-only care sheet/today schedule and outage tests are launch gates. |
+| LG-2 | **All-in pricing + later-charge authorization ledger** | P0 / Engine | Fable/Code · Codex money review | BLOCKED — spec/tests first | #3, #30, #31. Server price shown for a booking configuration includes every mandatory non-tax fee; damage/added-service charges require new affirmative approval; exact/objective cancellation/no-show authorization is snapshotted. Must update `packages/pricing` golden tests before checkout work. |
+| LG-3 | **Stripe direct-charge and Provider-scoped payment boundary** | P0 / Money + tenancy | Fable/Code · Codex security review | TODO | #4, #32. Standard Connect direct charges only; reject `application_fee_amount`; authorization, Customer/payment method, PaymentIntent, and saved-method lookup remain scoped to the identified connected account/business. Cross-tenant money-isolation tests required. |
+| LG-4 | **Versioned consent/evidence ledger** | P0 / Schema | Fable/Code · Codex review | BLOCKED — retention counsel input | #5, #19, #29. Version/hash exact text and UI, checkbox state, actor/session/device/app version, timestamps, provider legal identity, booking total/timing, and booking ID; fresh acceptance for material changes. Retention duration cannot be finalized without counsel. |
+| LG-5 | **SaaS auto-renewal + purchase snapshot controls** | P0 / Billing | Fable/Code · Codex review | BLOCKED — counsel/CARL timing confirmation | #6, #7, #8. Separate unchecked renewal consent, dynamic amount/date, notices and fallback cancellation; snapshot plan/support description; business deletion cancels renewal immediately. Validate with Stripe Test Clocks. |
+| LG-6 | **Deletion, leave-provider, ownership transfer, and closure saga** | P0 / Store + safety | Fable/Code · Codex security review | TODO | #9–17, #22, #27, #34. In-app + web deletion paths; affirmative successor acceptance; immediate option; future-booking cancellation amount preview; simultaneous notices; safe active-service restriction; exports/refunds/fallback; tombstones, no functional retained login, debt never blocks deletion. |
+| LG-7 | **GPS consent, worker notice, lifecycle, and auto-stop** | P0 / D-054 launch gate | Fable/Code · Codex reliability/privacy review | BLOCKED — exact retention period/counsel covenant | #20, #24 (GPS), #26. Just-in-time unchecked consent before OS prompt; persistent worker notice; tracking only during active service; check-out/report-card/window/max-duration kill switches; no client coordinate replay; reliability and store-review tests scheduled early. |
+| LG-8 | **Privacy lifecycle jobs + disclosure change control** | P0 / Launch | Fable/Code · Codex review | BLOCKED — counsel periods + backup-cycle confirmation | #21, #23–25. Separate marketing/transactional streams, enforceable retention/deletion jobs, SDK/subprocessor inventory, store-disclosure sync, and a review gate before advertising/tracking activation. |
+| LG-9 | **Assignment-scoped home-access security** | P0 / Security | Fable/Code · Codex security review | TODO | #28, #33. Home-access data is visible only to assigned/authorized personnel during the service window; prompt code rotation when a Provider relationship ends. RLS and negative cross-role/cross-tenant tests required. |
+| LG-10 | **No-vetting product-language invariant** | Permanent guardrail / Launch | George/PM | TODO | #18. Product defines the invariant; Fable implements it; Codex reviews it in separate lane handoffs. No verified/trusted/certified/approved/screened badges, ratings, rankings, or endorsement implications in product, design, or marketing. |
 | LG-11 | **Enforcement and active-booking escalation playbook** | Launch / Operations | Danny · PM · counsel · Codex review | TODO | Legal README operational requirement. Define evidence preservation, severity, emergency handling, suspension authority, active-booking handling, Provider notice, and disclosure approval; product states must support the playbook. |
 
 **Dependency rule:** LG-2/LG-3 must land in pricing/Connect design before checkout; LG-4/LG-6/LG-8 must shape migrations before identity/legal tables are frozen; LG-7 must shape GPS storage and background-location work before implementation; LG-9 must shape home-access RLS before any client-location data ships.
@@ -119,13 +169,13 @@ _Week of: 2026-08-10 (updated 2026-08-15)_
 | BIZ-2 | Get EIN (free, irs.gov) | Danny | DONE | **Obtained 2026-07-06.** EIN stored in `Company/Formation/` (confidential). Download CP 575 letter → save there. Unblocks bank acct + D-U-N-S |
 | BIZ-3 | Open business bank account | Danny | DONE | **Account open + funded 2026-07-09** (owner capital contribution; self-fund ~6 mo). Details in `Finance/Banking/Wells-Fargo-Business-Checking.md`. |
 | BIZ-4 | Request D-U-N-S number (free) | Danny | DONE | **Obtained 2026-07-07 (same day) via myD&B free flow — D-U-N-S 11-314-3683.** Stored in `Company/Formation/Base509-LLC-Key-Identifiers.md`. **RESOLVED 2026-07-14 — D&B Profile Manager now shows `Base509 LLC · D-U-N-S 11-314-3683` (case #34660335 closed). Legal name + State (CA) correct = the fields Apple matches → BIZ-5 unblocked.** **Record cleanup still needed (do before enrolling):** Phone **blank but required\***; **Year Business Started = 2019 → should be 2026** (LLC formed 2026-07-04 — last ghost of the stale record); **Date Incorporated blank → 2026-07-04**; Company Website blank → `base509.com`; Total Employees = 2 → verify (Base509 is single-member). |
-| BIZ-5 | Open Apple Developer acct (Organization, $99) | Danny | DOING | **Business Apple ID created 2026-07-08** on `developer@base509.com` (throttle cleared; separate from personal ID). **2FA enabled** (2 trusted numbers). **HOLD LIFTED 2026-07-14 — D&B profile verified: `Base509 LLC · D-U-N-S 11-314-3683` (case #34660335 resolved).** → **ENROLL NOW** at developer.apple.com/enroll (Organization, $99), entity name **Base509 LLC**, D-U-N-S **11-314-3683**. **Critical path:** Apple's org verification has its own lead time (days–weeks, may include a callback), and it gates App Store Connect → TestFlight beta (D-050 beta ring) → ~Sep 10 submission → Oct 1 launch. Do not sit on it. **NEW BLOCKER 2026-07-14: Apple requires a publicly accessible company website** for Organization enrollment (org verification). `base509.com` is registered but **not live** → **MKT-4 / LR-5 pulled forward onto the critical path; a minimal live base509.com now gates enrollment.** Needs: legal name "Base509 LLC", what the company does, PetAppro mention, contact (@base509.com). Also set D&B "Company Website" = base509.com for consistency. |
-| BIZ-6 | Open Google Play acct (Organization, $25) | Danny | TODO | **Unblocked (D-U-N-S in hand).** Enroll as Organization; paste D-U-N-S 11-314-3683 |
+| BIZ-5 | Open Apple Developer acct (Organization, $99) | Danny | DONE | Apple Organization enrollment complete. Track App Store Connect/listing/build submission separately. |
+| BIZ-6 | Open Google Play acct (Organization, $25) | Danny | PAUSED — D&B ADDRESS | Enrollment is blocked until D&B propagates the current business address, the same root cause encountered during Apple enrollment. Resume as soon as D&B clears. |
 | BIZ-7 | Recruit 5–6 PCSP beta testers | Danny | TODO | Via local Facebook PCSP group + Danny's network. Post-freeze beta (late-Aug, TestFlight/closed track) — **not** the MVP-complete freeze bar (that's Danny+Marco's own business as first test tenant, D-028) |
 | BIZ-8 | **Elect S-corp tax status** — file IRS Form 2553, effective **2027-01-01** | Danny | TODO | **File Jan 2027** (hard deadline ~Mar 15, 2027 for a 1/1/27 effective date). LLC stays default disregarded-entity for 2026. Once active: reasonable-salary payroll + EDD reg, Form 1120-S / CA Form 100S, CPA. **Confirm with a CPA before filing.** |
 | BIZ-9 | **Bind business insurance (E&O + GL + cyber) just before launch** | Danny | TODO | Get quotes early Sept (Vouch/Embroker or Next/Hiscox/Thimble). Bind ~late Sept so it's **active before the first real provider/client uses the app** (~Oct 1). Budget models it starting Sept. |
-| BIZ-11 | **Set up Base509's own Stripe account for SaaS subscription billing** | Danny | TODO | **Separate from provider Connect** — this is Base509's merchant account billing *providers* the subscription via **Stripe Billing, web-only** (off IAP, D-042). Build Products/Prices per tier (`docs/planning/pricing-tiers-and-features.md`), free-trial→paid with auto-renewal controls (Provider Terms §4). **Stand up in TEST mode first**, validate trial/renewal with **Stripe Test Clocks**, flip live near launch. Distinct from the provider Connect Standard integration (that's in the portal, provider's own account). See `docs/specs/provider-onboarding-configuration.md` §8. |
-| BIZ-12 | **First `apps/web` push + Vercel Pro connection** | Danny · Claude Code | **BLOCKED — CURRENT LAUNCH BOTTLENECK** | `apps/web` has never been pushed. On Danny's go, Claude Code makes the first GitHub push; then connect Vercel and set Root Directory to `apps/web`. Preview/domain review precedes production promotion. Live Base509 still gates Apple enrollment. |
+| BIZ-11 | **Set up Base509's own Stripe account for SaaS subscription billing** | Danny · Fable/Code | DOING — ACCOUNT CREATED | Stripe account exists in sandbox/test mode. Next: Billing Products/Prices, promotion codes, Checkout, Customer Portal, verified webhooks, and Test Clocks. Provider→Base509, web-only, separate from Connect. |
+| BIZ-12 | **First `apps/web` push + Vercel Pro connection** | Danny · Fable/Code | DONE | Sites and waitlist are live; domains/HTTPS and production submission/email were verified. |
 | BIZ-10 | Virtual SF address + initial Statement of Information | Danny | **✅ DONE 2026-07-17** | ✅ Address: **Base509 LLC, 1875 Mission St Ste 103 #660, San Francisco, CA 94103** (PostScan Mail Starter, $100/yr, Form 1583 filed). ✅ **SOI filed** with it in both principal + mailing fields — home address is off the CA record of record (still permanent in the Articles). Applied to Provider Terms §12, Client Terms §12, Privacy §14, Key Identifiers. **↳ BIZ-10b: propagate the new address to D&B (Case #34660335), Wells Fargo, IRS, and Apple/Google enrollment so everything matches before store submission (BIZ-5/BIZ-6).** | File the SOI with 434 Hanover and you publish the home address a *second* time, make it the standing record, and need another filing to undo it. File it with a CMRA address and the home address stays in **one** historical doc (the Articles). Same deadline, same fee, opposite outcome. **There is no "edit address" button — the SOI *is* the edit mechanism** (Danny hit this 2026-07-17; Articles are a permanent filed record, the SOI supersedes the displayed address). **Confirmed:** Articles B20260309172 (filed 7/4/2026) list 434 Hanover as *both* principal + mailing; SOS search displays it. **Articles are permanent — mitigation, not a scrub.** Steps: (1) **CMRA in SF County now** — notarized USPS Form 1583 is the slow part, budget days; (2) counsel confirms CMRA acceptable for CA principal office — **the vendors saying "yes" sell mailboxes**; (3) file LLC-12 at bizfileOnline, virtual address in **both** address fields; (4) propagate to D&B (11-314-3683), bank, IRS, **Apple/Google enrollment (BIZ-5/BIZ-6 — store listings surface address data)**; (5) aggregator opt-outs (Bizapedia/OpenCorporates — **partial, assume already scraped**). Amending Articles (LLC-2) not worth it. `[VERIFY in bizfile: LLC SOI cadence (biennial?) + fee — determines how often the address reprints.]` → **D-059** |
 
 ---
@@ -137,17 +187,19 @@ _Week of: 2026-08-10 (updated 2026-08-15)_
 | MKT-1 | Register domain(s): petappro.com (+ defensive names) | Danny | DONE | **petappro.com + base509.com registered 2026-07-07, both under one Cloudflare account.** Defensive vertical names (hairappro/cleanappro) optional/later |
 | MKT-2 | Reserve social handles (IG, FB, Threads, TikTok, LinkedIn) @petappro | Danny | TODO | Grab early (~Aug 15). No X/Musk platforms |
 | MKT-3 | Brand kit: logo, profile/banner art, palette | Danny | TODO | PetAppro has tokens+logo; **Base509 corporate identity is the open item** (positioning, wordmark, palette, name story). Gates site visual pass only |
-| MKT-4 | Website scaffold + core pages (Next.js `apps/web`, **Vercel**) | Claude Code | DONE LOCALLY — AWAITING FIRST PUSH | Multi-domain build is push-ready; Aug 15 production build passed. `apps/web` is still absent from GitHub, so Vercel preview/deployment is blocked. = WEB-1 |
-| MKT-5 | **Policy registry + Privacy / Terms / Support URLs** | Danny/Claude Code | PUBLISHED LOCALLY — AWAITING DEPLOY QA | Policies are published in the local registry. Verify stable public URLs and version history after WEB-1. |
-| MKT-5b | **Contact page** (petappro.com + base509.com) | Danny/Claude Code | TODO | Form/email reachable; expected alongside support for store trust. = Roadmap LR-3 |
-| MKT-5c | **PetAppro site / app landing experience (Figma → code)** | Claude Code · Codex review | DONE LOCALLY — AWAITING FIRST PUSH | Built from real Figma content in the shared multi-domain app. Preview/domain and launch QA remain. = WEB-2 / LR-4 |
-| MKT-6 | Provider portal + Stripe Billing account path | Claude Code · Codex review | DOING — CRITICAL PATH / MONEY | Provider portal is in progress with optional/offline booking payments. SaaS subscription remains provider→Base509 via authenticated web only; no native IAP/link/CTA. = PORTAL-1/BILL-1/BILL-2/BILL-R |
+| MKT-4 | Website scaffold + core pages (Next.js `apps/web`, **Vercel**) | Fable/Code | DONE — LIVE | Base509/PetAppro and both www hosts live with HTTPS. Portal remains dark by explicit guard. |
+| MKT-5 | **Policy registry + Privacy / Terms / Support URLs** | Danny/Fable | DONE — LIVE | Published policy routes live; version-history behavior remains part of ongoing governance review. |
+| MKT-5b | **Contact page** (petappro.com + base509.com) | Danny/Fable/Code | TODO | Form/email reachable; expected alongside support for store trust. = Roadmap LR-3 |
+| MKT-5c | **PetAppro site / app landing experience (Figma → code)** | Fable/Code · Codex review | DONE — LIVE | Live in the shared multi-domain app. |
+| MKT-6 | Provider portal + Stripe Billing account path | Fable/Code · Codex review | DOING — LONG POLE / MONEY | Portal remains 404 in production. Stripe test-mode Billing is the active path; web-only, no native IAP/link/CTA. |
 | MKT-7 | Pre-launch content calendar + posts | Danny | TODO | Ramp from ~Sep 1 |
 | MKT-8 | Demo/sizzle video (Adobe Quick Cut) | Danny | TODO | Reuse on site + stores |
 | MKT-9 | Launch posts + store links | Danny | TODO | Oct 1 (fallback: late Oct) |
-| MKT-10 | Base509.com company/marketing hub page | Claude Code | DONE LOCALLY — AWAITING FIRST PUSH | Push-ready with published-policy routes; production build green Aug 15. First GitHub push → Vercel preview/domain QA remains. = Roadmap LR-5 |
-| MKT-12 | **App Store Review Guidelines compliance pass** — governance review **before** App Store Connect setup/submission | Codex (w/ Cowork) | TODO | Source: **https://developer.apple.com/app-store/review/guidelines/** (+ Google Play policies in parallel). Review PetAppro against the guidelines and report gaps to `STATUS.md`. **Known hotspots to check first:** **account deletion — TWO store requirements, not one: Apple 5.1.1(v) requires an IN-APP path; Google Play requires an in-app path **AND an external WEB resource** for deletion requests (support.google.com/googleplay/android-developer/answer/13327111). Both must exist — already noted in LR-6; **4.8 Sign in with Apple** (required as an equivalent option when offering Google/social login — D-031/D-038 include Apple, verify); **3.1.1 / 3.1.3 / 3.1.5(a)** — no in-app purchase or purchase CTA for the SaaS subscription (D-042), real-world services correctly outside IAP via Stripe Connect (D-007); **5.1.5 + background location** justification & consent for GPS (D-054 — top rejection risk); **4.5.4 push notifications** not required for function, marketing needs consent + opt-out (D-049); **5.1.1/5.1.2 privacy** — policy URL live (D-055/LR-1), permission strings, privacy nutrition labels; **2.3 accurate metadata** — no advertising unreleased features (**re-check F-026 "coming soon: GPS"**); **1.5** support URL (LR-2); **1.2 UGC** — n/a at MVP (no in-app messaging, D-053) but triggers report/block if two-way chat lands. |
-| MKT-11 | Create + submit app-store listings (App Store Connect + Play Console) | Danny/Claude Code | TODO | **Submit ~mid-Sep**; set release date = Oct 1 and hold, then keep a **review buffer to Oct 1** (= Roadmap LR-8). Needs org accounts (BIZ-5/6 = LR-6/7) + live legal URLs (MKT-5 = LR-1/2). = Roadmap LR-6/7 prep |
+| MKT-10 | Base509.com company/marketing hub page | Fable/Code | DONE — LIVE | Production verified. |
+| MKT-13 | Publish annual “1 month free” pricing model | Fable/Code | DONE — LIVE | Public pricing now shows annual totals: Starter $209, Solo $429, Duo $869, Crew $1,639; cards rebalanced. |
+| MKT-14 | Store-listing + launch-content packet | Cowork/Claude | TODO — DUE AUG 28 | Supply approved store metadata/copy, screenshot narrative, launch messaging, and Sep 1 content-calendar inputs to George. Protects the mid-September submission window; no product blocker today. |
+| MKT-12 | **App Store Review Guidelines compliance pass** — governance review **before** App Store Connect setup/submission | Codex | TODO | Product supplies the approved requirements as a separate handoff. Codex reviews PetAppro against Apple and Google Play policies and reports gaps to George. Known hotspots: in-app + web deletion paths, Sign in with Apple, no native SaaS purchase CTA/IAP, background-location consent, push-notification consent, privacy disclosures, accurate metadata, and support URLs. |
+| MKT-11 | Create + submit app-store listings (App Store Connect + Play Console) | Danny/Fable/Code | TODO | **Submit ~mid-Sep**; set release date = Oct 1 and hold, then keep a **review buffer to Oct 1** (= Roadmap LR-8). Needs org accounts (BIZ-5/6 = LR-6/7) + live legal URLs (MKT-5 = LR-1/2). = Roadmap LR-6/7 prep |
 
 ---
 
@@ -169,19 +221,18 @@ _Week of: 2026-08-10 (updated 2026-08-15)_
 
 ---
 
-## Upcoming (next 2–3 sprints — don't start yet)
-- Tenant-aware schema: `businesses`, `memberships`, generalized `services`, per-tenant `pricing_rules` (Sprint 2)
-- RBAC + RLS + RLS test suite (Sprint 3)
-- White-label config + brand resolver (Sprint 3)
-- Expo app scaffold + auth (Sprint 3)
-- Booking flow + **Stripe Connect payments (client→provider, in MVP — D-007 Option A)** + staff dashboard (Sprint 4). Manual tracking = fallback only.
-- **Stripe Connect (client→provider online pay)** — post-launch add (D-007). Not the same as SaaS Stripe Billing (MKT-6), which stays in.
+## Upcoming sequence
+
+The active app-build work is tracked in `ENV-1` through `PROD-DB-1` above. Phase A and the non-production environment are complete. Current sequence: wire Google/Apple provider auth → booking engine → separately reviewed per-occurrence conflicts → Expo/RN app → Connect/Billing wiring → store review/submission → production database apply near launch. Keep **Stripe Connect** (client→provider booking money) separate from **Stripe Billing** (provider→Base509 web-only subscription); no native IAP or subscription purchase CTA.
 
 ---
 
 ## Blocked / waiting
-- BIZ-5 (Apple): D-U-N-S no longer the blocker — now waiting on Apple's new-account throttle to clear (create business Apple ID on `developer@base509.com` tomorrow, use Google Voice #). BIZ-4 DONE, BIZ-6 unblocked.
-- ~~ARCH → Codex review~~ **DONE (2026-07-08):** Codex ratified, Danny locked **D-034–D-038**. Codex patched `technical_architecture.md` + `data_model_draft.md`. Remaining build-now "seam": `base509_accounts` + `auth_identities` and `base509_account_id` FKs must land before migrations (D-035).
+- **Google Play Organization enrollment:** PAUSED pending D&B propagation of the current business address; resume immediately when cleared. Apple enrollment is DONE and paid.
+- **Production database:** deliberately untouched; CFG-1 production apply is deferred until near launch and requires staging evidence plus Danny's explicit approval.
+- **Stripe wiring:** account exists in sandbox/test mode; implementation remains active across separate Billing and Connect workstreams.
+- **Google/Apple provider auth:** not externally blocked, but unwired and now the immediate hard launch gate before booking work proceeds.
+- ~~ARCH → Codex review~~ **DONE:** Codex ratified D-034–D-038; the stable account/identity/membership seam subsequently landed with CFG-1 at `c7ee515`.
 
 ---
 
@@ -194,6 +245,9 @@ _Week of: 2026-08-10 (updated 2026-08-15)_
 ---
 
 ## Changelog (newest first)
+- 2026-08-20 (George/PM, EOD report) — **Phase A essentially complete; critical path advanced to social auth → booking → mobile → payments.** Provider email/password signup/sign-in, recovery, real dev data, multi-tenant isolation, and persisted tenant-theme rendering are built and dev-deployed behind the dark portal domain. Google/Apple buttons meet brand spec but remain unwired and are a hard pre-launch gate. Public annual “1 month free” pricing is live at $209/$429/$869/$1,639. Branded transactional email is live from `noreply@petappro.com`, with support@ and branded templates configured. Added Product's Aug 28 store-listing/launch-content packet to protect mid-September submission. Oct 1 remains tracked. Local PM edit only — **DONE — ready to commit**; no commit/push/deploy by George.
+- 2026-08-18 (George/PM) — **CFG-1 foundation milestone closed GREEN and app-build phase opened.** Recorded `c7ee515` as accepted and pushed to `origin/main` after four Codex review passes; a material security defect was caught and fixed before acceptance. CI is green (103/103 against PostGIS; drift-clean). Production database remains untouched by design. Added the active sequence: CFG-1 dev/staging database → booking engine + portal on real non-production data → separately reviewed per-occurrence conflict handling → Stripe Connect/Billing → Expo/RN → store review → production apply near launch. Apple enrollment is approved/paid; Stripe account exists in sandbox/test mode; branded 404s are live; capacity contract/docs and portal exposure are resolved. Google Play is paused on D&B address propagation. Every feature adds tests to CI. Local PM edit only — **DONE — ready to commit**; no commit/push/deploy/database apply by George.
+- 2026-08-17 (George/PM) — **Four-lane operating model locked and master list reconciled.** George owns coordination/timeline/task tracking; Cowork/Claude owns Product; Codex is read-only Governance; Fable/Code is the sole coder/committer/pusher; Danny is final approver/deploy go. Added the explicit CFG-1A→F handoff chain. Current threads: docs commit `49911b5` awaits Danny's push call; portal exposure resolved (`/portal` 404); branded 404 in Product design; Stripe test mode and Google Play are long poles; Apple enrollment DONE. Marketing sites/waitlist are live. Local PM edit only — **DONE — ready to commit**; no commit/push/deploy by George.
 - 2026-08-15 (Codex, from Danny status) — **Board/timeline re-baselined around the actual web bottleneck.** Base509 is push-ready; policies are published locally; the design system is published as a library; PetAppro marketing is built from real Figma content; provider portal is in progress with optional/offline booking payments. Verified `apps/web` production build green (53 routes). `apps/web` has never been pushed to GitHub: Danny-authorized first push by Claude Code is now the explicit launch bottleneck, gating Vercel (`Root Directory = apps/web`) → preview/domains → Supabase/Resend waitlist. No commit/push/deploy.
 - 2026-08-12 (George/PM + Codex) — **Web critical path and review queue updated.** Base509 multi-domain site and policy registry are local/push-ready; GitHub/Vercel connection is scheduled Aug 13, so neither item is marked deployed. Queued Codex reviews for the first `apps/web` push and the six-policy v1.0/public-history change. Promoted the PetAppro Figma→code site and provider Stripe Billing web experience to launch-critical. Added explicit no-IAP and Stripe separation gates: Billing is provider→Base509 web-only SaaS; Connect is client→provider physical-service money. Pre-push finding: policy-registry provenance says publication approval occurred 2026-08-13 while the effective/current status is Aug 12; correct or confirm before push. No commit/push/deploy.
 - 2026-07-31 — **Codex + Claude Code review reconciliation (Cowork doc-honesty pass).** Both reviewers returned CHANGES-NEEDED; the consensus is *specs sound/ratified, nothing implemented yet* (no `supabase/`, capacity schema, D-063 engine, tenant-isolation, LG-2/3). Fixed the safe doc contradictions so the batch commits honest: **D-063** status → "decided/spec complete; engine PENDING" (was "implemented"); **Payments working-default row** → Stripe Connect IS in MVP (D-007 Option A), was stale "deferred post-MVP"; **D-064** M&G gate reconciled with **D-006** ("configurable; hard *when enabled*"); **15-night cap** confirmed a **phantom** (never in PetAppro; mis-transcribed Woof 14-night self-service cap) and de-flagged in roadmap/technical_architecture/strategy (S1-3 satisfied by clean extraction); **`auth_identities`** draft synced to the architecture contract (unique by `(issuer, provider_subject)`). Verified already-fixed: `capacity_model = bounded|unlimited`, `capacity_group_id` separate from `conflict_group_id`. **Routed to Codex (pre-migration):** capacity_config dual window (service-cap-at-bedtime vs pool-consumption-spans-presence), generic per-pet service-incompatibility rule, `capacity_groups` entity in the map + `business_availability` pool-override FK, `PRICING_MODELS as const`. **Routed to Claude Code (gated):** D-063 engine correction, real tenant-isolation validation in the pricing engine, D-057 closure-refund job, forbidden-Stripe-param executable tests. No commit/push/deploy. (Cowork)
