@@ -66,18 +66,23 @@ export function PortalPlanProvider({
    *  only the legacy demo default for unwired previews. */
   initialPlanKey?: string;
   business?: PortalBusinessContext | null;
-  /** SERVER-PROJECTED effective allowlist (canonical keys; null = full
-   *  library). When provided it is AUTHORITATIVE — the matrix derivation
-   *  above is only the demo fallback for unwired previews (Codex item 2d:
-   *  the portal must render the DB projection, not a client re-derivation
-   *  that can drift from what set_business_theme will actually accept). */
-  themeAllowlist?: string[] | null;
+  /** SERVER-PROJECTED effective allowlist (always a concrete canonical key
+   *  list — full-tier businesses carry the complete roster). When provided
+   *  it is AUTHORITATIVE — the matrix derivation above is only the demo
+   *  fallback for unwired previews (Codex item 2d: the portal must render
+   *  the DB projection, not a client re-derivation that can drift from what
+   *  set_business_theme will actually accept). Anything malformed fails
+   *  CLOSED to Starter, never to the full library (Codex round-5 item 3). */
+  themeAllowlist?: string[];
 }) {
   const [planKey, setPlanKey] = useState(initialPlanKey);
   const value = useMemo(() => {
     const entitlements = entitlementsFor(planKey);
     if (themeAllowlist !== undefined) {
-      entitlements.themeAllowlist = themeAllowlist ?? undefined;
+      entitlements.themeAllowlist =
+        Array.isArray(themeAllowlist) && themeAllowlist.length > 0
+          ? themeAllowlist
+          : ['brandy_blue'];
     }
     return {
       planKey,

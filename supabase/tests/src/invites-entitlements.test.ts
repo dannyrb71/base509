@@ -299,11 +299,30 @@ describe('business bootstrap hardening (Codex re-review, permanent gate)', () =>
         /FORBIDDEN.*idempotency key/,
       )
     })
+    // The denial must leave the target tenant EXACTLY as bootstrapped — one
+    // business, one active Owner, one Starter row — and grant the intruder
+    // no relationship to it whatsoever (Codex round-5 item 4).
     const admin = await connect()
-    const n = await admin.query(
-      `select count(*) as n from public.businesses where bootstrap_key = $1`, [key],
+    const counts = await admin.query(
+      `select
+         (select count(*) from public.businesses where bootstrap_key = $1) as businesses,
+         (select count(*) from public.business_memberships m
+            join public.businesses b on b.id = m.business_id
+          where b.bootstrap_key = $1 and m.role = 'owner' and m.status = 'active') as owners,
+         (select count(*) from public.business_entitlements e
+            join public.businesses b on b.id = e.business_id
+          where b.bootstrap_key = $1 and e.tier_key = 'starter') as starter_rows,
+         (select count(*) from public.business_memberships m
+            join public.businesses b on b.id = m.business_id
+          where b.bootstrap_key = $1 and m.base509_account_id = $2) as intruder_memberships`,
+      [key, intruder.accountId],
     )
-    expect(Number(n.rows[0].n)).toBe(1)
+    expect(counts.rows[0]).toEqual({
+      businesses: '1',
+      owners: '1',
+      starter_rows: '1',
+      intruder_memberships: '0',
+    })
     await admin.end()
   })
 })
@@ -358,6 +377,83 @@ describe('theme persistence boundary (Codex item 2)', () => {
       // The safe default IS allowed on Starter.
       await c.query(`select public.set_business_theme($1, 'brandy_blue', 'dark')`, [biz.businessId])
     })
+  })
+
+  it('NULL key or mode is rejected cleanly — no settings mutation, no audit (Codex round-5 P1-1)', async () => {
+    const biz = await newBusiness()
+    await setEntitlements(biz.businessId, { theme_allowlist: FULL })
+    const admin = await connect()
+    await admin.query(
+      `update public.businesses set settings = '{"beta_flag": true}'::jsonb where id = $1`,
+      [biz.businessId],
+    )
+    await asUser(biz.owner.sub, async (c) => {
+      // Three-valued logic would let NULL slip past `not in`/`= any` checks;
+      // the RPC must reject NULLs explicitly instead of persisting JSON nulls.
+      await expectError(
+        c.query(`select public.set_business_theme($1, null, 'dark')`, [biz.businessId]),
+        /VALIDATION_FAILED.*required/,
+      )
+      await expectError(
+        c.query(`select public.set_business_theme($1, 'brandy_blue', null)`, [biz.businessId]),
+        /VALIDATION_FAILED.*required/,
+      )
+    })
+    const row = await admin.query(`select settings from public.businesses where id = $1`, [
+      biz.businessId,
+    ])
+    expect(row.rows[0].settings).toEqual({ beta_flag: true }) // untouched — no theme_* keys, no JSON nulls
+    const audit = await admin.query(
+      `select count(*) as n from public.audit_events
+       where business_id = $1 and action = 'business.theme_change'`,
+      [biz.businessId],
+    )
+    expect(Number(audit.rows[0].n)).toBe(0)
+    await admin.end()
+  })
+
+  it('TOCTOU: an admin demoted while the RPC waits on the tenant lock is refused (Codex round-5 P1-2)', async () => {
+    const biz = await newBusiness()
+    await setEntitlements(biz.businessId, { theme_allowlist: FULL })
+    const adminMember = await addMember(biz, 'admin')
+
+    // A superuser transaction holds the tenant row lock…
+    const locker = await connect()
+    await locker.query('begin')
+    await locker.query(`select id from public.businesses where id = $1 for update`, [
+      biz.businessId,
+    ])
+
+    // …while the (still-)admin calls the RPC: the pre-lock role check passes
+    // and the call blocks on the FOR UPDATE lock.
+    const rpcConn = await connect()
+    await become(rpcConn, 'authenticated', { sub: adminMember.sub })
+    const pending = rpcConn
+      .query(`select public.set_business_theme($1, 'chessie', 'dark')`, [biz.businessId])
+      .then(() => 'fulfilled', (e: Error) => `rejected: ${e.message}`)
+    await new Promise((resolve) => setTimeout(resolve, 200)) // let it reach the lock wait
+
+    // Demote the caller, then release the lock. The RPC's post-lock re-check
+    // (fresh READ COMMITTED snapshot) must see the demotion and refuse.
+    await locker.query(`update public.business_memberships set role = 'staff' where id = $1`, [
+      adminMember.membershipId,
+    ])
+    await locker.query('commit')
+
+    expect(await pending).toMatch(/rejected: .*FORBIDDEN/)
+
+    const row = await locker.query(`select settings from public.businesses where id = $1`, [
+      biz.businessId,
+    ])
+    expect(row.rows[0].settings?.theme_key).toBeUndefined()
+    const audit = await locker.query(
+      `select count(*) as n from public.audit_events
+       where business_id = $1 and action = 'business.theme_change'`,
+      [biz.businessId],
+    )
+    expect(Number(audit.rows[0].n)).toBe(0)
+    await locker.end()
+    await rpcConn.end()
   })
 
   it('the direct settings write path is CLOSED for authenticated roles', async () => {

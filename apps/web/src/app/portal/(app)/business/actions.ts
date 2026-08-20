@@ -59,8 +59,7 @@ export async function saveBrandTheme(input: {
   if (input.themeMode !== 'light' && input.themeMode !== 'dark') {
     return { error: 'Theme mode must be light or dark.' };
   }
-  const allowlist = ctx.entitlements.themeAllowlist;
-  if (allowlist !== null && !allowlist.includes(input.themeKey)) {
+  if (!ctx.entitlements.themeAllowlist.includes(input.themeKey)) {
     return { error: 'That theme isn’t included in your plan.' };
   }
 

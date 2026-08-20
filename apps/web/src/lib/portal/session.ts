@@ -31,7 +31,9 @@ export type PortalEntitlements = {
   planKey: string;
   clientLimit: number | null;
   seatLimit: number | null;
-  themeAllowlist: string[] | null;
+  /** Always a concrete key list — fail-closed Starter on anything malformed;
+   *  full-tier businesses carry the complete roster (never null/"all"). */
+  themeAllowlist: string[];
 };
 
 /** UX hint only — always re-validated against memberships (never authority). */
@@ -157,7 +159,16 @@ export async function getEntitlements(
     planKey: ['starter', 'solo', 'duo', 'crew', 'team', 'enterprise'].includes(tier) ? tier : 'starter',
     clientLimit: typeof e.client_limit === 'number' ? e.client_limit : null,
     seatLimit: typeof e.seat_limit === 'number' ? e.seat_limit : null,
-    themeAllowlist: Array.isArray(e.theme_allowlist) ? (e.theme_allowlist as string[]) : null,
+    // Fail CLOSED on a malformed/missing projection (Codex round-5 item 3):
+    // anything that isn't a clean string array collapses to the Starter set,
+    // never the full library. The DB always projects an array — a full-tier
+    // business gets the complete key list, so there is no "null = all" case.
+    themeAllowlist:
+      Array.isArray(e.theme_allowlist) &&
+      e.theme_allowlist.length > 0 &&
+      e.theme_allowlist.every((k) => typeof k === 'string')
+        ? (e.theme_allowlist as string[])
+        : ['brandy_blue'],
   };
 }
 
