@@ -99,6 +99,7 @@ export async function middleware(req: NextRequest) {
     pathname.startsWith('/api/') ||
     pathname.startsWith('/brands/') ||
     pathname.startsWith('/sample-brands/') || // theme-mockup assets (SVGs skip the optimizer, so raw paths must survive)
+    pathname.startsWith('/email/') || // email-embedded assets fetched by mail clients at the raw path
     pathname === '/favicon.ico' ||
     pathname === '/robots.txt' ||
     pathname === '/sitemap.xml'
