@@ -2,6 +2,7 @@ import { cache } from 'react';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import type { SupabaseClient, User } from '@supabase/supabase-js';
+import { DEFAULT_THEME_KEY, isThemeKey, type ThemeKey, type ThemeMode } from '@/data/petappro-themes';
 import { createPortalServerClient } from './supabase-server';
 
 /**
@@ -21,6 +22,9 @@ export type PortalBusiness = {
   timezone: string;
   currency: string;
   role: 'owner' | 'admin' | 'manager' | 'staff';
+  /** Canonical stored theme (businesses.settings.theme_key) — fail-safe Brandy Blue. */
+  themeKey: ThemeKey;
+  themeMode: ThemeMode;
 };
 
 export type PortalEntitlements = {
@@ -59,7 +63,7 @@ export async function listMemberships(supabase: SupabaseClient): Promise<PortalB
   const ids = memberships.map((m) => m.business_id as string);
   const { data: businesses, error: bizError } = await supabase
     .from('businesses')
-    .select('id, name, slug, timezone, currency')
+    .select('id, name, slug, timezone, currency, settings')
     .in('id', ids);
   if (bizError) throw new Error(`business lookup failed: ${bizError.message}`);
 
@@ -73,6 +77,11 @@ export async function listMemberships(supabase: SupabaseClient): Promise<PortalB
           timezone: b.timezone as string,
           currency: b.currency as string,
           role: m.role as PortalBusiness['role'],
+          themeKey: (() => {
+            const k = (b.settings as Record<string, unknown> | null)?.theme_key;
+            return isThemeKey(k) ? k : DEFAULT_THEME_KEY;
+          })(),
+          themeMode: ((b.settings as Record<string, unknown> | null)?.theme_mode === 'dark' ? 'dark' : 'light') as ThemeMode,
         }]
       : [];
   });

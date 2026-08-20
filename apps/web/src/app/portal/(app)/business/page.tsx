@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { PortalBusinessView } from '@/components/PortalBusinessView';
 import { getPortalContext } from '@/lib/portal/session';
-import { saveBusinessProfile } from './actions';
+import { saveBrandTheme, saveBusinessProfile } from './actions';
 
 export const metadata: Metadata = { title: 'Business' };
 
@@ -15,6 +15,8 @@ export default async function PortalBusinessPage() {
         currency: ctx.active.currency,
       }}
       saveProfile={saveBusinessProfile}
+      initialBrand={{ themeKey: ctx.active.themeKey, themeMode: ctx.active.themeMode }}
+      saveTheme={saveBrandTheme}
     />
   );
 }

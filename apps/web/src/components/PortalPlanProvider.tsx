@@ -12,8 +12,10 @@ export type PlanEntitlements = {
   themeAllowlist?: readonly string[];
 };
 
-const BREED_THEMES = ['Husky', 'Irish Setter'] as const;
-const ALL_BREED_THEMES = ['Bichon Frise', 'Blue Heeler', 'Chessie'] as const;
+// CANONICAL theme keys (theme-tiers.md roster / DB known_theme_keys) — the
+// allowlist currency is keys, never display names (petappro-themes.ts binding).
+const BREED_THEMES = ['husky', 'irish_setter'] as const;
+const ALL_BREED_THEMES = ['bichon_frise', 'blue_heeler', 'chessie'] as const;
 
 function matrixIncludes(feature: string, tierIndex: number) {
   return MATRIX.find((row) => row.feature.startsWith(feature))?.cells[tierIndex] === true;
@@ -29,7 +31,7 @@ function entitlementsFor(planKey: string): PlanEntitlements {
     seatLimit,
     walkerPlan: seatLimit <= 1 ? 'solo' : seatLimit === 2 ? 'duo' : 'crew',
     themeAllowlist: matrixIncludes('Full library', tierIndex) ? undefined : [
-      'Brandy Blue',
+      'brandy_blue',
       ...(matrixIncludes('Breed themes', tierIndex) ? BREED_THEMES : []),
       ...(matrixIncludes('All breed themes', tierIndex) ? ALL_BREED_THEMES : []),
     ],

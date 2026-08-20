@@ -8,6 +8,7 @@ import { CapacityField, PortalInfo, PortalModal, PortalPageHeader, PortalPanel }
 import { PortalWalkingRates } from '@/components/PortalWalkingRates';
 import { INITIAL_SERVICE_ZONES, PortalZoneManager } from '@/components/PortalZoneManager';
 import { ThemeGallery, type ThemeMode, type ThemeName } from '@/components/ThemeGallery';
+import { themeByKey, themeByName, themeNamesForKeys, type ThemeKey } from '@/data/petappro-themes';
 
 type Service = { name: string; enabled: boolean; price: string; holidayPrice: string; extraDog: string; extendedDiscount?: string; unit: string; note: string };
 type ServiceTab = 'boarding-daycare' | 'walking';
@@ -40,18 +41,26 @@ export type BusinessProfile = { name: string; timezone: string; currency: string
 export function PortalBusinessView({
   initialProfile,
   saveProfile,
+  initialBrand,
+  saveTheme,
 }: {
   /** Real tenant profile (A1 step 4); absent only in legacy unwired previews. */
   initialProfile?: BusinessProfile;
   /** Server action persisting the profile to the tenant row (RLS admin-gated). */
   saveProfile?: (p: { name: string; timezone: string }) => Promise<{ ok?: boolean; error?: string }>;
+  /** Tenant's STORED canonical theme (businesses.settings) — the live preview source. */
+  initialBrand?: { themeKey: ThemeKey; themeMode: ThemeMode };
+  /** Server action persisting theme key+mode (entitlement-validated server-side). */
+  saveTheme?: (p: { themeKey: string; themeMode: string }) => Promise<{ ok?: boolean; error?: string }>;
 }) {
   const [businessName, setBusinessName] = useState(initialProfile?.name ?? 'Woof Wetreats');
   const [timezone, setTimezone] = useState(initialProfile?.timezone ?? 'America/Los_Angeles');
   const [saving, setSaving] = useState(false);
   const [logo, setLogo] = useState<string>('');
-  const [theme, setTheme] = useState<ThemeName>('Husky');
-  const [mode, setMode] = useState<ThemeMode>('light');
+  const [theme, setTheme] = useState<ThemeName>(
+    themeByKey(initialBrand?.themeKey).name as ThemeName,
+  );
+  const [mode, setMode] = useState<ThemeMode>(initialBrand?.themeMode ?? 'light');
   const [themeOpen, setThemeOpen] = useState(false);
   const [zoneManagerOpen, setZoneManagerOpen] = useState(false);
   const [zones, setZones] = useState(INITIAL_SERVICE_ZONES);
@@ -125,7 +134,33 @@ export function PortalBusinessView({
         </PortalPanel>
 
         <PortalPanel title="Brand Appearance" eyebrow="Client app" action={<button className="portal-text-button type-body-bold" type="button" onClick={() => setThemeOpen(true)}>Choose Theme</button>}>
-          <div className={`portal-brand-preview portal-brand-preview--${mode}`}><span className="portal-brand-preview__mark">{logo ? <Image src={logo} alt="" width={48} height={48} unoptimized /> : initials}</span><div><strong className="type-title">{businessName || 'Your Business'}</strong><p className="type-caption">{theme} · {mode === 'light' ? 'Light' : 'Dark'}</p></div></div>
+          {(() => {
+            /* LIVE THEME PREVIEW: the card paints the tenant's selected
+               theme (canonical key -> --pa-theme-<slug>-* tokens + font, the
+               same tokens the live picker uses). Text colors are chosen per
+               mode for AA on the theme surface: dark mode = the shared
+               near-white preview text on the theme's dark surface; light
+               mode = the theme's dark ink on its pastel surface. */
+            const t = themeByName(theme);
+            const surface = mode === 'dark' ? `var(--pa-theme-${t.cssSlug}-dark)` : `var(--pa-theme-${t.cssSlug}-light)`;
+            const ink = mode === 'dark' ? 'var(--pa-theme-preview-dark-text)' : `var(--pa-theme-${t.cssSlug}-dark)`;
+            const markBg = mode === 'dark' ? `var(--pa-theme-${t.cssSlug}-light)` : `var(--pa-theme-${t.cssSlug}-dark)`;
+            const markInk = mode === 'dark' ? `var(--pa-theme-${t.cssSlug}-dark)` : `var(--pa-theme-${t.cssSlug}-light)`;
+            return (
+              <div
+                className={`portal-brand-preview portal-brand-preview--${mode}`}
+                style={{ background: surface, color: ink, fontFamily: `'${t.font}', var(--font-body)` }}
+              >
+                <span className="portal-brand-preview__mark" style={{ background: markBg, color: markInk }}>
+                  {logo ? <Image src={logo} alt="" width={48} height={48} unoptimized /> : initials}
+                </span>
+                <div>
+                  <strong className="type-title">{businessName || 'Your Business'}</strong>
+                  <p className="type-caption">{theme} · {mode === 'light' ? 'Light' : 'Dark'}</p>
+                </div>
+              </div>
+            );
+          })()}
           <p className="type-body">This uses the same live theme picker as the PetAppro Themes page.</p>
         </PortalPanel>
       </div>
@@ -213,8 +248,13 @@ export function PortalBusinessView({
       </div>}
 
       <PortalModal open={themeOpen} onClose={() => setThemeOpen(false)} eyebrow="Client App" title="Choose a Theme" wide>
-        <div className="portal-theme-picker"><ThemeGallery initialTheme={theme} initialMode={mode} allowedThemes={entitlements.themeAllowlist as readonly ThemeName[] | undefined} onChange={(nextTheme, nextMode) => { setTheme(nextTheme); setMode(nextMode); }} /></div>
-        <div className="portal-modal-actions"><button className="btn btn--cta type-button" type="button" onClick={() => setThemeOpen(false)}>Apply Theme</button></div>
+        <div className="portal-theme-picker"><ThemeGallery initialTheme={theme} initialMode={mode} allowedThemes={entitlements.themeAllowlist ? (themeNamesForKeys(entitlements.themeAllowlist) as readonly ThemeName[]) : undefined} onChange={(nextTheme, nextMode) => { setTheme(nextTheme); setMode(nextMode); }} /></div>
+        <div className="portal-modal-actions"><button className="btn btn--cta type-button" type="button" onClick={async () => {
+          setThemeOpen(false);
+          if (!saveTheme) return; // legacy unwired preview
+          const result = await saveTheme({ themeKey: themeByName(theme).key, themeMode: mode });
+          setNotice(result.error ? `Couldn't save theme: ${result.error}` : 'Theme saved — your client app now uses it.');
+        }}>Apply Theme</button></div>
       </PortalModal>
 
       <PortalZoneManager open={zoneManagerOpen} onClose={() => setZoneManagerOpen(false)} zones={zones} setZones={setZones} />

@@ -2372,3 +2372,11 @@
 [data-brand='petappro'] .portal-auth__providers-note {
   margin-top: var(--pa-space-2); text-align: center; color: var(--text-secondary);
 }
+
+/* ── Brand Appearance live preview (Profile & Brand card) ────────────────────
+   The card paints the tenant's SELECTED theme via inline vars; every text
+   node inherits the mode-correct ink so nothing (incl. the "Theme · Mode"
+   caption, previously dark-on-dark) can fall below AA on the theme surface. */
+[data-brand='petappro'] .portal-brand-preview .type-title,
+[data-brand='petappro'] .portal-brand-preview .type-caption { color: inherit; }
+[data-brand='petappro'] .portal-brand-preview .type-caption { opacity: 1; }

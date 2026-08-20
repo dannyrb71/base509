@@ -36,3 +36,52 @@ export async function saveBusinessProfile(input: {
   revalidatePath('/portal', 'layout');
   return { ok: true };
 }
+
+/**
+ * Persist the tenant's selected theme (canonical KEY + mode) into
+ * businesses.settings. The key must be in the SERVER-resolved effective
+ * entitlement allowlist (canonical keys from the DB projection — null means
+ * the full library), so a tampered request can't store a theme the tier
+ * doesn't include. Owner/Admin only (business config), RLS-enforced beneath.
+ */
+export async function saveBrandTheme(input: {
+  themeKey: string;
+  themeMode: string;
+}): Promise<{ ok?: boolean; error?: string }> {
+  const { isThemeKey } = await import('@/data/petappro-themes');
+  const ctx = await getPortalContext();
+  if (ctx.active.role !== 'owner' && ctx.active.role !== 'admin') {
+    return { error: 'Only Owners and Admins can change the client-app theme.' };
+  }
+  if (!isThemeKey(input.themeKey)) return { error: 'Unknown theme.' };
+  if (input.themeMode !== 'light' && input.themeMode !== 'dark') {
+    return { error: 'Theme mode must be light or dark.' };
+  }
+  const allowlist = ctx.entitlements.themeAllowlist;
+  if (allowlist !== null && !allowlist.includes(input.themeKey)) {
+    return { error: 'That theme isn’t included in your plan.' };
+  }
+
+  const { data: current, error: readError } = await ctx.supabase
+    .from('businesses')
+    .select('settings')
+    .eq('id', ctx.active.id)
+    .single();
+  if (readError) return { error: readError.message };
+
+  const settings = {
+    ...((current?.settings as Record<string, unknown>) ?? {}),
+    theme_key: input.themeKey,
+    theme_mode: input.themeMode,
+  };
+  const { error } = await ctx.supabase
+    .from('businesses')
+    .update({ settings })
+    .eq('id', ctx.active.id)
+    .select('id')
+    .single();
+  if (error) return { error: error.message };
+
+  revalidatePath('/portal', 'layout');
+  return { ok: true };
+}
