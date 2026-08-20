@@ -28,11 +28,15 @@ type PreviewVars = CSSProperties & Record<`--preview-${string}`, string>;
 export type ThemeName = (typeof THEMES)[number]['name'];
 export type ThemeMode = 'light' | 'dark';
 
-export function ThemeGallery({ initialTheme = 'Brandy Blue', initialMode = 'dark', onChange, allowedThemes }: {
+export function ThemeGallery({ initialTheme = 'Brandy Blue', initialMode = 'dark', onChange, allowedThemes, brand }: {
   initialTheme?: ThemeName;
   initialMode?: ThemeMode;
   onChange?: (theme: ThemeName, mode: ThemeMode) => void;
   allowedThemes?: readonly ThemeName[];
+  /** The tenant's brand for the screen mockup (portal): uploaded logo when
+   *  set, else a monogram chip — NEVER a broken image. Absent = the
+   *  marketing page's sample brand. */
+  brand?: { name: string; logoUrl?: string | null; monogram?: string };
 } = {}) {
   const [selectedName, setSelectedName] = useState<ThemeName>(initialTheme);
   const [mode, setMode] = useState<ThemeMode>(initialMode);
@@ -96,7 +100,20 @@ export function ThemeGallery({ initialTheme = 'Brandy Blue', initialMode = 'dark
         <div className="theme-phone-shell">
           <div className="theme-phone-screen">
             <div className="theme-phone-brand">
-              <Image src="/sample-brands/woof-wetreats/logo-horizontal.svg" alt="Woof Wetreats" width={143} height={32} />
+              {brand ? (
+                brand.logoUrl ? (
+                  // Tenant logo (may be a data: URL from the upload field).
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={brand.logoUrl} alt={`${brand.name} logo`} height={32} style={{ maxHeight: 32, width: 'auto' }} />
+                ) : (
+                  <>
+                    <span className="theme-phone-brand__monogram" aria-hidden="true">{brand.monogram ?? 'PA'}</span>
+                    <strong>{brand.name}</strong>
+                  </>
+                )
+              ) : (
+                <Image src="/sample-brands/woof-wetreats/logo-horizontal.svg" alt="Woof Wetreats" width={143} height={32} />
+              )}
             </div>
             <h3>Care for every pet</h3>
             <div className="theme-phone-services">

@@ -2396,3 +2396,10 @@
 [data-brand='petappro'] .portal-auth__label-row .type-label { margin-top: 0; }
 [data-brand='petappro'] .portal-auth__forgot { color: var(--text-accent); text-decoration: none; }
 [data-brand='petappro'] .portal-auth__forgot:hover { text-decoration: underline; }
+
+/* ── Theme-picker mockup: tenant monogram chip (no broken images, ever) ────── */
+[data-brand='petappro'] .theme-phone-brand__monogram {
+  display: grid; place-items: center; width: 32px; height: 32px;
+  border-radius: 999px; background: var(--preview-mid); color: #fff;
+  font: 700 13px/1 var(--preview-font); letter-spacing: 0.02em; flex: none;
+}

@@ -248,7 +248,7 @@ export function PortalBusinessView({
       </div>}
 
       <PortalModal open={themeOpen} onClose={() => setThemeOpen(false)} eyebrow="Client App" title="Choose a Theme" wide>
-        <div className="portal-theme-picker"><ThemeGallery initialTheme={theme} initialMode={mode} allowedThemes={entitlements.themeAllowlist ? (themeNamesForKeys(entitlements.themeAllowlist) as readonly ThemeName[]) : undefined} onChange={(nextTheme, nextMode) => { setTheme(nextTheme); setMode(nextMode); }} /></div>
+        <div className="portal-theme-picker"><ThemeGallery initialTheme={theme} initialMode={mode} allowedThemes={entitlements.themeAllowlist ? (themeNamesForKeys(entitlements.themeAllowlist) as readonly ThemeName[]) : undefined} brand={{ name: businessName || 'Your Business', logoUrl: logo || null, monogram: initials }} onChange={(nextTheme, nextMode) => { setTheme(nextTheme); setMode(nextMode); }} /></div>
         <div className="portal-modal-actions"><button className="btn btn--cta type-button" type="button" onClick={async () => {
           setThemeOpen(false);
           if (!saveTheme) return; // legacy unwired preview
