@@ -10,6 +10,15 @@ import { getPortalContext } from '@/lib/portal/session';
  * with the REAL tier — the portal renders the tenant's actual entitlements,
  * not the old demo default.
  */
+/**
+ * Never prerender the authenticated portal: without this, a build with NO
+ * portal env (e.g. Vercel before the vars are configured) throws the env
+ * check before cookies() can mark the tree dynamic, and next build dies
+ * prerendering /portal/* (seen on deploy dpl_EvAVATE…). Session-bound pages
+ * are request-time by nature.
+ */
+export const dynamic = 'force-dynamic';
+
 export default async function PortalAppLayout({ children }: { children: React.ReactNode }) {
   const ctx = await getPortalContext();
   return (
