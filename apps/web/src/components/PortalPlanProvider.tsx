@@ -79,8 +79,13 @@ export function PortalPlanProvider({
   const value = useMemo(() => {
     const entitlements = entitlementsFor(planKey);
     if (themeAllowlist !== undefined) {
+      // Same fail-closed shape check as session.ts (Codex round-6 P2): a
+      // runtime value that isn't a non-empty all-string array collapses to
+      // Starter, never to the full library.
       entitlements.themeAllowlist =
-        Array.isArray(themeAllowlist) && themeAllowlist.length > 0
+        Array.isArray(themeAllowlist) &&
+        themeAllowlist.length > 0 &&
+        themeAllowlist.every((k) => typeof k === 'string')
           ? themeAllowlist
           : ['brandy_blue'];
     }

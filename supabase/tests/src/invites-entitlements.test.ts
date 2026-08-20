@@ -412,6 +412,53 @@ describe('theme persistence boundary (Codex item 2)', () => {
     await admin.end()
   })
 
+  it('empty or brandy_blue-less allowlists fail closed on BOTH boundaries (Codex round-6 P1)', async () => {
+    const biz = await newBusiness()
+
+    // Write side: sync REJECTS such envelopes outright — never persisted.
+    await expectError(
+      setEntitlements(biz.businessId, { theme_allowlist: [] }),
+      /VALIDATION_FAILED.*theme_allowlist/,
+    )
+    await expectError(
+      setEntitlements(biz.businessId, { theme_allowlist: ['husky'] }),
+      /VALIDATION_FAILED.*theme_allowlist/,
+    )
+
+    // Read side: an INVALID allowlist that somehow reached storage resolves
+    // to the Starter envelope (['brandy_blue']), never to the raw value.
+    // Legitimize a crew row first, then corrupt only the allowlist column.
+    await setEntitlements(biz.businessId, {
+      theme_allowlist: ['brandy_blue', 'husky', 'chessie'],
+    })
+    const admin = await connect()
+    for (const bad of ['[]', '["husky"]']) {
+      await admin.query(
+        `update public.business_entitlements set theme_allowlist = $1::jsonb where business_id = $2`,
+        [bad, biz.businessId],
+      )
+      const eff = await admin.query(
+        `select app.effective_entitlements($1) -> 'theme_allowlist' as allowlist,
+                app.effective_entitlements($1) ->> 'tier_key' as tier`,
+        [biz.businessId],
+      )
+      expect(eff.rows[0].allowlist).toEqual(['brandy_blue']) // Starter fallback
+      expect(eff.rows[0].tier).toBe('starter')
+      // …and the RPC therefore refuses everything outside the safe default,
+      // while the safe default itself keeps working.
+      await asUser(biz.owner.sub, async (c) => {
+        await expectError(
+          c.query(`select public.set_business_theme($1, 'husky', 'dark')`, [biz.businessId]),
+          /THEME_NOT_ALLOWED/,
+        )
+        await c.query(`select public.set_business_theme($1, 'brandy_blue', 'light')`, [
+          biz.businessId,
+        ])
+      })
+    }
+    await admin.end()
+  })
+
   it('TOCTOU: an admin demoted while the RPC waits on the tenant lock is refused (Codex round-5 P1-2)', async () => {
     const biz = await newBusiness()
     await setEntitlements(biz.businessId, { theme_allowlist: FULL })
@@ -431,7 +478,24 @@ describe('theme persistence boundary (Codex item 2)', () => {
     const pending = rpcConn
       .query(`select public.set_business_theme($1, 'chessie', 'dark')`, [biz.businessId])
       .then(() => 'fulfilled', (e: Error) => `rejected: ${e.message}`)
-    await new Promise((resolve) => setTimeout(resolve, 200)) // let it reach the lock wait
+
+    // DETERMINISTIC sync point (Codex round-6 P1): wait until the RPC's
+    // backend is provably past its pre-lock auth check and blocked on the
+    // tenant row lock — pg_stat_activity reports it active on this query
+    // with a Lock wait_event. Only then is demote-then-commit a real TOCTOU.
+    const deadline = Date.now() + 10_000
+    for (;;) {
+      const waiting = await locker.query(
+        `select 1 from pg_stat_activity
+         where query like '%set_business_theme%'
+           and state = 'active'
+           and wait_event_type = 'Lock'
+           and pid <> pg_backend_pid()`,
+      )
+      if (waiting.rowCount) break
+      if (Date.now() > deadline) throw new Error('RPC backend never reached the tenant-lock wait')
+      await new Promise((resolve) => setTimeout(resolve, 20))
+    }
 
     // Demote the caller, then release the lock. The RPC's post-lock re-check
     // (fresh READ COMMITTED snapshot) must see the demotion and refuse.
