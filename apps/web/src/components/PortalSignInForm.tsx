@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
+import { PortalAuthProviders } from '@/components/PortalAuthProviders';
 import { createPortalBrowserClient } from '@/lib/portal/supabase-browser';
 
 /**
@@ -101,6 +102,8 @@ export function PortalSignInForm() {
           {state === 'busy' ? 'Signing in…' : 'Sign in'}
         </button>
       </form>
+      {/* A2 wires Google + Apple (+ passcode) here — launch requirement. */}
+      <PortalAuthProviders mode="sign-in" />
       <p className="type-caption portal-auth__alt">
         New here? <Link href="/portal/sign-up">Create your provider account</Link>
       </p>

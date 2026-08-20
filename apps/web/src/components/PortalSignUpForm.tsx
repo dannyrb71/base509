@@ -161,7 +161,7 @@ export function PortalSignUpForm() {
         </button>
       </form>
       {/* A2 wires Google + Apple (+ passcode) here — launch requirement. */}
-      <PortalAuthProviders />
+      <PortalAuthProviders mode="sign-up" />
       <p className="type-caption portal-auth__alt">
         Already have an account? <Link href="/portal/sign-in">Sign in</Link>
       </p>
