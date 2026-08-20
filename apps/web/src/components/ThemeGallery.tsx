@@ -70,9 +70,11 @@ export function ThemeGallery({ initialTheme = 'Brandy Blue', initialMode = 'dark
               <span className="theme-dot" style={{ background: item.mid }}>
                 <i style={{ background: item.light }} />
               </span>
-              <span className="theme-chip-copy">
-                <strong className="type-body-bold">{item.name}</strong>
-                <small className="type-caption">Font: {item.font}</small>
+              {/* Each swatch card renders in ITS OWN typeface (inline styles
+                  outrank the type classes' pinned font-family). */}
+              <span className="theme-chip-copy" style={{ fontFamily: `'${item.font}', sans-serif` }}>
+                <strong className="type-body-bold" style={{ fontFamily: 'inherit' }}>{item.name}</strong>
+                <small className="type-caption" style={{ fontFamily: 'inherit' }}>Font: {item.font}</small>
               </span>
               <span className="theme-mini-dots" aria-hidden="true">
                 {[item.light, item.mid, item.dark].map((color) => <i key={color} style={{ background: color }} />)}
