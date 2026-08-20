@@ -59,21 +59,34 @@ export function PortalPlanProvider({
   children,
   initialPlanKey = 'crew',
   business = null,
+  themeAllowlist,
 }: {
   children: ReactNode;
   /** Real tier from the server entitlement projection (A1); 'crew' remains
    *  only the legacy demo default for unwired previews. */
   initialPlanKey?: string;
   business?: PortalBusinessContext | null;
+  /** SERVER-PROJECTED effective allowlist (canonical keys; null = full
+   *  library). When provided it is AUTHORITATIVE — the matrix derivation
+   *  above is only the demo fallback for unwired previews (Codex item 2d:
+   *  the portal must render the DB projection, not a client re-derivation
+   *  that can drift from what set_business_theme will actually accept). */
+  themeAllowlist?: string[] | null;
 }) {
   const [planKey, setPlanKey] = useState(initialPlanKey);
-  const value = useMemo(() => ({
-    planKey,
-    setPlanKey,
-    tier: TIERS.find((tier) => tier.key === planKey) ?? TIERS[3],
-    entitlements: entitlementsFor(planKey),
-    business,
-  }), [planKey, business]);
+  const value = useMemo(() => {
+    const entitlements = entitlementsFor(planKey);
+    if (themeAllowlist !== undefined) {
+      entitlements.themeAllowlist = themeAllowlist ?? undefined;
+    }
+    return {
+      planKey,
+      setPlanKey,
+      tier: TIERS.find((tier) => tier.key === planKey) ?? TIERS[3],
+      entitlements,
+      business,
+    };
+  }, [planKey, business, themeAllowlist]);
   return <PortalPlanContext.Provider value={value}>{children}</PortalPlanContext.Provider>;
 }
 

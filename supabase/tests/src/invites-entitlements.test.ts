@@ -5,7 +5,7 @@
 // - Endpoint + DB negative gates; sync duplicate/out-of-order/stub-vs-master;
 //   paid→Starter over-limit; fail-closed
 import { afterAll, describe, expect, it } from 'vitest'
-import { asService, asUser, closeAll, connect, expectError, race, uuid } from './db'
+import { asService, asUser, become, closeAll, connect, expectError, race, uuid } from './db'
 import {
   addClient,
   addMember,
@@ -256,6 +256,212 @@ describe('business bootstrap slug + multi-business (Phase A 0a)', () => {
     )
     expect(Number(e.rows[0].n)).toBe(2)
     await admin.end()
+  })
+})
+
+describe('business bootstrap hardening (Codex re-review, permanent gate)', () => {
+  it('CONCURRENT same-account/same-key bootstrap: exactly 1 business, 1 Owner membership, 1 Starter entitlement', async () => {
+    const owner = await newAccount()
+    const key = uuid()
+    const { ok, errors } = await race(
+      Array.from({ length: 6 }, () => async (c: any) =>
+        c.query(`select public.create_business('Race Kennel', $1) as id`, [key])),
+      { sub: owner.sub },
+    )
+    expect(errors).toEqual([])
+    expect(ok).toBe(6) // idempotent: every call returns the same business
+    const admin = await connect()
+    const counts = await admin.query(
+      `select
+         (select count(*) from public.businesses where bootstrap_key = $1) as businesses,
+         (select count(*) from public.business_memberships m
+            join public.businesses b on b.id = m.business_id
+          where b.bootstrap_key = $1 and m.role = 'owner' and m.status = 'active') as owners,
+         (select count(*) from public.business_entitlements e
+            join public.businesses b on b.id = e.business_id
+          where b.bootstrap_key = $1 and e.tier_key = 'starter') as starter_rows`,
+      [key],
+    )
+    expect(counts.rows[0]).toEqual({ businesses: '1', owners: '1', starter_rows: '1' })
+    await admin.end()
+  })
+
+  it('a DIFFERENT account reusing the same idempotency key is DENIED', async () => {
+    const owner = await newAccount()
+    const key = uuid()
+    await asUser(owner.sub, (c) =>
+      c.query(`select public.create_business('Mine', $1)`, [key]),
+    )
+    const intruder = await newAccount()
+    await asUser(intruder.sub, async (c) => {
+      await expectError(
+        c.query(`select public.create_business('Not mine', $1)`, [key]),
+        /FORBIDDEN.*idempotency key/,
+      )
+    })
+    const admin = await connect()
+    const n = await admin.query(
+      `select count(*) as n from public.businesses where bootstrap_key = $1`, [key],
+    )
+    expect(Number(n.rows[0].n)).toBe(1)
+    await admin.end()
+  })
+})
+
+describe('theme persistence boundary (Codex item 2)', () => {
+  const CITY = 'san_fursisco'
+  const FULL = ['brandy_blue', 'husky', 'irish_setter', 'bichon_frise', 'blue_heeler', 'chessie',
+    'bark_avenue_ny', 'south_bark_miami', 'hollywoowoowood', 'san_fursisco']
+
+  it('allowed selection persists via the RPC (merge-preserving, audited)', async () => {
+    const biz = await newBusiness()
+    await setEntitlements(biz.businessId, { theme_allowlist: FULL })
+    const admin = await connect()
+    // Pre-seed an unrelated settings key to prove merge preservation.
+    await admin.query(
+      `update public.businesses set settings = '{"beta_flag": true}'::jsonb where id = $1`,
+      [biz.businessId],
+    )
+    await asUser(biz.owner.sub, (c) =>
+      c.query(`select public.set_business_theme($1, $2, 'dark')`, [biz.businessId, CITY]),
+    )
+    const row = await admin.query(`select settings from public.businesses where id = $1`, [
+      biz.businessId,
+    ])
+    expect(row.rows[0].settings.theme_key).toBe(CITY)
+    expect(row.rows[0].settings.theme_mode).toBe('dark')
+    expect(row.rows[0].settings.beta_flag).toBe(true) // unrelated key preserved
+    const audit = await admin.query(
+      `select count(*) as n from public.audit_events
+       where business_id = $1 and action = 'business.theme_change'`,
+      [biz.businessId],
+    )
+    expect(Number(audit.rows[0].n)).toBe(1)
+    await admin.end()
+  })
+
+  it('disallowed selection is refused at the DB (Starter picking a city theme)', async () => {
+    const biz = await newBusiness() // Starter: allowlist [brandy_blue]
+    await asUser(biz.owner.sub, async (c) => {
+      await expectError(
+        c.query(`select public.set_business_theme($1, $2, 'dark')`, [biz.businessId, CITY]),
+        /THEME_NOT_ALLOWED/,
+      )
+      await expectError(
+        c.query(`select public.set_business_theme($1, 'not_a_theme', 'dark')`, [biz.businessId]),
+        /VALIDATION_FAILED.*unknown theme/,
+      )
+      await expectError(
+        c.query(`select public.set_business_theme($1, 'brandy_blue', 'sepia')`, [biz.businessId]),
+        /VALIDATION_FAILED.*mode/,
+      )
+      // The safe default IS allowed on Starter.
+      await c.query(`select public.set_business_theme($1, 'brandy_blue', 'dark')`, [biz.businessId])
+    })
+  })
+
+  it('the direct settings write path is CLOSED for authenticated roles', async () => {
+    const biz = await newBusiness()
+    await asUser(biz.owner.sub, async (c) => {
+      await expectError(
+        c.query(
+          `update public.businesses set settings = '{"theme_key":"san_fursisco","theme_mode":"dark"}'::jsonb
+           where id = $1`,
+          [biz.businessId],
+        ),
+        /permission denied/,
+      )
+      // The legit profile columns still work.
+      await c.query(`update public.businesses set name = 'Still Mine' where id = $1`, [
+        biz.businessId,
+      ])
+    })
+  })
+
+  it('cross-tenant theme writes are refused (RPC selector proven, direct denied)', async () => {
+    const a = await newBusiness()
+    const b = await newBusiness()
+    await setEntitlements(b.businessId, { theme_allowlist: FULL })
+    await asUser(a.owner.sub, async (c) => {
+      await expectError(
+        c.query(`select public.set_business_theme($1, 'brandy_blue', 'light')`, [b.businessId]),
+        /FORBIDDEN/,
+      )
+      await expectError(
+        c.query(`update public.businesses set settings = '{}'::jsonb where id = $1`, [b.businessId]),
+        /permission denied/,
+      )
+    })
+  })
+
+  it('downgrade falls back a now-disallowed stored theme (same lock, audited)', async () => {
+    const biz = await newBusiness()
+    await setEntitlements(biz.businessId, { theme_allowlist: FULL })
+    await asUser(biz.owner.sub, (c) =>
+      c.query(`select public.set_business_theme($1, $2, 'dark')`, [biz.businessId, CITY]),
+    )
+    // Downgrade to Starter's allowlist.
+    await setEntitlements(biz.businessId, {
+      tier_key: 'starter', client_limit: 5, seat_limit: 1, theme_allowlist: ['brandy_blue'],
+    })
+    const admin = await connect()
+    const row = await admin.query(`select settings from public.businesses where id = $1`, [
+      biz.businessId,
+    ])
+    expect(row.rows[0].settings.theme_key).toBe('brandy_blue') // fell back
+    expect(row.rows[0].settings.theme_mode).toBe('dark') // mode untouched
+    const audit = await admin.query(
+      `select count(*) as n from public.audit_events
+       where business_id = $1 and action = 'business.theme_fallback'`,
+      [biz.businessId],
+    )
+    expect(Number(audit.rows[0].n)).toBe(1)
+    await admin.end()
+  })
+
+  it('CONCURRENT selection-vs-downgrade always lands in an allowed state', async () => {
+    for (let round = 0; round < 3; round++) {
+      const biz = await newBusiness()
+      await setEntitlements(biz.businessId, { theme_allowlist: FULL })
+      const downgradeEnvelope = {
+        source_system: 'base509_master',
+        event_id: uuid(),
+        source_version: 5000 + round,
+        operational_business_id: biz.businessId,
+        tier_key: 'starter',
+        capabilities: {},
+        client_limit: 5,
+        seat_limit: 1,
+        theme_allowlist: ['brandy_blue'],
+      }
+      const clients = await Promise.all([connect(), connect()])
+      try {
+        await become(clients[0]!, 'authenticated', { sub: biz.owner.sub })
+        await become(clients[1]!, 'service_role')
+        await Promise.allSettled([
+          clients[0]!.query(`select public.set_business_theme($1, $2, 'dark')`, [
+            biz.businessId, CITY,
+          ]),
+          clients[1]!.query(`select * from public.sync_entitlements($1)`, [
+            JSON.stringify(downgradeEnvelope),
+          ]),
+        ])
+      } finally {
+        for (const c of clients) await c.end().catch(() => {})
+      }
+      // Invariant regardless of interleaving: the stored theme is in the
+      // FINAL effective allowlist.
+      const admin = await connect()
+      const check = await admin.query(
+        `select (app.effective_entitlements($1) -> 'theme_allowlist')
+                  ? coalesce(b.settings ->> 'theme_key', 'brandy_blue') as allowed,
+                b.settings ->> 'theme_key' as stored
+         from public.businesses b where b.id = $1`,
+        [biz.businessId],
+      )
+      expect(check.rows[0].allowed, `round ${round}: stored=${check.rows[0].stored}`).toBe(true)
+      await admin.end()
+    }
   })
 })
 

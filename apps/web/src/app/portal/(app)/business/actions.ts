@@ -38,11 +38,13 @@ export async function saveBusinessProfile(input: {
 }
 
 /**
- * Persist the tenant's selected theme (canonical KEY + mode) into
- * businesses.settings. The key must be in the SERVER-resolved effective
- * entitlement allowlist (canonical keys from the DB projection — null means
- * the full library), so a tampered request can't store a theme the tier
- * doesn't include. Owner/Admin only (business config), RLS-enforced beneath.
+ * Persist the tenant's selected theme (canonical KEY + mode) via the typed
+ * `set_business_theme` RPC — the ONLY write path to settings.theme_*. The
+ * RPC re-derives the actor from the session JWT, requires Owner/Admin, locks
+ * the tenant row, and re-reads the EFFECTIVE entitlement allowlist under
+ * that lock before persisting (direct UPDATE(settings) is revoked, so a
+ * hand-rolled request can't bypass it). The checks here are only friendlier
+ * errors ahead of the authoritative DB enforcement.
  */
 export async function saveBrandTheme(input: {
   themeKey: string;
@@ -62,25 +64,17 @@ export async function saveBrandTheme(input: {
     return { error: 'That theme isn’t included in your plan.' };
   }
 
-  const { data: current, error: readError } = await ctx.supabase
-    .from('businesses')
-    .select('settings')
-    .eq('id', ctx.active.id)
-    .single();
-  if (readError) return { error: readError.message };
-
-  const settings = {
-    ...((current?.settings as Record<string, unknown>) ?? {}),
-    theme_key: input.themeKey,
-    theme_mode: input.themeMode,
-  };
-  const { error } = await ctx.supabase
-    .from('businesses')
-    .update({ settings })
-    .eq('id', ctx.active.id)
-    .select('id')
-    .single();
-  if (error) return { error: error.message };
+  const { error } = await ctx.supabase.rpc('set_business_theme', {
+    p_business_id: ctx.active.id,
+    p_theme_key: input.themeKey,
+    p_theme_mode: input.themeMode,
+  });
+  if (error) {
+    if (error.message.includes('THEME_NOT_ALLOWED')) {
+      return { error: 'That theme isn’t included in your plan.' };
+    }
+    return { error: error.message };
+  }
 
   revalidatePath('/portal', 'layout');
   return { ok: true };

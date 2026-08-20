@@ -1571,6 +1571,14 @@ export type Database = {
         Args: { p_business_id: string; p_invite_id: string }
         Returns: undefined
       }
+      set_business_theme: {
+        Args: {
+          p_business_id: string
+          p_theme_key: string
+          p_theme_mode: string
+        }
+        Returns: undefined
+      }
       set_calendar_day: {
         Args: {
           p_all_services_blocked: boolean

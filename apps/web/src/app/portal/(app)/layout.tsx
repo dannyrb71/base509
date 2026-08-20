@@ -24,6 +24,7 @@ export default async function PortalAppLayout({ children }: { children: React.Re
   return (
     <PortalPlanProvider
       initialPlanKey={ctx.entitlements.planKey}
+      themeAllowlist={ctx.entitlements.themeAllowlist}
       business={{
         id: ctx.active.id,
         name: ctx.active.name,
