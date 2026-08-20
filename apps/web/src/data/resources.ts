@@ -21,7 +21,7 @@ export type ResourceSection = {
   description: string;
   /** Route inside the petappro brand tree (petappro.com strips the prefix via D-056). */
   route: string;
-  /** Small emoji/icon shown on the hub card (optional). */
+  /** Optional design-system icon path shown on the hub card. */
   icon?: string;
   /** The launch flag — see visibility model above. */
   visible: boolean;
@@ -34,7 +34,6 @@ export const RESOURCE_SECTIONS: ResourceSection[] = [
     description:
       'Practical reads for dog-care businesses — pricing, capacity, client care, and running the operation without losing your evenings.',
     route: '/petappro/resources/articles',
-    icon: '📰',
     visible: true,
   },
   {
@@ -43,7 +42,6 @@ export const RESOURCE_SECTIONS: ResourceSection[] = [
     description:
       'Step-by-step walkthroughs — longer, structured how-tos you can follow start to finish.',
     route: '/petappro/resources/guides',
-    icon: '🧭',
     // DARK until the first guides are written (portal how-tos wait for the portal).
     visible: false,
   },
@@ -53,7 +51,6 @@ export const RESOURCE_SECTIONS: ResourceSection[] = [
     description:
       'Curated tools, templates, and outside resources we actually recommend.',
     route: '/petappro/resources/toolbox',
-    icon: '🧰',
     // DARK until the link list is curated.
     visible: false,
   },

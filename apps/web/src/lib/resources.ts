@@ -29,6 +29,11 @@ export type ResourceDoc = {
   date: string;
   author?: string;
   coverImage?: string;
+  /** Meaningful cover description when the image conveys article content. */
+  coverImageAlt?: string;
+  coverImageWidth?: number;
+  coverImageHeight?: number;
+  coverImageUnoptimized?: boolean;
   seo?: { title?: string; description?: string };
   published: boolean;
   /** Raw MDX body (frontmatter stripped). */
@@ -93,6 +98,10 @@ function parseDoc(section: 'articles' | 'guides', file: string): ResourceDoc {
     date: String(data.date ?? ''),
     author: typeof data.author === 'string' ? data.author : undefined,
     coverImage: typeof data.coverImage === 'string' ? data.coverImage : undefined,
+    coverImageAlt: typeof data.coverImageAlt === 'string' ? data.coverImageAlt : undefined,
+    coverImageWidth: typeof data.coverImageWidth === 'number' ? data.coverImageWidth : undefined,
+    coverImageHeight: typeof data.coverImageHeight === 'number' ? data.coverImageHeight : undefined,
+    coverImageUnoptimized: data.coverImageUnoptimized === true,
     seo:
       data.seo && typeof data.seo === 'object'
         ? {

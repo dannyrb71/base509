@@ -145,12 +145,12 @@ export function ResourceArticle({ doc }: { doc: ResourceDoc }) {
             <div className="res-cover">
               <Image
                 src={doc.coverImage}
-                alt=""
-                width={1440}
-                height={720}
+                alt={doc.coverImageAlt ?? ''}
+                width={doc.coverImageWidth ?? 1440}
+                height={doc.coverImageHeight ?? 720}
                 priority
                 sizes="(max-width: 760px) 100vw, 960px"
-                unoptimized={doc.coverImage.endsWith('.svg')}
+                unoptimized={doc.coverImageUnoptimized || doc.coverImage.endsWith('.svg')}
               />
             </div>
           )}

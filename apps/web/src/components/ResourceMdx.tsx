@@ -6,8 +6,9 @@ import type { ReactNode } from 'react';
  * (Resources build spec, 2026-08-19). Anything beyond these is plain
  * Markdown — keep the authoring surface small and unbreakable.
  *
- * Inline images live in public/resources/<slug>/… and are referenced with
- * absolute public paths, e.g. src="/resources/my-article/kennel.png".
+ * PetAppro inline images live in public/brands/petappro.com/resources/<slug>/…
+ * so multi-domain middleware treats them as static assets. Reference them with
+ * absolute public paths, e.g. src="/brands/petappro.com/resources/my-article/kennel.png".
  */
 
 /** Single image with required alt text and an optional caption. */
@@ -17,12 +18,14 @@ export function Figure({
   caption,
   width = 1200,
   height = 800,
+  unoptimized = false,
 }: {
   src: string;
   alt: string;
   caption?: string;
   width?: number;
   height?: number;
+  unoptimized?: boolean;
 }) {
   if (!alt) {
     // alt is required by the spec; fail loudly at build (static generation)
@@ -37,7 +40,7 @@ export function Figure({
         width={width}
         height={height}
         sizes="(max-width: 760px) 100vw, 720px"
-        unoptimized={src.endsWith('.svg')}
+        unoptimized={unoptimized || src.endsWith('.svg')}
       />
       {caption && <figcaption className="type-caption">{caption}</figcaption>}
     </figure>
