@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import { createPortalBrowserClient } from '@/lib/portal/supabase-browser';
+import { IconEnvelope } from '@/components/icons/IconEnvelope';
 
 /**
  * Password recovery request (A1 gap fix — launch requirement).
@@ -57,7 +58,7 @@ export function PortalForgotPasswordForm() {
   if (state === 'sent') {
     return (
       <div className="portal-auth__success" role="status">
-        <h1 className="type-title-lg">Check your email 📬</h1>
+        <h1 className="type-title-lg">Check your email <IconEnvelope className="portal-auth__inline-icon" /></h1>
         <p className="type-body">
           If an account exists for <strong>{email}</strong>, we&rsquo;ve sent a link to
           reset its password. The link works once and expires after a while.

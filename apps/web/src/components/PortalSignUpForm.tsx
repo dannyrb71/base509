@@ -5,6 +5,7 @@ import { useRef, useState } from 'react';
 import { PasswordInput } from '@/components/PasswordInput';
 import { createPortalBrowserClient } from '@/lib/portal/supabase-browser';
 import { PortalAuthProviders } from '@/components/PortalAuthProviders';
+import { IconEnvelope } from '@/components/icons/IconEnvelope';
 
 /**
  * Provider sign-up (A1 step 2). Email/password with REQUIRED email
@@ -76,7 +77,7 @@ export function PortalSignUpForm() {
   if (state === 'check-email') {
     return (
       <div className="portal-auth__success" role="status">
-        <h1 className="type-title-lg">Check your email 📬</h1>
+        <h1 className="type-title-lg">Check your email <IconEnvelope className="portal-auth__inline-icon" /></h1>
         <p className="type-body">
           We sent a verification link to <strong>{email}</strong>. Open it to finish
           creating your account — the portal unlocks once your email is verified.

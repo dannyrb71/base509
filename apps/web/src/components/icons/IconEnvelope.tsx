@@ -1,0 +1,23 @@
+/**
+ * Design-system envelope (design-system/assets/icons/icon-envelope.svg),
+ * inlined so it colors via currentColor — pair with a class that sets
+ * `color: var(--pa-brand-accent)` to render the canonical accent green.
+ * Decorative by default (aria-hidden): it accompanies copy, never replaces it.
+ */
+export function IconEnvelope({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 297 212"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path
+        d="M38.6481 212H262.044C284.076 212 297 199.211 297 173.88V38.1207C297 12.7889 283.953 0 258.351 0H34.9556C12.9237 0 0 12.7889 0 38.1207V173.88C0 199.211 13.0469 212 38.6481 212ZM37.9095 193.186C25.7244 193.186 18.8317 186.423 18.8317 173.757V37.9976C18.8317 25.4548 25.7244 18.8144 37.9095 18.8144H258.967C271.152 18.8144 278.168 25.4548 278.168 38.1207V173.88C278.168 186.423 271.152 193.186 258.967 193.186H37.9095ZM148.438 138.341C156.315 138.341 163.946 135.39 170.963 128.995L286.783 24.8399L273.983 11.9281L160.254 114.362C156.438 117.805 152.5 119.404 148.438 119.404C144.377 119.404 140.438 117.805 136.622 114.362L22.8935 11.9281L10.0928 24.8399L125.914 128.995C132.93 135.39 140.56 138.341 148.438 138.341ZM24.7397 196.26L112.129 108.828L99.328 96.0395L11.9391 183.348L24.7397 196.26ZM272.382 196.383L285.184 183.471L197.671 96.0395L184.748 108.828L272.382 196.383Z"
+        fill="currentColor"
+      />
+    </svg>
+  );
+}

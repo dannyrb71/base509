@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { PortalAuthProviders } from '@/components/PortalAuthProviders';
 import { PasswordInput } from '@/components/PasswordInput';
 import { createPortalBrowserClient } from '@/lib/portal/supabase-browser';
+import { IconEnvelope } from '@/components/icons/IconEnvelope';
 
 /**
  * Provider sign-in (A1 step 3). Email/password → cookie session → the
@@ -65,7 +66,7 @@ export function PortalSignInForm() {
           open the link we emailed you.
         </p>
         {state === 'resent' ? (
-          <p className="type-body">A fresh link is on its way. 📬</p>
+          <p className="type-body">A fresh link is on its way. <IconEnvelope className="portal-auth__inline-icon" /></p>
         ) : (
           <button className="btn btn--secondary type-button" type="button" onClick={resend}>
             Send a new link

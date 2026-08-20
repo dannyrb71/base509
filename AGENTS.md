@@ -21,6 +21,7 @@ A native iOS + Android booking platform (Expo/React Native) with a **multi-tenan
 7. Molecules rule: no one-off UI patches; shared components only.
 8. No secrets in the bundle or repo.
 9. Payments: booking = Stripe Connect (Standard, provider-owned); SaaS subscription sold on **web only** (never iOS IAP).
+10. **No emoji in UI copy** (Danny, 2026-08-19 — off-brand). Anything a user can see — headings, body copy, buttons, empty/success states, emails — uses words and design-system icons (`design-system/assets/icons/`, inlined with `fill="currentColor"` + a brand token), never emoji. Code comments and internal docs are exempt.
 
 ## What to check in every review
 - Does pricing/booking behavior match the regression tests? Any divergence between client preview, staff edit, and server booking?

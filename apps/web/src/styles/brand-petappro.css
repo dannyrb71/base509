@@ -2410,3 +2410,8 @@
   border-radius: 999px; background: var(--preview-mid); color: #fff;
   font: 700 13px/1 var(--preview-font); letter-spacing: 0.02em; flex: none;
 }
+
+/* Inline icon sitting inside auth copy (replaces the old mailbox emoji):
+   em-sized so it tracks the heading or body type it accompanies, brand
+   accent via token so a theme/brand change recolors it with everything else. */
+[data-brand='petappro'] .portal-auth__inline-icon { display: inline-block; height: 0.78em; width: auto; color: var(--pa-brand-accent); vertical-align: -0.04em; margin-left: 0.3em; }
