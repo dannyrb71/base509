@@ -40,6 +40,13 @@ When reviewing a token file (`design-system/tokens/*.tokens.json`) or a componen
 
 Output findings by severity — **Blocker / Should-fix / Nit** — each with exact file + location and a concrete fix. End with a one-line verdict: **CHANGES-NEEDED** or **READY-FOR-GOVERNOR** (Danny's call, not yours).
 
+## Content authoring (Resources articles/guides)
+Marketing-site Resources content is MDX under `apps/web/content/resources/<articles|guides>/<slug>.mdx`, rendered by the pipeline in `apps/web/src/lib/resources.ts` + `ResourceMdx.tsx`. Conventions (the build enforces most of these — a violation fails `next build`, never ships a broken page):
+- **Frontmatter contract:** `title`, `slug` (must match the filename), `excerpt`, `section` (`articles` | `guides`), `category`, `audience` (`owner` | `provider` | `both`), `date` (`YYYY-MM-DD`), `author`, optional `coverImage` (+ `coverImageAlt`, `coverImageWidth`/`coverImageHeight`, `coverImageUnoptimized`), optional `seo.title`/`seo.description`.
+- **`published: true` is the ONLY thing that makes content public.** False or missing → excluded from every index and route. A published item missing required frontmatter fails the build. Flipping `published` to true is a Danny-approval gate, same as a deploy.
+- **Images** live in `public/brands/petappro.com/resources/<slug>/…` and are referenced by absolute public path. Use the MDX components — `<Figure>` (alt text REQUIRED; build-errors without it), `<ImageRow>` (two figures, stacks on mobile), `<Callout>` — never raw `<img>`.
+- **Copy rules:** golden rule 10 applies (no emoji); factual/safety content (recalls, health) must cite its primary source and date within the body; no legal copy is authored here (policies pipeline owns that, `src/lib/policies.ts`).
+
 ## Roadmap awareness
 Critical path: pricing extraction → tenant schema → Expo booking flow → beta → **submit ~Sep 10** → **launch Oct 1**. Store accounts (D-U-N-S, Apple/Google org) run in parallel and must start early August. If a milestone slips, escalate with the de-scope order from the roadmap doc (cut QuickBooks/reports/SMS/white-label polish before ever cutting tenancy, RBAC/RLS, the shared pricing package, or its tests).
 
