@@ -1,6 +1,8 @@
 import Image from 'next/image';
 import { CardCarousel } from '@/components/CardCarousel';
 import { Section, Eyebrow, Btn, Card } from '@/components/ui';
+import { ResourceCard } from '@/components/ResourcePages';
+import { listPublished } from '@/lib/resources';
 
 const featureCards = [
   {
@@ -42,6 +44,7 @@ const themes = [
 ];
 
 export default function PetApproHome() {
+  const homeArticles = listPublished('articles').slice(0, 3);
   return (
     <div className="petappro-home">
       <Section id="home-hero">
@@ -196,6 +199,27 @@ export default function PetApproHome() {
           <Btn href="/petappro/pricing" variant="secondary">See all plans</Btn>
         </div>
       </Section>
+
+      {homeArticles.length > 0 && (
+        <Section id="home-articles" tint>
+          <div className="home-section-heading">
+            <Eyebrow>Articles</Eyebrow>
+            <h2 className="type-headline">
+              The latest from<br className="home-mobile-break" />{' '}PetAppro
+            </h2>
+          </div>
+          {/* Always a 3-column grid: fewer than 3 published articles leaves
+              the remaining slot(s) open (Danny: the space waits for #3). */}
+          <div className="grid grid--3 res-grid">
+            {homeArticles.map((doc) => (
+              <ResourceCard key={doc.slug} doc={doc} />
+            ))}
+          </div>
+          <div className="home-centered-action">
+            <Btn href="/petappro/resources/articles" variant="secondary">Read more articles</Btn>
+          </div>
+        </Section>
+      )}
 
       <Section id="home-final-cta" inverse tight>
         <h2 className="type-headline">
