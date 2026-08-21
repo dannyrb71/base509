@@ -820,6 +820,26 @@ const POLICY_REGISTRY: Array<{ table: string; policy: string; cmd: string; roles
 ]
 
 describe('RLS policy registry (A2 round-2 — exact identities, not table names)', () => {
+  // The behavioral probe surface, DERIVED from the same CAPACITY_TABLES
+  // source the probes iterate, plus the four singleton probes below. The
+  // coupling test asserts this equals the admin-classified registry
+  // exactly — classify a new policy 'admin' and the suite fails until a
+  // probe covers it (Codex round-2 re-review #2, item 1).
+  const ADMIN_PROBE_COVERAGE: string[] = [
+    ...CAPACITY_TABLES.flatMap((t) => ['INSERT', 'UPDATE', 'DELETE'].map((cmd) => `${t}|${cmd}`)),
+    'businesses|UPDATE',
+    'audit_events|SELECT',
+    'business_invite_codes|SELECT',
+    'business_memberships|SELECT',
+  ]
+
+  it('every admin-classified policy has a behavioral probe (coverage == registry)', () => {
+    const adminPolicies = POLICY_REGISTRY.filter((r) => r.cls === 'admin').map(
+      (r) => `${r.table}|${r.cmd}`,
+    )
+    expect([...adminPolicies].sort()).toEqual([...ADMIN_PROBE_COVERAGE].sort())
+  })
+
   it('REGISTRY == pg_policies on (table, policy, command, roles)', async () => {
     const admin = await connect()
     const rows = await admin.query(

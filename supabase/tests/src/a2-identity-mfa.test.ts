@@ -203,28 +203,8 @@ describe('AAL2 enforcement — typed ops (require_role admin+, catalog-backed)',
 })
 
 describe('AAL2 enforcement — direct RLS paths (has_role admin+, catalog-backed)', () => {
-  it('the admin-gated policy catalog is fully classified', async () => {
-    // Every policy whose guard uses has_role(..., 'admin') — a new one must
-    // be added here (and covered below) or this fails.
-    const EXPECTED_POLICY_TABLES = [
-      'audit_events', // admin-only audit reads
-      'availability_conflict_groups', 'business_invite_codes', 'business_memberships',
-      'business_service_zones', 'business_services', 'businesses', 'capacity_groups',
-      'service_member_capacity_defaults', 'service_window_assignment_zones',
-      'service_window_assignments', 'service_window_zones', 'service_windows', 'service_zones',
-    ]
-    const admin = await connect()
-    const rows = await admin.query(
-      `select distinct tablename
-       from pg_policies
-       where schemaname = 'public'
-         and (coalesce(qual, '') like '%has_role%''admin''%'
-           or coalesce(with_check, '') like '%has_role%''admin''%')
-       order by tablename`,
-    )
-    expect(rows.rows.map((r) => r.tablename as string).sort()).toEqual([...EXPECTED_POLICY_TABLES].sort())
-    await admin.end()
-  })
+  // (The former table-name policy check lived here — superseded by the exact
+  // POLICY_REGISTRY equality + probe-coverage coupling in tenancy-rls.test.ts.)
 
   it('has_role itself: admin rank fails closed below AAL2; staff rank unaffected', async () => {
     const biz = await newBusiness()
@@ -462,17 +442,44 @@ describe('auth passthrough views — frozen surface (Codex round-2 item 3)', () 
       { table_name: 'gotrue_identities', column_name: 'provider' },
       { table_name: 'gotrue_verified_totp', column_name: 'user_id' },
     ])
+    // FULL privilege vector (Codex round-2 #2): these are potentially-
+    // updatable views — the freeze must catch an accidental DML grant, not
+    // just a SELECT one. cfg1_owner: SELECT only. API roles: nothing.
+    const PRIVS = ['SELECT', 'INSERT', 'UPDATE', 'DELETE', 'TRUNCATE', 'REFERENCES', 'TRIGGER'] as const
     for (const v of ['gotrue_identities', 'gotrue_verified_totp']) {
-      const acl = await admin.query(
-        `select
-           has_table_privilege('cfg1_owner', 'app.${v}', 'select') as owner_sel,
-           has_table_privilege('anon', 'app.${v}', 'select') as anon_sel,
-           has_table_privilege('authenticated', 'app.${v}', 'select') as auth_sel,
-           has_table_privilege('service_role', 'app.${v}', 'select') as svc_sel`,
-      )
-      expect(acl.rows[0]).toEqual({ owner_sel: true, anon_sel: false, auth_sel: false, svc_sel: false })
+      for (const role of ['cfg1_owner', 'anon', 'authenticated', 'service_role'] as const) {
+        for (const priv of PRIVS) {
+          const r = await admin.query(`select has_table_privilege($1, $2, $3) as ok`, [
+            role, `app.${v}`, priv,
+          ])
+          const expected = role === 'cfg1_owner' && priv === 'SELECT'
+          if (r.rows[0].ok !== expected) {
+            throw new Error(`app.${v}: ${role} ${priv} = ${r.rows[0].ok}, expected ${expected}`)
+          }
+        }
+      }
     }
     await admin.end()
+  })
+
+  it('every DML verb on the views is DENIED outright for every API role', async () => {
+    for (const role of ['anon', 'authenticated', 'service_role'] as const) {
+      const c = await connect()
+      await become(c, role, role === 'anon' ? {} : { sub: uuid() })
+      for (const v of ['gotrue_identities', 'gotrue_verified_totp']) {
+        await expectError(c.query(`select * from app.${v} limit 1`), /permission denied/)
+        await expectError(
+          c.query(`insert into app.${v} (user_id) values (gen_random_uuid())`),
+          /permission denied/,
+        )
+        await expectError(
+          c.query(`update app.${v} set user_id = user_id`),
+          /permission denied/,
+        )
+        await expectError(c.query(`delete from app.${v}`), /permission denied/)
+      }
+      await c.end()
+    }
   })
 
   it('cross-subject isolation: syncing A never reads or reports B state', async () => {
