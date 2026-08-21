@@ -81,8 +81,10 @@ grant execute on function auth.uid(), auth.jwt(), auth.role() to anon, authentic
 
 -- Supabase's default privileges: api roles can use objects in public unless
 -- migrations revoke them (CFG-1 revokes explicitly, which the tests verify).
+-- Matches the PROJECT's hardened posture (see 20260816090000): anon gets
+-- NO default table privileges — only explicit grants (waitlist INSERT).
 alter default privileges in schema public
-  grant all on tables to anon, authenticated, service_role;
+  grant all on tables to authenticated, service_role;
 alter default privileges in schema public
   grant all on functions to anon, authenticated, service_role;
 alter default privileges in schema public

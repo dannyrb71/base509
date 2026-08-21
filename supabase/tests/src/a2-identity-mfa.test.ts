@@ -40,19 +40,82 @@ describe('AAL2 enforcement — typed ops (require_role admin+, catalog-backed)',
     set_business_theme: (b) => [`select public.set_business_theme($1, 'brandy_blue', 'dark')`, [b]],
   }
 
-  it('the classification is EXHAUSTIVE: every require_role-admin caller in the catalog is listed', async () => {
+  // ── FULL client-executable FUNCTION REGISTRY (Codex round-2 item 1) ──────
+  // Every function in public/app/test_harness executable by any API role,
+  // registered by FULL identity signature with an authority class. The
+  // equality test compares this against the live pg_proc catalog — a new,
+  // renamed, or re-signatured client-executable function fails the gate
+  // until classified. 'admin'-classified functions are exactly the AAL
+  // sweep set (cross-checked against ADMIN_OPS below), so helper
+  // indirection or hand-rolled checks can't dodge the sweep by dodging a
+  // source-text pattern.
+  const FUNCTION_REGISTRY: Record<string, string> = {
+    // app schema — caller-context helpers (RLS/RPC building blocks)
+    'app.capacity_check_human_override(p_business_id uuid, p_business_service_id uuid, p_start_date date, p_end_date date, p_pet_count integer, p_service_window_id uuid, p_service_zone_id uuid, p_exclude_booking_id uuid, p_reason text)': 'manager',
+    'app.client_business_ids()': 'helper',
+    'app.current_base509_account_id()': 'helper',
+    'app.current_client_id(p_business_id uuid)': 'helper',
+    'app.current_membership(p_business_id uuid)': 'helper',
+    'app.has_capability(p_business_id uuid, p_capability text)': 'helper',
+    'app.has_role(p_business_id uuid, p_min_role membership_role)': 'helper',
+    'app.member_business_ids()': 'helper',
+    'app.require_account()': 'helper',
+    'app.require_role(p_business_id uuid, p_min_role membership_role)': 'helper',
+    'app.role_rank(p_role membership_role)': 'helper',
+    // public schema — typed ops by minimum authority
+    'public.bootstrap_account()': 'account',
+    'public.change_membership_role(p_business_id uuid, p_membership_id uuid, p_new_role membership_role)': 'admin',
+    'public.create_business(p_name text, p_idempotency_key uuid, p_timezone text, p_currency text)': 'account',
+    'public.create_client(p_business_id uuid, p_display_name text, p_emergency_contact jsonb, p_vet_info jsonb)': 'admin',
+    'public.create_invite(p_business_id uuid, p_type text, p_target_role membership_role, p_max_uses integer, p_expires_at timestamp with time zone)': 'admin',
+    'public.effective_availability(p_business_id uuid, p_business_service_id uuid, p_start_date date, p_end_date date, p_service_window_id uuid, p_service_zone_id uuid, p_pet_count integer)': 'staff',
+    'public.get_effective_entitlements(p_business_id uuid)': 'member',
+    'public.reactivate_client(p_business_id uuid, p_client_id uuid)': 'admin',
+    'public.reactivate_member(p_business_id uuid, p_membership_id uuid)': 'admin',
+    'public.redeem_invite(p_token text)': 'account',
+    // remove_member: removing ANOTHER member is admin (swept); removing
+    // yourself is staff-level by design (pinned by its own test below).
+    'public.remove_member(p_business_id uuid, p_membership_id uuid)': 'admin',
+    'public.reset_day_override(p_business_id uuid, p_kind text, p_target_id uuid, p_service_date date)': 'admin',
+    'public.revoke_invite(p_business_id uuid, p_invite_id uuid)': 'admin',
+    'public.set_business_theme(p_business_id uuid, p_theme_key text, p_theme_mode text)': 'admin',
+    'public.set_calendar_day(p_business_id uuid, p_service_date date, p_all_services_blocked boolean, p_holiday_pricing text, p_note text)': 'admin',
+    'public.set_client_status(p_business_id uuid, p_client_id uuid, p_status client_status, p_reason text)': 'admin',
+    'public.set_occurrence_care_status(p_business_id uuid, p_occurrence_id uuid, p_status text)': 'staff',
+    'public.set_pool_day_override(p_business_id uuid, p_capacity_group_id uuid, p_service_date date, p_pool_limit_override integer)': 'admin',
+    'public.set_service_day_override(p_business_id uuid, p_business_service_id uuid, p_service_date date, p_is_available boolean, p_service_limit_override integer)': 'admin',
+    'public.set_window_day_override(p_business_id uuid, p_service_window_id uuid, p_service_date date, p_is_available boolean, p_assignments jsonb)': 'admin',
+    'public.sync_entitlements(p_envelope jsonb)': 'machine',
+    'public.sync_identity_audit()': 'account',
+    'public.team_directory(p_business_id uuid)': 'staff',
+    // test_harness — local suite plumbing (never in a hosted migration)
+    'test_harness.cancel_booking(p_business_id uuid, p_booking_id uuid)': 'harness',
+    'test_harness.reserve_fixture(p_business_id uuid, p_business_service_id uuid, p_client_id uuid, p_start_date date, p_end_date date, p_pet_count integer, p_service_window_id uuid, p_service_zone_id uuid, p_status text)': 'harness',
+    'test_harness.reserve_fixture_over_capacity(p_business_id uuid, p_business_service_id uuid, p_client_id uuid, p_start_date date, p_end_date date, p_pet_count integer, p_service_window_id uuid, p_service_zone_id uuid, p_reason text)': 'harness',
+  }
+
+  it('REGISTRY == CATALOG: every client-executable function is classified by full signature', async () => {
     const admin = await connect()
     const rows = await admin.query(
-      `select p.proname
-       from pg_proc p
-       join pg_namespace n on n.oid = p.pronamespace
-       where n.nspname = 'public'
-         and p.prosrc like '%require_role(%''admin''%'
-       order by p.proname`,
+      `select n.nspname || '.' || p.proname || '(' || pg_get_function_identity_arguments(p.oid) || ')' as sig
+       from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+       where n.nspname in ('public', 'app', 'test_harness')
+         and (has_function_privilege('anon', p.oid, 'execute')
+           or has_function_privilege('authenticated', p.oid, 'execute')
+           or has_function_privilege('service_role', p.oid, 'execute'))`,
     )
-    expect(rows.rows.map((r) => r.proname).sort()).toEqual(Object.keys(ADMIN_OPS).sort())
+    expect(rows.rows.map((r) => r.sig as string).sort()).toEqual(Object.keys(FUNCTION_REGISTRY).sort())
     await admin.end()
   })
+
+  it('the ADMIN sweep set is exactly the admin-classified registry entries', () => {
+    const adminClassified = Object.keys(FUNCTION_REGISTRY)
+      .filter((sig) => FUNCTION_REGISTRY[sig] === 'admin')
+      .map((sig) => sig.replace(/^public\./, '').replace(/\(.*$/, ''))
+      .sort()
+    expect(Object.keys(ADMIN_OPS).sort()).toEqual(adminClassified)
+  })
+
 
   it('ALL 14 admin ops refuse AAL1 with MFA_REQUIRED (and AAL2 clears the gate)', async () => {
     const biz = await newBusiness()
@@ -371,5 +434,77 @@ describe('identity binding invariant (A2.3 — PRODUCT RULING: bind on verified 
     )
     expect(Number(n.rows[0].n)).toBe(1) // one (issuer, subject) mapping row
     await accounts.end()
+  })
+})
+
+describe('auth passthrough views — frozen surface (Codex round-2 item 3)', () => {
+  it('ownership, exact columns, and ACLs are pinned', async () => {
+    const admin = await connect()
+    // Owned by the migration role (postgres) ON PURPOSE: cfg1_owner cannot
+    // read auth.*; the views are its only window, and only cfg1_owner may
+    // look through them.
+    const owners = await admin.query(
+      `select c.relname, pg_get_userbyid(c.relowner) as owner
+       from pg_class c join pg_namespace n on n.oid = c.relnamespace
+       where n.nspname = 'app' and c.relkind = 'v' order by c.relname`,
+    )
+    expect(owners.rows).toEqual([
+      { relname: 'gotrue_identities', owner: 'postgres' },
+      { relname: 'gotrue_verified_totp', owner: 'postgres' },
+    ])
+    const cols = await admin.query(
+      `select table_name, column_name from information_schema.columns
+       where table_schema = 'app' and table_name in ('gotrue_identities', 'gotrue_verified_totp')
+       order by table_name, ordinal_position`,
+    )
+    expect(cols.rows).toEqual([
+      { table_name: 'gotrue_identities', column_name: 'user_id' },
+      { table_name: 'gotrue_identities', column_name: 'provider' },
+      { table_name: 'gotrue_verified_totp', column_name: 'user_id' },
+    ])
+    for (const v of ['gotrue_identities', 'gotrue_verified_totp']) {
+      const acl = await admin.query(
+        `select
+           has_table_privilege('cfg1_owner', 'app.${v}', 'select') as owner_sel,
+           has_table_privilege('anon', 'app.${v}', 'select') as anon_sel,
+           has_table_privilege('authenticated', 'app.${v}', 'select') as auth_sel,
+           has_table_privilege('service_role', 'app.${v}', 'select') as svc_sel`,
+      )
+      expect(acl.rows[0]).toEqual({ owner_sel: true, anon_sel: false, auth_sel: false, svc_sel: false })
+    }
+    await admin.end()
+  })
+
+  it('cross-subject isolation: syncing A never reads or reports B state', async () => {
+    const a = await newAccount()
+    const b = await newAccount()
+    const admin = await connect()
+    await admin.query(`insert into auth.identities (user_id, provider) values ($1, 'google')`, [b.sub])
+    await admin.query(
+      `insert into auth.mfa_factors (user_id, factor_type, status) values ($1, 'totp', 'verified')`,
+      [b.sub],
+    )
+    await admin.end()
+    // A has NO auth-layer state: the sync must observe nothing, no matter
+    // what exists for other subjects.
+    await asUser(a.sub, async (c) => {
+      const r = await c.query(`select public.sync_identity_audit() as ev`)
+      expect(r.rows[0].ev).toEqual([])
+    })
+    // …and B's own sync reports exactly B's state, attributed to B only.
+    await asUser(b.sub, async (c) => {
+      const r = await c.query(`select public.sync_identity_audit() as ev`)
+      expect(r.rows[0].ev).toEqual([
+        { action: 'identity.link', provider: 'google' },
+        { action: 'identity.mfa_enroll', provider: 'totp' },
+      ])
+    })
+    const check = await connect()
+    const rows = await check.query(
+      `select count(*) as n from public.audit_events where actor_account_id = $1 and action like 'identity.%'`,
+      [a.accountId],
+    )
+    expect(Number(rows.rows[0].n)).toBe(0)
+    await check.end()
   })
 })

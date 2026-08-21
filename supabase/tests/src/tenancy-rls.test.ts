@@ -46,6 +46,10 @@ interface TableSpec {
   name: string
   businessScoped: boolean
   insert?: (b: TenantIds, bizB: string) => { sql: string; params: unknown[] }
+  /** No API-role access at all — only definer functions touch it. */
+  definerOnly?: boolean
+  /** The marketing waitlist: anon INSERT is the one sanctioned anon write. */
+  anonInsert?: boolean
 }
 
 const REGISTRY: TableSpec[] = [
@@ -159,6 +163,10 @@ const REGISTRY: TableSpec[] = [
   },
   { name: 'booking_occurrences', businessScoped: true },
   { name: 'entitlement_sync_receipts', businessScoped: true },
+  // A2: per-account GoTrue snapshot behind sync_identity_audit — sealed.
+  { name: 'account_auth_state', businessScoped: false, definerOnly: true },
+  // Pre-launch marketing waitlist (2026-08-15 layer): anon INSERT only.
+  { name: 'waitlist', businessScoped: false, anonInsert: true },
 ]
 
 const ALL_TABLES = REGISTRY.map((t) => t.name)
@@ -322,10 +330,13 @@ describe('anonymous access', () => {
   it('is denied on every CFG-1 table for select/insert/update/delete', async () => {
     const c = await connect()
     await become(c, 'anon')
-    for (const t of ALL_TABLES) {
-      const pk = t === 'base509_accounts' ? 'base509_account_id' : 'id'
+    for (const spec of REGISTRY) {
+      const t = spec.name
+      const pk = t === 'base509_accounts' || t === 'account_auth_state' ? 'base509_account_id' : 'id'
       await expectError(c.query(`select * from public.${t} limit 1`), /permission denied/)
-      await expectError(c.query(`insert into public.${t} default values`), /permission denied/)
+      if (!spec.anonInsert) {
+        await expectError(c.query(`insert into public.${t} default values`), /permission denied/)
+      }
       await expectError(c.query(`update public.${t} set ${pk} = ${pk}`), /permission denied/)
       await expectError(c.query(`delete from public.${t}`), /permission denied/)
     }
@@ -350,9 +361,10 @@ describe('anonymous access', () => {
     await c.query(`insert into public.waitlist (email) values ($1)`, [
       `${uuid()}@example.com`,
     ])
-    // The list is write-only from the public internet: no row ever comes back.
-    const r = await c.query('select * from public.waitlist')
-    expect(r.rowCount).toBe(0)
+    // Write-only from the public internet in the STRICTEST sense: anon has
+    // no SELECT grant at all (the hardened project defaults — the old
+    // 0-rows expectation encoded a local-shim over-grant, not prod).
+    await expectError(c.query('select * from public.waitlist'), /permission denied/)
     await c.end()
   })
 })
@@ -735,5 +747,263 @@ describe('lifecycle loss of access', () => {
         /FORBIDDEN/,
       )
     })
+  })
+})
+
+// ─────────────────────────────────────────────────────────────────────────────
+// A2 Codex round-2: the RLS POLICY REGISTRY. Every policy in the public
+// schema registered by exact (table, policy, command, roles) identity with
+// an authority class; the equality test fails if a policy is added,
+// removed, renamed, re-scoped, or re-roled without classification here —
+// a weakened policy can no longer hide behind its table name. Every
+// admin-classified policy then gets a same-tenant AAL1 AND missing-claim
+// probe per command (has_role fails closed below AAL2).
+// ─────────────────────────────────────────────────────────────────────────────
+
+type PolicyClass = 'admin' | 'staff' | 'manager' | 'member' | 'self' | 'client' | 'anon-insert'
+const CAPACITY_TABLES = [
+  'availability_conflict_groups', 'capacity_groups', 'business_services',
+  'service_zones', 'business_service_zones', 'service_windows',
+  'service_window_zones', 'service_member_capacity_defaults',
+  'service_window_assignments', 'service_window_assignment_zones',
+] as const
+
+const POLICY_REGISTRY: Array<{ table: string; policy: string; cmd: string; roles: string; cls: PolicyClass }> = [
+  { table: 'audit_events', policy: 'audit_select_admin', cmd: 'SELECT', roles: '{authenticated}', cls: 'admin' },
+  { table: 'auth_identities', policy: 'identities_select_self', cmd: 'SELECT', roles: '{authenticated}', cls: 'self' },
+  { table: 'base509_accounts', policy: 'accounts_select_self', cmd: 'SELECT', roles: '{authenticated}', cls: 'self' },
+  { table: 'base509_accounts', policy: 'accounts_update_self', cmd: 'UPDATE', roles: '{authenticated}', cls: 'self' },
+  { table: 'booking_occurrences', policy: 'occurrences_select_client', cmd: 'SELECT', roles: '{authenticated}', cls: 'client' },
+  { table: 'booking_occurrences', policy: 'occurrences_select_staff', cmd: 'SELECT', roles: '{authenticated}', cls: 'staff' },
+  { table: 'booking_pets', policy: 'booking_pets_delete_manager', cmd: 'DELETE', roles: '{authenticated}', cls: 'manager' },
+  { table: 'booking_pets', policy: 'booking_pets_insert_client', cmd: 'INSERT', roles: '{authenticated}', cls: 'client' },
+  { table: 'booking_pets', policy: 'booking_pets_insert_staff', cmd: 'INSERT', roles: '{authenticated}', cls: 'staff' },
+  { table: 'booking_pets', policy: 'booking_pets_select_client', cmd: 'SELECT', roles: '{authenticated}', cls: 'client' },
+  { table: 'booking_pets', policy: 'booking_pets_select_staff', cmd: 'SELECT', roles: '{authenticated}', cls: 'staff' },
+  { table: 'bookings', policy: 'bookings_insert_client', cmd: 'INSERT', roles: '{authenticated}', cls: 'client' },
+  { table: 'bookings', policy: 'bookings_insert_staff', cmd: 'INSERT', roles: '{authenticated}', cls: 'staff' },
+  { table: 'bookings', policy: 'bookings_select_client', cmd: 'SELECT', roles: '{authenticated}', cls: 'client' },
+  { table: 'bookings', policy: 'bookings_select_staff', cmd: 'SELECT', roles: '{authenticated}', cls: 'staff' },
+  { table: 'bookings', policy: 'bookings_update_client_cancel', cmd: 'UPDATE', roles: '{authenticated}', cls: 'client' },
+  { table: 'bookings', policy: 'bookings_update_manager', cmd: 'UPDATE', roles: '{authenticated}', cls: 'manager' },
+  { table: 'business_calendar_days', policy: 'business_calendar_days_select_staff', cmd: 'SELECT', roles: '{authenticated}', cls: 'staff' },
+  { table: 'business_entitlements', policy: 'entitlements_select_member', cmd: 'SELECT', roles: '{authenticated}', cls: 'member' },
+  { table: 'business_invite_codes', policy: 'invites_select_admin', cmd: 'SELECT', roles: '{authenticated}', cls: 'admin' },
+  { table: 'business_memberships', policy: 'memberships_select_admin', cmd: 'SELECT', roles: '{authenticated}', cls: 'admin' },
+  { table: 'business_memberships', policy: 'memberships_select_own', cmd: 'SELECT', roles: '{authenticated}', cls: 'self' },
+  { table: 'business_service_day_overrides', policy: 'business_service_day_overrides_select_staff', cmd: 'SELECT', roles: '{authenticated}', cls: 'staff' },
+  { table: 'businesses', policy: 'businesses_select_related', cmd: 'SELECT', roles: '{authenticated}', cls: 'member' },
+  { table: 'businesses', policy: 'businesses_update_admin', cmd: 'UPDATE', roles: '{authenticated}', cls: 'admin' },
+  { table: 'capacity_group_day_overrides', policy: 'capacity_group_day_overrides_select_staff', cmd: 'SELECT', roles: '{authenticated}', cls: 'staff' },
+  { table: 'clients', policy: 'clients_select_member', cmd: 'SELECT', roles: '{authenticated}', cls: 'member' },
+  { table: 'clients', policy: 'clients_select_self', cmd: 'SELECT', roles: '{authenticated}', cls: 'self' },
+  { table: 'clients', policy: 'clients_update_self', cmd: 'UPDATE', roles: '{authenticated}', cls: 'self' },
+  { table: 'clients', policy: 'clients_update_staff_ops', cmd: 'UPDATE', roles: '{authenticated}', cls: 'staff' },
+  { table: 'pets', policy: 'pets_insert_own', cmd: 'INSERT', roles: '{authenticated}', cls: 'client' },
+  { table: 'pets', policy: 'pets_insert_staff', cmd: 'INSERT', roles: '{authenticated}', cls: 'staff' },
+  { table: 'pets', policy: 'pets_select_member', cmd: 'SELECT', roles: '{authenticated}', cls: 'member' },
+  { table: 'pets', policy: 'pets_select_own', cmd: 'SELECT', roles: '{authenticated}', cls: 'client' },
+  { table: 'pets', policy: 'pets_update_own', cmd: 'UPDATE', roles: '{authenticated}', cls: 'client' },
+  { table: 'pets', policy: 'pets_update_staff', cmd: 'UPDATE', roles: '{authenticated}', cls: 'staff' },
+  { table: 'service_window_day_override_assignment_zones', policy: 'service_window_day_override_assignment_zones_select_staff', cmd: 'SELECT', roles: '{authenticated}', cls: 'staff' },
+  { table: 'service_window_day_override_assignments', policy: 'service_window_day_override_assignments_select_staff', cmd: 'SELECT', roles: '{authenticated}', cls: 'staff' },
+  { table: 'service_window_day_overrides', policy: 'service_window_day_overrides_select_staff', cmd: 'SELECT', roles: '{authenticated}', cls: 'staff' },
+  { table: 'waitlist', policy: 'anon can join waitlist', cmd: 'INSERT', roles: '{anon}', cls: 'anon-insert' },
+  // The ten capacity-config tables share one generated policy shape:
+  // staff SELECT + admin INSERT/UPDATE/DELETE.
+  ...CAPACITY_TABLES.flatMap((t): Array<{ table: string; policy: string; cmd: string; roles: string; cls: PolicyClass }> => [
+    { table: t, policy: `${t}_select_staff`, cmd: 'SELECT', roles: '{authenticated}', cls: 'staff' },
+    { table: t, policy: `${t}_insert_admin`, cmd: 'INSERT', roles: '{authenticated}', cls: 'admin' },
+    { table: t, policy: `${t}_update_admin`, cmd: 'UPDATE', roles: '{authenticated}', cls: 'admin' },
+    { table: t, policy: `${t}_delete_admin`, cmd: 'DELETE', roles: '{authenticated}', cls: 'admin' },
+  ]),
+]
+
+describe('RLS policy registry (A2 round-2 — exact identities, not table names)', () => {
+  it('REGISTRY == pg_policies on (table, policy, command, roles)', async () => {
+    const admin = await connect()
+    const rows = await admin.query(
+      `select tablename, policyname, cmd, roles::text as roles
+       from pg_policies where schemaname = 'public'`,
+    )
+    const key = (r: { tablename?: string; table?: string; policyname?: string; policy?: string; cmd: string; roles: string }) =>
+      `${r.tablename ?? r.table}|${r.policyname ?? r.policy}|${r.cmd}|${r.roles}`
+    expect(rows.rows.map((r) => key(r)).sort()).toEqual(POLICY_REGISTRY.map((r) => key(r)).sort())
+    await admin.end()
+  })
+
+  // Same-tenant probes for EVERY admin-classified policy, run under BOTH
+  // sub-AAL2 session shapes: explicit aal1 and missing claim entirely.
+  const SUB_AAL2_SHAPES: Array<[string, Record<string, unknown> | 'missing']> = [
+    ['aal1 claim', { aal: 'aal1' }],
+    ['missing aal claim', 'missing'],
+  ]
+
+  async function ownerConn(shape: Record<string, unknown> | 'missing') {
+    const c = await connect()
+    if (shape === 'missing') {
+      await c.query(`select set_config('request.jwt.claims', $1, false)`, [
+        JSON.stringify({ sub: bizA.owner.sub, iss: 'https://test.local/auth/v1', role: 'authenticated' }),
+      ])
+      await c.query('set role authenticated')
+    } else {
+      await become(c, 'authenticated', { sub: bizA.owner.sub, ...shape })
+    }
+    return c
+  }
+
+  for (const [label, shape] of SUB_AAL2_SHAPES) {
+    it(`every admin WRITE policy is closed and every admin READ policy is empty at ${label}`, async () => {
+      // Fresh probe fixtures at AAL2 (a zone that collides with nothing, the
+      // owner's own membership id, one throwaway row per capacity table).
+      const probeZone = await createZone(bizA, 'aalpz-' + uuid().slice(0, 8))
+      const admin = await connect()
+      const ownerMembershipId = (
+        await admin.query(
+          `select id from public.business_memberships where business_id = $1 and role = 'owner'`,
+          [bizA.businessId],
+        )
+      ).rows[0].id as string
+      await admin.end()
+
+      const INSERTS: Record<(typeof CAPACITY_TABLES)[number], { sql: string; params: unknown[] }> = {
+        availability_conflict_groups: {
+          sql: `insert into public.availability_conflict_groups (business_id, name) values ($1, 'aalp-' || gen_random_uuid()) returning id`,
+          params: [bizA.businessId],
+        },
+        capacity_groups: {
+          sql: `insert into public.capacity_groups (business_id, name, resource_unit, pool_limit) values ($1, 'aalp-' || gen_random_uuid(), 'dogs', 4) returning id`,
+          params: [bizA.businessId],
+        },
+        business_services: {
+          sql: `insert into public.business_services (business_id, service_type_key, name, capacity_model, capacity_config, duration_model)
+                values ($1, 'boarding', 'aalp-' || gen_random_uuid(), 'bounded', '{"version":1,"slot_unit":"dogs","service_limit":3}', 'overnight') returning id`,
+          params: [bizA.businessId],
+        },
+        service_zones: {
+          sql: `insert into public.service_zones (business_id, name, boundary) values ($1, 'aalp-' || gen_random_uuid(), $2) returning id`,
+          params: [bizA.businessId, JSON.stringify(validBoundary(55))],
+        },
+        business_service_zones: {
+          sql: `insert into public.business_service_zones (business_id, business_service_id, service_zone_id) values ($1, $2, $3) returning id`,
+          params: [bizA.businessId, idsA.svc, probeZone],
+        },
+        service_windows: {
+          sql: `insert into public.service_windows (business_id, business_service_id, name, start_time, end_time) values ($1, $2, 'aalp-' || gen_random_uuid(), '03:00', '04:00') returning id`,
+          params: [bizA.businessId, idsA.svc],
+        },
+        service_window_zones: {
+          sql: `insert into public.service_window_zones (business_id, service_window_id, service_zone_id) values ($1, $2, $3) returning id`,
+          params: [bizA.businessId, idsA.window, probeZone],
+        },
+        service_member_capacity_defaults: {
+          sql: `insert into public.service_member_capacity_defaults (business_id, business_service_id, business_membership_id, capacity) values ($1, $2, $3, 2) returning id`,
+          params: [bizA.businessId, idsA.svc, ownerMembershipId],
+        },
+        service_window_assignments: {
+          sql: `insert into public.service_window_assignments (business_id, service_window_id, business_membership_id) values ($1, $2, $3) returning id`,
+          params: [bizA.businessId, idsA.window, ownerMembershipId],
+        },
+        service_window_assignment_zones: {
+          sql: `insert into public.service_window_assignment_zones (business_id, service_window_assignment_id, service_zone_id) values ($1, $2, $3) returning id`,
+          params: [bizA.businessId, idsA.assignment, probeZone],
+        },
+      }
+
+      // Cleanup order matters (FKs): children before parents.
+      const CLEANUP_ORDER: Array<(typeof CAPACITY_TABLES)[number]> = [
+        'service_window_assignment_zones', 'service_window_assignments',
+        'service_member_capacity_defaults', 'service_window_zones', 'service_windows',
+        'business_service_zones', 'service_zones', 'business_services',
+        'capacity_groups', 'availability_conflict_groups',
+      ]
+
+      const sub = await ownerConn(shape)
+      try {
+        const throwaway: Partial<Record<string, string>> = {}
+        // Seed one row per capacity table at AAL2 (the real admin session).
+        await asUser(bizA.owner.sub, async (c) => {
+          for (const t of CAPACITY_TABLES) {
+            const spec = INSERTS[t]
+            throwaway[t] = (await c.query(spec.sql, spec.params)).rows[0].id as string
+          }
+        })
+
+        // WRITE policies at sub-AAL2: INSERT refused by with_check; UPDATE
+        // and DELETE see zero rows (using-clause fails closed).
+        for (const t of CAPACITY_TABLES) {
+          const spec = INSERTS[t]
+          await expectError(sub.query(spec.sql, spec.params), /row-level security/)
+          const upd = await sub.query(
+            `update public.${t} set business_id = business_id where id = $1`,
+            [throwaway[t]],
+          )
+          expect(upd.rowCount).toBe(0)
+          const del = await sub.query(`delete from public.${t} where id = $1`, [throwaway[t]])
+          expect(del.rowCount).toBe(0)
+        }
+        // businesses_update_admin.
+        const bupd = await sub.query(
+          `update public.businesses set name = name where id = $1`,
+          [bizA.businessId],
+        )
+        expect(bupd.rowCount).toBe(0)
+        // Admin READ policies: audit + invites empty; memberships collapse
+        // to the caller's own row.
+        expect((await sub.query(`select id from public.audit_events where business_id = $1`, [bizA.businessId])).rowCount).toBe(0)
+        expect((await sub.query(`select id from public.business_invite_codes where business_id = $1`, [bizA.businessId])).rowCount).toBe(0)
+        const own = await sub.query(`select base509_account_id from public.business_memberships where business_id = $1`, [bizA.businessId])
+        expect(own.rowCount).toBe(1)
+
+        // The SAME rows open at AAL2 — update each, then clean up in FK order.
+        await asUser(bizA.owner.sub, async (c) => {
+          for (const t of CAPACITY_TABLES) {
+            const upd = await c.query(
+              `update public.${t} set business_id = business_id where id = $1`,
+              [throwaway[t]],
+            )
+            expect(upd.rowCount).toBe(1)
+          }
+          for (const t of CLEANUP_ORDER) {
+            const del = await c.query(`delete from public.${t} where id = $1`, [throwaway[t]])
+            expect(del.rowCount).toBe(1)
+          }
+          expect((await c.query(`update public.businesses set name = name where id = $1`, [bizA.businessId])).rowCount).toBe(1)
+          expect((await c.query(`select id from public.business_invite_codes where business_id = $1`, [bizA.businessId])).rowCount).toBeGreaterThan(0)
+          expect((await c.query(`select id from public.audit_events where business_id = $1 limit 1`, [bizA.businessId])).rowCount).toBe(1)
+          expect((await c.query(`select id from public.business_memberships where business_id = $1`, [bizA.businessId])).rowCount).toBeGreaterThan(1)
+        })
+      } finally {
+        await sub.end()
+      }
+    }, 120_000)
+  }
+})
+
+describe('public-table registry (A2 round-2 — catalog equality + sealed tables)', () => {
+  it('REGISTRY == pg_tables: every public table must be classified', async () => {
+    const admin = await connect()
+    const rows = await admin.query(
+      `select tablename from pg_tables where schemaname = 'public' order by tablename`,
+    )
+    expect(rows.rows.map((r) => r.tablename as string).sort()).toEqual(
+      REGISTRY.map((t) => t.name).sort(),
+    )
+    await admin.end()
+  })
+
+  it('definer-only tables refuse anon, authenticated, AND service_role on every verb', async () => {
+    for (const spec of REGISTRY.filter((t) => t.definerOnly)) {
+      const t = spec.name
+      for (const role of ['anon', 'authenticated', 'service_role'] as const) {
+        const c = await connect()
+        await become(c, role, role === 'anon' ? {} : { sub: uuid() })
+        await expectError(c.query(`select * from public.${t} limit 1`), /permission denied/)
+        await expectError(c.query(`insert into public.${t} default values`), /permission denied/)
+        await expectError(c.query(`update public.${t} set updated_at = updated_at`), /permission denied/)
+        await expectError(c.query(`delete from public.${t}`), /permission denied/)
+        await c.end()
+      }
+    }
   })
 })
