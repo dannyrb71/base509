@@ -33,7 +33,10 @@ export async function become(
   claims: Record<string, unknown> = {},
 ): Promise<void> {
   await c.query('reset role')
-  const jwt = role === 'anon' ? { role, ...claims } : { role, iss: ISS, ...claims }
+  // Authenticated sessions default to aal2 — the portal enforces AAL2 for
+  // Owner/Admin (A2.4), so that is the realistic session shape. MFA tests
+  // pass { aal: 'aal1' } explicitly to probe the DB backstop.
+  const jwt = role === 'anon' ? { role, ...claims } : { role, iss: ISS, aal: 'aal2', ...claims }
   await c.query(`select set_config('request.jwt.claims', $1, false)`, [JSON.stringify(jwt)])
   await c.query(`set role ${role}`)
 }

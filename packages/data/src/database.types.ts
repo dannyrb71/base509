@@ -1538,6 +1538,10 @@ export type Database = {
         Args: { p_business_id: string }
         Returns: Json
       }
+      log_identity_event: {
+        Args: { p_action: string; p_provider: string }
+        Returns: undefined
+      }
       reactivate_client: {
         Args: { p_business_id: string; p_client_id: string }
         Returns: undefined
