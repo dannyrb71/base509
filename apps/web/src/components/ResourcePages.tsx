@@ -40,7 +40,7 @@ export function ResourceCard({ doc }: { doc: ResourceDoc }) {
         <div className="res-card__cover">
           <Image
             src={doc.coverImage}
-            alt=""
+            alt={doc.cardImageAlt ?? ''}
             width={doc.coverImageWidth ?? 640}
             height={doc.coverImageHeight ?? 480}
             sizes="(max-width: 760px) 100vw, 400px"

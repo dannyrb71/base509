@@ -31,6 +31,8 @@ export type ResourceDoc = {
   coverImage?: string;
   /** Meaningful cover description when the image conveys article content. */
   coverImageAlt?: string;
+  /** Alt for the cover as rendered on index cards (defaults to decorative ""). */
+  cardImageAlt?: string;
   coverImageWidth?: number;
   coverImageHeight?: number;
   coverImageUnoptimized?: boolean;
@@ -99,6 +101,7 @@ function parseDoc(section: 'articles' | 'guides', file: string): ResourceDoc {
     author: typeof data.author === 'string' ? data.author : undefined,
     coverImage: typeof data.coverImage === 'string' ? data.coverImage : undefined,
     coverImageAlt: typeof data.coverImageAlt === 'string' ? data.coverImageAlt : undefined,
+    cardImageAlt: typeof data.cardImageAlt === 'string' ? data.cardImageAlt : undefined,
     coverImageWidth: typeof data.coverImageWidth === 'number' ? data.coverImageWidth : undefined,
     coverImageHeight: typeof data.coverImageHeight === 'number' ? data.coverImageHeight : undefined,
     coverImageUnoptimized: data.coverImageUnoptimized === true,
