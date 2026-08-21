@@ -14,13 +14,19 @@ import { ensureBootstrap, postAuthDestination } from '@/lib/portal/session';
  */
 
 /** Allowlisted post-exchange destinations — never an open redirect. */
-const NEXT_ALLOWLIST = ['/reset-password', '/account'] as const;
+function allowlistedNext(raw: string | null): string | null {
+  if (!raw) return null;
+  if (raw === '/reset-password' || raw === '/account') return raw;
+  // Identity-link returns carry which provider was just connected (audited
+  // client-side on arrival) — still a closed set, never a free-form path.
+  if (/^\/account\?linked=(google|apple)$/.test(raw)) return raw;
+  return null;
+}
 
 export async function GET(req: NextRequest) {
   const code = req.nextUrl.searchParams.get('code');
   const to = (path: string) => portalRedirect(req, path);
-  const nextParam = req.nextUrl.searchParams.get('next');
-  const next = (NEXT_ALLOWLIST as readonly string[]).includes(nextParam ?? '') ? nextParam : null;
+  const next = allowlistedNext(req.nextUrl.searchParams.get('next'));
 
   // Provider-side refusals (user hit "Cancel" at Google/Apple, provider
   // error) arrive as ?error=… with no code — land back on sign-in honestly.

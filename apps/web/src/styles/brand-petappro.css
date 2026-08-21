@@ -2428,3 +2428,5 @@
 [data-brand='petappro'] .portal-auth__choose-item { display: flex; justify-content: space-between; align-items: center; gap: var(--pa-space-3); padding: var(--pa-space-3) var(--pa-space-4); border: 1px solid var(--border-subtle); border-radius: 12px; text-decoration: none; color: var(--text-primary); }
 [data-brand='petappro'] .portal-auth__choose-item:hover { border-color: var(--pa-brand-primary); }
 [data-brand='petappro'] .portal-auth__choose-role { text-transform: capitalize; color: var(--text-secondary); }
+[data-brand='petappro'] .portal-mfa-qr-live { display: block; margin: var(--pa-space-4) auto; border: 1px solid var(--border-subtle); border-radius: 12px; background: #FFFFFF; padding: var(--pa-space-2); }
+[data-brand='petappro'] .portal-mfa-secret { user-select: all; word-break: break-all; background: var(--surface-sunken, rgba(0,0,0,0.05)); padding: 2px 6px; border-radius: 6px; }

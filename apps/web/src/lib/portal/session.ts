@@ -209,8 +209,18 @@ export const getPortalContext = cache(async (): Promise<PortalContext> => {
   const memberships = await ensureBootstrap(supabase, user);
   const active = await resolveActiveBusiness(memberships);
   if (!active) {
-    // Bootstrap guarantees a business; reaching here means it failed hard.
-    throw new Error('No active business membership for this account');
+    // Customer-only account (or a hard bootstrap failure): the landing
+    // route re-runs the idempotent bootstrap and applies the A2 routing.
+    redirect('/portal/auth/landing');
+  }
+  // A2.4: Owner/Admin portal sessions require AAL2 — a session that hasn't
+  // verified a second factor is sent to enroll/verify before ANY portal
+  // surface renders. Staff/Manager are unaffected at launch. The DB
+  // backstop (require_role) enforces the same invariant on every
+  // admin-gated op, so bypassing this redirect gains nothing.
+  if (active.role === 'owner' || active.role === 'admin') {
+    const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+    if (aal && aal.currentLevel !== 'aal2') redirect('/portal/mfa');
   }
   const entitlements = await getEntitlements(supabase, active.id);
   return { supabase, user, memberships, active, entitlements };

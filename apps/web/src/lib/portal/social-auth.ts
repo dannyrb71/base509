@@ -14,9 +14,9 @@ function linkPrefix() {
   return window.location.pathname.startsWith('/portal') ? '/portal' : '';
 }
 
-export function portalCallbackUrl(next?: '/account') {
+export function portalCallbackUrl(next?: string) {
   const base = `${window.location.origin}${linkPrefix()}/auth/callback`;
-  return next ? `${base}?next=${next}` : base;
+  return next ? `${base}?next=${encodeURIComponent(next)}` : base;
 }
 
 /** Google/Apple OAuth — redirects the browser to the provider. */
