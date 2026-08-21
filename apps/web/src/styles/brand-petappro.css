@@ -2242,6 +2242,9 @@
 
 [data-brand='petappro'] .res-grid { align-items: stretch; }
 [data-brand='petappro'] .res-card { display: flex; flex-direction: column; gap: var(--pa-space-2); }
+/* Card headlines read at body-lg scale, bold (Danny 2026-08-20: full title
+   size is too loud on cards) — size and weight stepped via tokens. */
+[data-brand='petappro'] .res-card .type-title { font-size: var(--type-body-lg-size); line-height: 1.35; font-weight: var(--type-weight-bold); }
 [data-brand='petappro'] .res-card .card__cta { margin-top: auto; }
 [data-brand='petappro'] .res-card__icon { font-size: 28px; line-height: 1; }
 [data-brand='petappro'] .res-card__cover { margin: calc(-1 * var(--pa-space-2)) 0 var(--pa-space-2); border-radius: 12px; overflow: hidden; }
