@@ -81,10 +81,9 @@ export function PortalMfaForm() {
       setError('That code didn’t match. Codes rotate every 30 seconds — check and try again.');
       return;
     }
-    if (flow.kind === 'enroll') {
-      // Session is AAL2 now; the audit call itself may be admin-gated — best effort.
-      await supabase.rpc('log_identity_event', { p_action: 'identity.mfa_enroll', p_provider: 'totp' }).then(() => {}, () => {});
-    }
+    // Provenance-true audit: the server diffs the REAL factor state and
+    // records identity.mfa_enroll itself — nothing client-reported.
+    await supabase.rpc('sync_identity_audit').then(() => {}, () => {});
     window.location.assign('/portal/auth/landing');
   }
 

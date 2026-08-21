@@ -10,14 +10,17 @@ import type { UserIdentity } from '@supabase/supabase-js';
 /**
  * A2.3 — Connected sign-in methods + real two-factor management.
  *
- * Methods are the account's REAL auth identities (Supabase manual linking):
- * email (password + magic link ride the same identity), Google, Apple.
- * ADD runs a full verified OAuth link of a NEW provider identity to the
- * CURRENT session's account and returns here (?linked=…, audited).
- * REMOVE unlinks — guarded so the LAST usable method can never be removed
- * (belt here; Supabase refuses last-identity unlink as the suspenders).
- * NO auto-merge-by-email exists anywhere: linking happens only through
- * this signed-in, user-initiated flow.
+ * BINDING (product ruling): sign-in methods that share the account's
+ * provider-VERIFIED email bind to this one account — sign in with password
+ * today, Google tomorrow, Apple after that, and they all land here. This
+ * screen is the MANAGEMENT surface: see what's connected and add more.
+ * Removing a method is deliberately not offered yet (Codex round-1 P1-4:
+ * the last-method invariant isn't provably race-safe at the auth layer) —
+ * support removes methods until then.
+ *
+ * Audit is provenance-true (round-1 P1-5): the UI never reports events;
+ * it calls sync_identity_audit(), which diffs the caller's REAL auth-layer
+ * state server-side and records only actual changes.
  */
 
 const PROVIDER_LABEL: Record<string, string> = {
@@ -35,6 +38,9 @@ export function PortalSignInSecurity({ justLinked }: { justLinked?: 'google' | '
 
   const refresh = useCallback(async () => {
     const supabase = createPortalBrowserClient();
+    // Idempotent server-side diff of the REAL auth state — this is what
+    // writes link/unlink/MFA audit rows, never a client-reported event.
+    await supabase.rpc('sync_identity_audit').then(() => {}, () => {});
     const [{ data: ids }, { data: factors }] = await Promise.all([
       supabase.auth.getUserIdentities(),
       supabase.auth.mfa.listFactors(),
@@ -47,14 +53,12 @@ export function PortalSignInSecurity({ justLinked }: { justLinked?: 'google' | '
     void refresh();
   }, [refresh]);
 
-  // Arriving back from a completed link redirect: audit once, clean the URL.
+  // Back from a completed link redirect: friendly notice only — the audit
+  // trail comes from the server-side sync in refresh().
   useEffect(() => {
     if (!justLinked) return;
     window.history.replaceState(null, '', window.location.pathname);
-    const supabase = createPortalBrowserClient();
-    void supabase
-      .rpc('log_identity_event', { p_action: 'identity.link', p_provider: justLinked })
-      .then(() => setNotice(`${PROVIDER_LABEL[justLinked]} is now connected.`), () => {});
+    setNotice(`${PROVIDER_LABEL[justLinked]} is now connected.`);
   }, [justLinked]);
 
   async function link(provider: 'google' | 'apple') {
@@ -72,31 +76,6 @@ export function PortalSignInSecurity({ justLinked }: { justLinked?: 'google' | '
     // Success navigates away to the provider.
   }
 
-  async function unlink(identity: UserIdentity) {
-    if (!identities || identities.length <= 1) return; // last-method guard (belt)
-    setError('');
-    setNotice('');
-    setBusy(true);
-    const supabase = createPortalBrowserClient();
-    const { error: unlinkErr } = await supabase.auth.unlinkIdentity(identity);
-    if (unlinkErr) {
-      setBusy(false);
-      setError(
-        /last|only/i.test(unlinkErr.message)
-          ? 'That’s your only way to sign in — connect another method first.'
-          : 'Couldn’t remove that method just now. Try again.',
-      );
-      return;
-    }
-    const provider = identity.provider === 'email' ? 'email' : (identity.provider as 'google' | 'apple');
-    await supabase
-      .rpc('log_identity_event', { p_action: 'identity.unlink', p_provider: provider })
-      .then(() => {}, () => {});
-    setBusy(false);
-    setNotice('Sign-in method removed.');
-    void refresh();
-  }
-
   async function disableTotp() {
     setError('');
     setNotice('');
@@ -111,16 +90,12 @@ export function PortalSignInSecurity({ justLinked }: { justLinked?: 'google' | '
         return;
       }
     }
-    await supabase
-      .rpc('log_identity_event', { p_action: 'identity.mfa_unenroll', p_provider: 'totp' })
-      .then(() => {}, () => {});
     setBusy(false);
     setNotice('Two-factor turned off. Owners and Admins will be asked to set it up again on their next visit.');
-    void refresh();
+    void refresh(); // sync records identity.mfa_unenroll from the real state
   }
 
   const linked = new Set((identities ?? []).map((i) => i.provider));
-  const lastMethod = (identities?.length ?? 0) <= 1;
 
   return (
     <>
@@ -139,18 +114,7 @@ export function PortalSignInSecurity({ justLinked }: { justLinked?: 'google' | '
                     {identity.identity_data?.email ? String(identity.identity_data.email) : 'Connected'}
                   </span>
                 </div>
-                {lastMethod ? (
-                  <span className="type-caption">Your only sign-in method</span>
-                ) : (
-                  <button
-                    className="portal-remove-button type-body-bold"
-                    type="button"
-                    disabled={busy}
-                    onClick={() => unlink(identity)}
-                  >
-                    Remove
-                  </button>
-                )}
+                <span className="portal-status portal-status--paid">Connected</span>
               </article>
             ))}
           </div>
@@ -168,8 +132,10 @@ export function PortalSignInSecurity({ justLinked }: { justLinked?: 'google' | '
           )}
         </div>
         <p className="type-caption">
-          Adding a method connects it to THIS account after you sign in with it — accounts
-          are never combined just because two methods share an email address.
+          Sign-in methods that use your verified email connect to this same account —
+          password one day, Google or Apple the next, and you always land here. Need a
+          method removed? Email <a href="mailto:support@petappro.com">support@petappro.com</a> and
+          we’ll verify you first.
         </p>
       </PortalPanel>
 

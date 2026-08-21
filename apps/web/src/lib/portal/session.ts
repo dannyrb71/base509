@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation';
 import type { SupabaseClient, User } from '@supabase/supabase-js';
 import { DEFAULT_THEME_KEY, isThemeKey, type ThemeKey, type ThemeMode } from '@/data/petappro-themes';
 import { createPortalServerClient } from './supabase-server';
+import { ownerAdminNeedsMfa } from './mfa-gate';
 
 /**
  * Portal session + tenant resolution (Phase A/A1).
@@ -215,12 +216,14 @@ export const getPortalContext = cache(async (): Promise<PortalContext> => {
   }
   // A2.4: Owner/Admin portal sessions require AAL2 — a session that hasn't
   // verified a second factor is sent to enroll/verify before ANY portal
-  // surface renders. Staff/Manager are unaffected at launch. The DB
-  // backstop (require_role) enforces the same invariant on every
-  // admin-gated op, so bypassing this redirect gains nothing.
-  if (active.role === 'owner' || active.role === 'admin') {
-    const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
-    if (aal && aal.currentLevel !== 'aal2') redirect('/portal/mfa');
+  // surface renders. FAIL CLOSED (Codex round-1 P1-2): an error or null
+  // assurance answer gates exactly like AAL1. Staff/Manager unaffected at
+  // launch. The DB backstop (require_role + has_role) enforces the same
+  // invariant on every admin-gated op and RLS path, so bypassing this
+  // redirect gains nothing.
+  {
+    const { data: aal, error: aalError } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+    if (ownerAdminNeedsMfa(active.role, aal, aalError)) redirect('/portal/mfa');
   }
   const entitlements = await getEntitlements(supabase, active.id);
   return { supabase, user, memberships, active, entitlements };

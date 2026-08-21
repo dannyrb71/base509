@@ -134,7 +134,7 @@ describe('security-definer execution boundaries', () => {
     'public.reset_day_override': { auth: true, svc: true },
     'public.get_effective_entitlements': { auth: true, svc: true },
     'public.set_business_theme': { auth: true, svc: true },
-    'public.log_identity_event': { auth: true, svc: true },
+    'public.sync_identity_audit': { auth: true, svc: true },
     // public schema — machine op (workload identity only)
     'public.sync_entitlements': { auth: false, svc: true },
     // test harness (not a migration): the ordinary reserve path is machine-

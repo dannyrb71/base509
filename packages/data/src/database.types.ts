@@ -9,6 +9,34 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      account_auth_state: {
+        Row: {
+          base509_account_id: string
+          providers: Json
+          totp_verified: boolean
+          updated_at: string
+        }
+        Insert: {
+          base509_account_id: string
+          providers?: Json
+          totp_verified?: boolean
+          updated_at?: string
+        }
+        Update: {
+          base509_account_id?: string
+          providers?: Json
+          totp_verified?: boolean
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "account_auth_state_base509_account_id_fkey"
+            columns: ["base509_account_id"]
+            referencedRelation: "base509_accounts"
+            referencedColumns: ["base509_account_id"]
+          },
+        ]
+      }
       audit_events: {
         Row: {
           action: string
@@ -1538,10 +1566,6 @@ export type Database = {
         Args: { p_business_id: string }
         Returns: Json
       }
-      log_identity_event: {
-        Args: { p_action: string; p_provider: string }
-        Returns: undefined
-      }
       reactivate_client: {
         Args: { p_business_id: string; p_client_id: string }
         Returns: undefined
@@ -1646,6 +1670,7 @@ export type Database = {
           status: string
         }[]
       }
+      sync_identity_audit: { Args: never; Returns: Json }
       team_directory: {
         Args: { p_business_id: string }
         Returns: {

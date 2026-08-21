@@ -87,3 +87,23 @@ alter default privileges in schema public
   grant all on functions to anon, authenticated, service_role;
 alter default privileges in schema public
   grant all on sequences to anon, authenticated, service_role;
+
+-- A2 round-1: minimal GoTrue state tables (hosted Supabase provides these;
+-- sync_identity_audit reads them through postgres-owned passthrough views).
+-- Only the columns the CFG-1 layer reads.
+create table if not exists auth.users (
+  id uuid primary key default gen_random_uuid(),
+  email text
+);
+create table if not exists auth.identities (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null,
+  provider text not null,
+  identity_data jsonb not null default '{}'::jsonb
+);
+create table if not exists auth.mfa_factors (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null,
+  factor_type text not null,
+  status text not null
+);

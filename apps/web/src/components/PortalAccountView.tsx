@@ -14,7 +14,7 @@ export function PortalAccountView({ justLinked }: { justLinked?: 'google' | 'app
 
   return (
     <div className="portal-page">
-      <PortalPageHeader eyebrow="Account" title="Account & Security" body="Manage personal details, multi-factor authentication, passkeys, active sessions, and provider-portal notifications." action={<button className="btn btn--cta type-button" type="button" onClick={() => setNotice('Account preferences saved.')}>Save Changes</button>} />
+      <PortalPageHeader eyebrow="Account" title="Account & Security" body="Manage personal details, sign-in methods, two-factor authentication, active sessions, and provider-portal notifications." action={<button className="btn btn--cta type-button" type="button" onClick={() => setNotice('Account preferences saved.')}>Save Changes</button>} />
       <div className="portal-settings-grid">
         <PortalPanel title="Personal Details" eyebrow="Profile">
           <div className="portal-field-grid">
@@ -34,7 +34,7 @@ export function PortalAccountView({ justLinked }: { justLinked?: 'google' | 'app
           {([['bookings', 'Booking Requests', 'Push and email when a client requests a booking.'], ['payments', 'Payment Updates', 'Push and email for paid, due, and past-due charges.'], ['billing', 'Subscription Billing', 'Email for renewals, plan changes, and invoices.']] as const).map(([key, label, detail]) => <label key={key}><span><strong className="type-body-bold">{label}</strong><small className="type-caption">{detail}</small></span><span className="portal-checkbox"><input type="checkbox" checked={notifications[key]} onChange={(event) => setNotifications((value) => ({ ...value, [key]: event.target.checked }))} /><i aria-hidden="true" /></span></label>)}
         </div>
       </PortalPanel>
-      <div className="portal-account-callout"><strong className="type-body-bold">Web vs. Native App</strong><p className="type-body">MFA enrollment, passkeys, recovery, and session management live here on the web. The native app adds an optional local biometric app lock and can initiate step-up verification, but it does not replace server-verified MFA.</p></div>
+      <div className="portal-account-callout"><strong className="type-body-bold">Web vs. Native App</strong><p className="type-body">MFA enrollment, recovery, and session management live here on the web. The native app adds an optional local biometric app lock and can initiate step-up verification, but it does not replace server-verified MFA.</p></div>
 
       <PortalPanel title="Delete Account" eyebrow="Danger Zone" action={<button className="btn portal-danger-button type-button" type="button" onClick={() => setCloseOpen(true)}>Delete My Account</button>}>
         <p className="type-body">Permanently close your individual PetAppro account. If you are the only Owner, you must first transfer ownership or close the provider business. Canceling your subscription alone does not delete your account or business data.</p>

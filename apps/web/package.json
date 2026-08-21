@@ -2,12 +2,13 @@
   "name": "@petappro/web",
   "version": "0.1.0",
   "private": true,
-  "description": "Base509 multi-domain web: base509.com + petappro.com + app.petappro.com — one skeleton, per-brand theme (D-056)",
+  "description": "Base509 multi-domain web: base509.com + petappro.com + app.petappro.com \u2014 one skeleton, per-brand theme (D-056)",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test": "vitest run"
   },
   "dependencies": {
     "@googlemaps/js-api-loader": "^2.1.1",
@@ -27,6 +28,7 @@
     "@types/node": "^22.0.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
-    "typescript": "^5.6.0"
+    "typescript": "^5.6.0",
+    "vitest": "^4.1.11"
   }
 }
