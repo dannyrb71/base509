@@ -68,7 +68,7 @@ export function ResourceIndex({ section }: { section: 'articles' | 'guides' }) {
   const docs = listPublished(section);
   return (
     <>
-      <Section tight>
+      <Section tight className="res-index__head">
         <nav className="res-breadcrumb type-caption" aria-label="Breadcrumb">
           <Link href="/petappro/resources">Resources</Link>
           <span aria-hidden="true"> / </span>
@@ -77,7 +77,7 @@ export function ResourceIndex({ section }: { section: 'articles' | 'guides' }) {
         <h1 className="type-display">{meta.title}</h1>
         <p className="type-body-lg res-index__intro">{meta.description}</p>
       </Section>
-      <Section tight>
+      <Section tight className="res-index__list">
         {docs.length === 0 ? (
           <p className="type-body">Nothing published here yet — check back soon.</p>
         ) : (

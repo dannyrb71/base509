@@ -452,6 +452,7 @@
   gap: var(--pa-space-4);
   padding-top: var(--pa-space-6);
 }
+[data-brand='petappro'] #home-articles .res-grid { padding-top: var(--pa-space-6); }
 [data-brand='petappro'] .home-card-grid--four { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 [data-brand='petappro'] .home-card-grid .card {
   padding: var(--pa-space-6);
@@ -703,6 +704,7 @@
   [data-brand='petappro'] .home-section-heading--compact { max-width: 700px; }
   [data-brand='petappro'] #home-all-in-one { padding-block: var(--pa-space-14); }
   [data-brand='petappro'] .home-card-grid { padding-top: var(--pa-space-10); }
+  [data-brand='petappro'] #home-articles .res-grid { padding-top: var(--pa-space-10); }
   [data-brand='petappro'] #home-why .card { min-height: 200px; }
   [data-brand='petappro'] .home-steps { padding-top: var(--pa-space-5); }
   [data-brand='petappro'] .home-step { min-height: 191px; }
@@ -2231,6 +2233,13 @@
 [data-brand='petappro'] .res-breadcrumb a { color: var(--text-accent); text-decoration: none; }
 [data-brand='petappro'] .res-breadcrumb a:hover { text-decoration: underline; }
 [data-brand='petappro'] .res-index__intro { max-width: 640px; margin-top: var(--pa-space-3); }
+/* Index heading → cards: one gap matching the home-page rhythm (Danny
+   2026-08-20: stacked tight-section paddings doubled the space). */
+[data-brand='petappro'] .res-index__head { padding-bottom: 0; }
+[data-brand='petappro'] .res-index__list { padding-top: var(--pa-space-6); }
+@media (min-width: 1280px) {
+  [data-brand='petappro'] .res-index__list { padding-top: var(--pa-space-10); }
+}
 
 [data-brand='petappro'] .res-pills { display: flex; flex-wrap: wrap; gap: var(--pa-space-2); margin-bottom: var(--pa-space-3); }
 [data-brand='petappro'] .res-pill {

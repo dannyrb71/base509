@@ -27,6 +27,11 @@ export type ResourceDoc = {
   audience: ResourceAudience;
   /** ISO date (YYYY-MM-DD). */
   date: string;
+  /**
+   * Optional ISO datetime that orders same-date items (newest first, leftmost
+   * card). Display always uses `date`; this is a sort key only.
+   */
+  publishedAt?: string;
   author?: string;
   coverImage?: string;
   /** Meaningful cover description when the image conveys article content. */
@@ -88,6 +93,12 @@ function parseDoc(section: 'articles' | 'guides', file: string): ResourceDoc {
     if (!/^\d{4}-\d{2}-\d{2}$/.test(data.date)) {
       throw new Error(`content/resources/${section}/${file}: date must be YYYY-MM-DD`);
     }
+    if (
+      data.publishedAt !== undefined &&
+      !(typeof data.publishedAt === 'string' && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(data.publishedAt))
+    ) {
+      throw new Error(`content/resources/${section}/${file}: publishedAt must be an ISO datetime (YYYY-MM-DDTHH:MM…)`);
+    }
   }
 
   return {
@@ -98,6 +109,7 @@ function parseDoc(section: 'articles' | 'guides', file: string): ResourceDoc {
     category: String(data.category ?? 'General'),
     audience: AUDIENCES.includes(data.audience) ? data.audience : 'both',
     date: String(data.date ?? ''),
+    publishedAt: typeof data.publishedAt === 'string' ? data.publishedAt : undefined,
     author: typeof data.author === 'string' ? data.author : undefined,
     coverImage: typeof data.coverImage === 'string' ? data.coverImage : undefined,
     coverImageAlt: typeof data.coverImageAlt === 'string' ? data.coverImageAlt : undefined,
@@ -131,7 +143,15 @@ function allDocs(section: 'articles' | 'guides'): ResourceDoc[] {
 export function listPublished(section: 'articles' | 'guides'): ResourceDoc[] {
   return allDocs(section)
     .filter((d) => d.published)
-    .sort((a, b) => (a.date < b.date ? 1 : -1));
+    .sort((a, b) => {
+      // publishedAt (when present) refines date; "…T…" sorts after the bare
+      // date lexically, so a timestamped item outranks a same-day undated one.
+      const ka = a.publishedAt ?? a.date;
+      const kb = b.publishedAt ?? b.date;
+      if (ka !== kb) return ka < kb ? 1 : -1;
+      // Deterministic final tiebreak — readdir order varies by filesystem.
+      return a.slug < b.slug ? -1 : 1;
+    });
 }
 
 /** A doc by slug — PUBLISHED ONLY. Drafts and unknown slugs both return null (→ 404). */
