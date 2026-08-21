@@ -119,6 +119,11 @@ export async function ensureBootstrap(
 
   let memberships = await listMemberships(supabase);
   if (memberships.length === 0) {
+    // A2 routing guard: an account that exists as a CLIENT of some business
+    // (invite-redeemed pet owner) is a customer, not a provider — never mint
+    // a provider tenant for it. The web portal routes it to the app instead.
+    const { data: clientRows } = await supabase.from('clients').select('id').limit(1);
+    if ((clientRows ?? []).length > 0) return [];
     const businessName =
       (typeof meta.business_name === 'string' && meta.business_name.trim()) ||
       ownerName ||
@@ -140,6 +145,24 @@ export async function resolveActiveBusiness(
   if (memberships.length === 0) return null;
   const hint = (await cookies()).get(ACTIVE_BUSINESS_COOKIE)?.value;
   return memberships.find((m) => m.slug === hint) ?? memberships[0];
+}
+
+/**
+ * A2 locked routing decision — one login for every method, experience
+ * resolved POST-auth from the account's relationships, never asked:
+ * provider with one business → straight in; several → business picker
+ * (unless a still-valid pinned hint already names one); customer-only
+ * account on web → pointed at the app (the portal is provider-only).
+ */
+export async function postAuthDestination(memberships: PortalBusiness[]): Promise<string> {
+  if (memberships.length === 0) return '/app-only';
+  if (memberships.length === 1) {
+    return memberships[0].slug ? `/b/${memberships[0].slug}` : '/';
+  }
+  const hint = (await cookies()).get(ACTIVE_BUSINESS_COOKIE)?.value;
+  const pinned = memberships.find((m) => m.slug === hint);
+  if (pinned?.slug) return `/b/${pinned.slug}`;
+  return '/choose-business';
 }
 
 export async function getEntitlements(

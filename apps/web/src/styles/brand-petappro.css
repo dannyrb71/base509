@@ -2419,3 +2419,12 @@
    em-sized so it tracks the heading or body type it accompanies, brand
    accent via token so a theme/brand change recolors it with everything else. */
 [data-brand='petappro'] .portal-auth__inline-icon { display: inline-block; height: 0.78em; width: auto; color: var(--pa-brand-accent); vertical-align: -0.04em; margin-left: 0.3em; }
+
+/* A2 auth additions: link-styled buttons (magic-link toggle, sign-out in the
+   auth shell) and the multi-business picker list. */
+[data-brand='petappro'] .portal-auth__linklike { background: none; border: 0; padding: 0; color: var(--pa-brand-primary); text-decoration: underline; cursor: pointer; font: inherit; }
+[data-brand='petappro'] .portal-auth__inline-form { display: inline; }
+[data-brand='petappro'] .portal-auth__choose-list { list-style: none; margin: var(--pa-space-4) 0; padding: 0; display: grid; gap: var(--pa-space-2); }
+[data-brand='petappro'] .portal-auth__choose-item { display: flex; justify-content: space-between; align-items: center; gap: var(--pa-space-3); padding: var(--pa-space-3) var(--pa-space-4); border: 1px solid var(--border-subtle); border-radius: 12px; text-decoration: none; color: var(--text-primary); }
+[data-brand='petappro'] .portal-auth__choose-item:hover { border-color: var(--pa-brand-primary); }
+[data-brand='petappro'] .portal-auth__choose-role { text-transform: capitalize; color: var(--text-secondary); }

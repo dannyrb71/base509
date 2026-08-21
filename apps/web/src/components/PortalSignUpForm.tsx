@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useRef, useState } from 'react';
 import { PasswordInput } from '@/components/PasswordInput';
 import { createPortalBrowserClient } from '@/lib/portal/supabase-browser';
+import { startOAuth } from '@/lib/portal/social-auth';
 import { PortalAuthProviders } from '@/components/PortalAuthProviders';
 import { IconEnvelope } from '@/components/icons/IconEnvelope';
 
@@ -32,6 +33,12 @@ export function PortalSignUpForm() {
   const [state, setState] = useState<'idle' | 'busy' | 'check-email'>('idle');
   const [error, setError] = useState('');
   const startedAt = useRef(Date.now());
+
+  async function oauth(provider: 'google' | 'apple') {
+    setError('');
+    const failed = await startOAuth(provider);
+    if (failed) setError('Couldn’t reach the sign-in provider. Try again in a moment.');
+  }
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -161,7 +168,11 @@ export function PortalSignUpForm() {
         </button>
       </form>
       {/* A2 wires Google + Apple (+ passcode) here — launch requirement. */}
-      <PortalAuthProviders mode="sign-up" />
+      <PortalAuthProviders
+        mode="sign-up"
+        onGoogle={() => oauth('google')}
+        onApple={() => oauth('apple')}
+      />
       <p className="type-caption portal-auth__alt">
         Already have an account? <Link href="/portal/sign-in">Sign in</Link>
       </p>

@@ -3,6 +3,11 @@ import { PortalSignInForm } from '@/components/PortalSignInForm';
 
 export const metadata: Metadata = { title: 'Sign in' };
 
-export default function PortalSignInPage() {
-  return <PortalSignInForm />;
+export default async function PortalSignInPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string }>;
+}) {
+  const { error } = await searchParams;
+  return <PortalSignInForm arrivalError={error} />;
 }
